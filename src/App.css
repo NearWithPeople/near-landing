@@ -19,6 +19,33 @@
   border-bottom: 1px solid rgba(202, 138, 4, 0.35);
 }
 
+.toast-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 0.85rem 1.25rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--near-ink);
+  background: #ffd000;
+  border-bottom: 1px solid rgba(202, 138, 4, 0.4);
+  animation: toast-slide 0.28s ease-out;
+}
+
+@keyframes toast-slide {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .nav__brand {
   display: flex;
   align-items: center;
@@ -97,6 +124,66 @@
   opacity: 0.92;
 }
 
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.nav__social {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.nav__social-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--near-ink);
+  background: rgba(15, 23, 42, 0.07);
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    color 0.2s;
+}
+
+.nav__social-btn:hover {
+  background: rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+}
+
+.nav__social-btn--ig:hover {
+  color: #be185d;
+  background: rgba(190, 24, 93, 0.1);
+}
+
+@media (max-width: 420px) {
+  .nav__cta {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .nav__social-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav__social-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+#features,
+#how,
+#cta {
+  scroll-margin-top: 5.5rem;
+}
+
 /* ——— Hero ——— */
 .hero {
   position: relative;
@@ -163,8 +250,89 @@
   margin: 0 0 1.75rem;
   font-size: clamp(1rem, 2vw, 1.125rem);
   color: var(--near-muted);
-  max-width: 32ch;
+  max-width: min(58ch, 100%);
   line-height: 1.65;
+}
+
+/* Подписка TG / IG — три блока (hero, возможности, как работает) */
+.social-follow {
+  margin-top: 0.25rem;
+  max-width: min(52ch, 100%);
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px dashed rgba(148, 163, 184, 0.55);
+  background: rgba(255, 255, 255, 0.45);
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.social-follow:hover {
+  background: var(--near-gold-soft);
+  border-color: rgba(202, 138, 4, 0.55);
+  border-style: solid;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+
+.social-follow__label {
+  margin: 0 0 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.72);
+  line-height: 1.45;
+}
+
+.social-follow:hover .social-follow__label {
+  color: var(--near-ink);
+}
+
+.social-follow__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.social-follow__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--near-ink);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+}
+
+.social-follow__chip:hover {
+  background: var(--near-white);
+  border-color: var(--near-gold);
+  transform: translateY(-1px);
+}
+
+.social-follow__chip--ig:hover {
+  border-color: #e4405f;
+}
+
+.hero__social {
+  margin-top: 1.5rem;
+}
+
+.section__social {
+  max-width: 640px;
+  margin: 0 auto 2rem;
+}
+
+.section__social--how {
+  margin-bottom: 2.25rem;
 }
 
 .hero__actions {
@@ -194,6 +362,17 @@
 .btn--primary:hover {
   transform: translateY(-2px);
   opacity: 0.95;
+}
+
+.btn--primary.btn--inactive {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primary.btn--inactive:hover {
+  transform: none;
+  opacity: 0.55;
 }
 
 .btn--ghost {
@@ -465,6 +644,99 @@
   margin-right: auto;
 }
 
+.cta__lead {
+  margin: 0 auto 1.5rem;
+  opacity: 0.88;
+  font-size: 1.0625rem;
+  max-width: 46ch;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.cta__form {
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.cta__label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+  opacity: 0.78;
+  color: #f8fafc;
+}
+
+.cta__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 520px) {
+  .cta__row {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .cta__input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cta__submit {
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+}
+
+.cta__input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(15, 23, 42, 0.55);
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.cta__input::placeholder {
+  color: rgba(248, 250, 252, 0.38);
+}
+
+.cta__input:focus {
+  outline: 2px solid var(--near-gold);
+  outline-offset: 2px;
+  border-color: rgba(255, 208, 0, 0.45);
+}
+
+.cta__input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cta__submit:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cta__feedback {
+  margin: 1rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.cta__feedback--ok {
+  color: #86efac;
+}
+
+.cta__feedback--err {
+  color: #fca5a5;
+}
+
 .cta__box .btn--primary {
   background: linear-gradient(145deg, var(--near-gold) 0%, var(--near-gold-dark) 100%);
   color: var(--near-ink);
@@ -510,7 +782,27 @@
   font-weight: 500;
 }
 
-.footer__meta {
+.footer__social {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   font-size: 0.8125rem;
   color: rgba(15, 23, 42, 0.55);
+}
+
+.footer__sep {
+  user-select: none;
+}
+
+.footer__link {
+  color: rgba(15, 23, 42, 0.75);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer__link:hover {
+  color: var(--near-ink);
 }
