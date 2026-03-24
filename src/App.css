@@ -240,10 +240,7 @@
 }
 
 .hero__title span {
-  background: linear-gradient(120deg, #ca8a04 0%, var(--near-gold-dark) 40%, var(--near-gold) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--near-gold);
 }
 
 .hero__lead {
