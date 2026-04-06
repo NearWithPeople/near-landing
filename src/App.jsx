@@ -4,7 +4,6 @@ import './App.css'
 const TG_URL = 'https://t.me/nearbelapp'
 const IG_URL = 'https://www.instagram.com/nearapp.by/'
 
-/** Forminit: POST только email — см. https://forminit.com/docs/submit-form-api/ */
 const FORMINIT_FORM_ID = 'ojgrfc489yu'
 const FORMINIT_SUBMIT_URL = `https://forminit.com/f/${FORMINIT_FORM_ID}`
 
@@ -74,7 +73,6 @@ function SocialFollowStrip({ label, className = '' }) {
   )
 }
 
-/** Логотип из near-frontend/screens/ assets/logo.svg */
 function BrandLogo({ className = '', size = 40 }) {
   return (
     <img
@@ -143,7 +141,7 @@ export default function App() {
     <div className="landing" id="top">
       {downloadToast && (
         <div className="toast-top" role="status" aria-live="polite">
-          Всё будет, немного терпения
+          Можно будет скачать и не только 
         </div>
       )}
       <header className="nav">
