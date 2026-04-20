@@ -8,11 +8,11 @@
 
 :root {
   --near-gold: #ffd000;
-  --near-gold-soft: #fff8d6;
-  --near-gold-dark: #e6bb00;
-  --near-ink: #0f172a;
-  --near-muted: #64748b;
-  --near-bg: #f8fafc;
+  --near-gold-soft: rgba(255, 208, 0, 0.12);
+  --near-gold-dark: #e0b900;
+  --near-ink: #ffffff;
+  --near-muted: rgba(255, 255, 255, 0.72);
+  --near-bg: #0a0b0d;
   --near-white: #ffffff;
   --near-green: #22c55e;
   --near-blue: #3b82f6;
