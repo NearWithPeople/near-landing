@@ -27,6 +27,23 @@ export function normalizePhone(input) {
   return digits.slice(0, 20)
 }
 
+export function splitFullName(input) {
+  const parts = String(input || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  return {
+    lastName: parts[0] || '',
+    firstName: parts[1] || '',
+    middleName: parts.slice(2).join(' '),
+  }
+}
+
+export function buildFullName({ lastName = '', firstName = '', middleName = '' }) {
+  return [lastName, firstName, middleName].map((part) => String(part || '').trim()).filter(Boolean).join(' ')
+}
+
 export function safeParseJSON(s) {
   try {
     return JSON.parse(s)

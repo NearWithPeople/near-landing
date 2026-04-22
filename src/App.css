@@ -5,8 +5,9 @@
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(circle at top left, rgba(255, 208, 0, 0.1), transparent 25%),
-    linear-gradient(180deg, #101114 0%, #0a0b0d 100%);
+    radial-gradient(circle at top center, rgba(174, 68, 90, 0.18), transparent 32%),
+    radial-gradient(circle at 20% 30%, rgba(102, 37, 73, 0.14), transparent 24%),
+    linear-gradient(180deg, #ae445a 0%, #662549 24%, #451952 58%, #1d1a39 100%);
   color: #fff;
 }
 
@@ -20,8 +21,8 @@
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: rgba(255, 208, 0, 0.12);
-  border: 1px solid rgba(255, 208, 0, 0.22);
+  background: rgba(243, 159, 90, 0.12);
+  border: 1px solid rgba(243, 159, 90, 0.22);
 }
 
 .brand__mark--sm {
@@ -52,7 +53,7 @@
   width: min(100%, 760px);
   border-radius: 28px;
   padding: 32px;
-  background: rgba(18, 20, 25, 0.92);
+  background: rgba(29, 26, 57, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
@@ -73,8 +74,8 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #ffd000;
-  background: rgba(255, 208, 0, 0.1);
+  color: #f39f5a;
+  background: rgba(243, 159, 90, 0.1);
 }
 
 .guestLanding__title,
@@ -110,7 +111,7 @@
 }
 
 .primaryButton {
-  background: #ffd000;
+  background: #f39f5a;
   color: #111;
 }
 
@@ -141,6 +142,7 @@
 .roleTabs {
   display: inline-flex;
   gap: 8px;
+  flex-wrap: wrap;
   padding: 6px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.04);
@@ -164,14 +166,33 @@
 .roleTabs__item.is-active,
 .choiceCard.is-active,
 .appNav__item.is-active {
-  background: rgba(255, 208, 0, 0.12);
-  border-color: rgba(255, 208, 0, 0.35);
-  color: #ffd000;
+  background: rgba(243, 159, 90, 0.12);
+  border-color: rgba(243, 159, 90, 0.35);
+  color: #f39f5a;
 }
 
 .authForm {
   display: grid;
   gap: 16px;
+}
+
+.authCard__switch {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.authCard__switchButton {
+  border: none;
+  background: transparent;
+  color: #f39f5a;
+  font: inherit;
+  font-weight: 800;
+  padding: 0;
+}
+
+.authForm__textarea {
+  resize: vertical;
+  min-height: 110px;
 }
 
 .authForm__grid {
@@ -211,8 +232,207 @@
 }
 
 .input--dark:focus {
-  border-color: rgba(255, 208, 0, 0.45);
-  box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.12);
+  border-color: rgba(243, 159, 90, 0.45);
+  box-shadow: 0 0 0 3px rgba(243, 159, 90, 0.12);
+}
+
+.customSelect {
+  position: relative;
+  min-width: 0;
+}
+
+.customSelect__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.customSelect.has-clear .customSelect__trigger {
+  padding-right: 74px;
+}
+
+.customSelect.has-clear .customSelect__chevron {
+  margin-right: 28px;
+}
+
+.customSelect__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customSelect__chevron {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-1px);
+  transition: transform 0.16s ease;
+  opacity: 0.8;
+}
+
+.customSelect.is-open .customSelect__chevron {
+  transform: rotate(-135deg) translateX(-1px);
+}
+
+.customSelect__clear {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.customSelect__clear:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.customSelect__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 6px;
+  max-height: min(320px, calc(100dvh - 120px));
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(14, 15, 18, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+}
+
+.customSelect__option {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+}
+
+.customSelect__option:hover,
+.customSelect__option.is-selected {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.customSelect__option.is-selected {
+  border-color: rgba(243, 159, 90, 0.22);
+  color: #f39f5a;
+}
+
+.customSelect__check {
+  color: rgba(243, 159, 90, 0.8);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.filtersMobile {
+  display: none;
+}
+
+.filtersMobile__toggle,
+.filtersMobile__close {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 13, 16, 0.94);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+}
+
+.filtersMobile__toggle {
+  min-height: 46px;
+  width: 100%;
+  border-radius: 16px;
+  padding: 0 16px;
+}
+
+.filtersMobile__sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+.mapPanel__toolbar:has(.responsiveFilters.is-open) {
+  z-index: 90;
+}
+
+.filtersMobile__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.52);
+}
+
+.filtersMobile__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  gap: 14px;
+  padding: 16px 16px calc(20px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  background: rgba(14, 15, 18, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.34);
+}
+
+.filtersMobile__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filtersMobile__title {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.filtersMobile__close {
+  min-height: 40px;
+  border-radius: 14px;
+  padding: 0 14px;
+}
+
+.filtersMobile__body {
+  display: grid;
+  gap: 10px;
+  max-height: min(70dvh, 520px);
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .formError {
@@ -254,6 +474,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .appBrand--button {
@@ -262,6 +483,19 @@
   color: inherit;
   padding: 0;
   text-align: left;
+}
+
+.appBrand--header {
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.brand__mark--header {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #e63d33;
+  border: none;
 }
 
 .appBrand__title,
@@ -279,11 +513,17 @@
   font-size: 20px;
 }
 
+.appBrand__title--header {
+  font-size: 14px;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
 .appNav__dot {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #ffd000;
+  background: #f39f5a;
 }
 
 .userCard {
@@ -294,10 +534,17 @@
 }
 
 .appMain {
-  padding: 20px 20px 110px;
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
+}
+
+.appMain--map {
+  max-width: none;
+  padding: 0;
+  position: relative;
+  min-height: 100dvh;
+  height: 100dvh;
 }
 
 .appTopbar {
@@ -309,34 +556,181 @@
 }
 
 .appTopbar--flat {
-  padding: 6px 0 0;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
 }
+
+.appTopbar--overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: auto;
+  margin-left: 0;
+  z-index: 50;
+  margin-bottom: 0;
+  padding: 0;
+}
+
 
 .appTopbar__title {
   font-size: 28px;
+}
+
+.appTopbar__shell {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, rgba(12, 13, 16, 0.96) 0%, rgba(8, 9, 12, 0.92) 100%);
+  
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+
+.appTopbar__left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
 .appTopbar__right {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.appTopbar__mobileActions {
+  display: none;
+}
+
+.appHeaderNav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.appHeaderNav__item {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.appHeaderNav__item.is-active,
+.appHeaderNav__item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.appTopbar__utility {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 14px;
+  padding: 0 12px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.76);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.appTopbar__utilityIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+}
+
+.appTopbar__utilityIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.appTopbar__city {
+  min-width: 148px;
+}
+
+.appTopbar__city .customSelect {
+  min-width: 0;
+}
+
+.appTopbar__cityTrigger {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  padding: 0 12px;
+}
+
+.appTopbar__cityMenu {
+  min-width: 220px;
+}
+
+.appTopbar__mobileCity {
+  display: none;
+}
+
+.appTopbar__mobileCity .customSelect {
+  min-width: 0;
+}
+
+.appTopbar__mobileCityTrigger {
+  min-width: 0;
+  min-height: 38px;
+  max-width: 132px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.statusBadge--header {
+  min-height: 42px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.appTopbar__cta {
+  min-height: 42px;
+  border-radius: 14px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  box-shadow: none;
 }
 
 .profileIconButton {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
   color: #fff;
 }
 
 .profileIconButton.is-active {
-  background: rgba(255, 208, 0, 0.12);
-  border-color: rgba(255, 208, 0, 0.3);
-  color: #ffd000;
+  background: rgba(243, 159, 90, 0.12);
+  border-color: rgba(243, 159, 90, 0.3);
+  color: #f39f5a;
 }
 
 .profileIconButton svg {
@@ -349,6 +743,12 @@
   gap: 18px;
 }
 
+.appContent--map {
+  gap: 0;
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
 .bottomNav {
   position: fixed;
   left: 16px;
@@ -356,45 +756,58 @@
   bottom: 16px;
   z-index: 40;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px;
-  border-radius: 22px;
-  background: rgba(12, 13, 16, 0.94);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(7, 8, 10, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.bottomNav--map {
+  z-index: 55;
 }
 
 @media (min-width: 980px) {
   .bottomNav {
     left: 50%;
     right: auto;
-    width: min(560px, calc(100vw - 32px));
+    width: min(320px, calc(100vw - 32px));
     transform: translateX(-50%);
   }
 }
 
 .bottomNav__item {
   border: none;
-  border-radius: 16px;
-  padding: 12px 10px;
+  min-height: 52px;
+  border-radius: 14px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   background: transparent;
   color: rgba(255, 255, 255, 0.74);
+  font-size: 13px;
   font-weight: 800;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
 }
 
 .bottomNav__item svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+}
+
+.bottomNav__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
 }
 
 .bottomNav__item.is-active {
-  background: rgba(255, 208, 0, 0.12);
-  color: #ffd000;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .appActions {
@@ -439,9 +852,9 @@
 
 .heroStrip__badge,
 .tag--accent {
-  background: rgba(255, 208, 0, 0.12);
-  border-color: rgba(255, 208, 0, 0.28);
-  color: #ffd000;
+  background: rgba(243, 159, 90, 0.12);
+  border-color: rgba(243, 159, 90, 0.28);
+  color: #f39f5a;
 }
 
 .pageGrid {
@@ -461,9 +874,257 @@
 .catalogPage,
 .reviewsPage {
   border-radius: 24px;
-  background: rgba(18, 20, 25, 0.92);
+  background: rgba(29, 26, 57, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 20px;
+}
+
+.mapExperience {
+  display: block;
+  min-height: 100dvh;
+}
+
+.mapExperience--fullscreen {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+.mapToolbar {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(12, 13, 16, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.mapPanel__toolbar {
+  position: absolute;
+  top: max(94px, calc(env(safe-area-inset-top) + 78px));
+  left: 16px;
+  right: 16px;
+  z-index: 7;
+}
+
+@media (min-width: 1100px) {
+  .mapToolbar {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1.4fr;
+    align-items: center;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 761px) {
+  .appMain {
+    padding: 18px 18px 28px;
+  }
+
+  .appMain--map {
+    padding: 0;
+  }
+
+  .appTopbar__shell {
+    min-height: 62px;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+
+  .appTopbar__left {
+    gap: 12px;
+    flex: 1 1 auto;
+  }
+
+  .appHeaderNav {
+    gap: 0;
+    min-width: 0;
+  }
+
+  .appHeaderNav__item {
+    padding: 8px 9px;
+    font-size: 13px;
+  }
+
+  .appTopbar__right {
+    gap: 8px;
+    flex: 0 1 auto;
+  }
+
+  .appTopbar__utility {
+    width: 42px;
+    min-width: 42px;
+    padding: 0;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .appTopbar__utility span {
+    display: none;
+  }
+
+  .appTopbar__city {
+    min-width: 132px;
+    max-width: 168px;
+  }
+
+  .appTopbar__cityTrigger {
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .appTopbar__cta {
+    display: none;
+  }
+
+  .profileIconButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .bottomNav--map {
+    display: none;
+  }
+
+  .mapPanel__toolbar {
+    top: max(92px, calc(env(safe-area-inset-top) + 76px));
+  }
+
+  .mapToolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .mapToolbar__search,
+  .mapToolbar__searchWrap {
+    grid-column: 1 / -1;
+  }
+
+  .mapPanel__overlay {
+    gap: 8px;
+    max-width: calc(100vw - 32px);
+    flex-wrap: wrap;
+  }
+
+  .mapPanel__overlay--topLeft,
+  .mapPanel__overlay--topRight {
+    top: max(216px, calc(env(safe-area-inset-top) + 200px));
+  }
+
+  .mapPanel__overlay--topRight {
+    justify-content: flex-end;
+  }
+
+  .mapboxCanvas .mapboxgl-ctrl-top-right {
+    right: 16px;
+    bottom: 26px;
+  }
+
+  .spotlightCard--floating {
+    left: 16px;
+    right: auto;
+    width: min(420px, calc(100vw - 32px));
+    bottom: 20px;
+    border-radius: 24px;
+  }
+
+  .spotlightCard__eyebrow {
+    flex-wrap: wrap;
+  }
+
+  .catalogSearch {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .catalogFilterBar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalogSearch__submit {
+    grid-column: 1 / -1;
+  }
+
+  .catalogLayout {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .catalogWidget,
+  .catalogPromoCard,
+  .catalogFeed__header {
+    padding: 16px;
+  }
+
+  .catalogJobCard {
+    padding: 20px;
+  }
+}
+
+.mapToolbar__control,
+.mapToolbar__search {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0 14px;
+  font: inherit;
+  color: #ffffff;
+  outline: none;
+}
+
+.mapToolbar__searchWrap {
+  position: relative;
+  width: 100%;
+}
+
+.mapToolbar__searchWrap.is-active .mapToolbar__search {
+  padding-right: 48px;
+}
+
+.mapToolbar__control:focus,
+.mapToolbar__search:focus {
+  border-color: rgba(243, 159, 90, 0.55);
+  box-shadow: 0 0 0 3px rgba(243, 159, 90, 0.14);
+}
+
+.mapToolbar__clear {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.mapToolbar__clear:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.mapPanel--full {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-height: 100dvh;
 }
 
 .panelHeader,
@@ -471,23 +1132,23 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
   align-items: center;
   margin-bottom: 18px;
 }
 
 .mapPlaceholder {
-  min-height: 360px;
-  border-radius: 22px;
+  min-height: 100dvh;
+  border-radius: 0;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  background: #0b0c0e;
 }
 
 .mapboxCanvas,
 .mapboxFallback {
   width: 100%;
-  min-height: 360px;
+  min-height: 100dvh;
   height: 100%;
 }
 
@@ -496,31 +1157,264 @@
   place-items: center;
   padding: 24px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.74);
+  color: rgba(255, 255, 255, 0.78);
+  background: #0b0c0e;
+}
+
+.mapboxCanvas .mapboxgl-ctrl-top-right {
+  top: auto;
+  bottom: 218px;
+  right: 16px;
+  transform: none;
+}
+
+.mapboxCanvas .mapboxgl-ctrl-top-right .mapboxgl-ctrl {
+  margin: 0;
+}
+
+.mapVacancySheet {
+  position: absolute;
+  top: max(222px, calc(env(safe-area-inset-top) + 206px));
+  left: 16px;
+  z-index: 6;
+  width: min(360px, calc(100vw - 32px));
+  border-radius: 28px;
+  background: rgba(29, 26, 57, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(22px);
+}
+
+.mapVacancySheet__content {
+  padding: 22px;
+}
+
+.mapVacancySheet__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.mapVacancySheet__eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-right: 44px;
+}
+
+.mapVacancySheet__title {
+  margin-top: 16px;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+}
+
+.mapVacancySheet__company {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.mapVacancySheet__meta {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mapVacancySheet__tags {
+  margin-top: 14px;
+}
+
+.mapVacancySheet__button {
+  margin-top: 18px;
+}
+
+.mapboxVacancyPopupShell {
+  z-index: 7;
+}
+
+.mapboxVacancyPopupShell .mapboxgl-popup-content {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(12, 13, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+}
+
+.mapboxVacancyPopupShell .mapboxgl-popup-tip {
+  border-top-color: rgba(12, 13, 16, 0.96);
+}
+
+.mapVacancyPopup {
+  width: min(280px, calc(100vw - 56px));
+  padding: 16px;
+  color: #ffffff;
+}
+
+.mapVacancyPopup__title {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.mapVacancyPopup__company {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mapVacancyPopup__meta {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mapVacancyPopup__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mapVacancyPopup__button {
+  width: 100%;
+  margin-top: 14px;
 }
 
 .mapboxMarker {
-  width: 22px;
-  height: 22px;
+  position: relative;
+  width: 26px;
+  height: 26px;
   border: none;
   background: transparent;
   padding: 0;
   cursor: pointer;
+  outline: none;
 }
 
 .mapboxMarker__dot {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: block;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px 999px 999px 0;
-  transform: rotate(-45deg);
-  background: #ffd000;
-  border: 2px solid rgba(0, 0, 0, 0.35);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f7b27a 0%, #f39f5a 100%);
+  border: 2px solid rgba(8, 10, 14, 0.78);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+}
+
+.mapboxMarker__dot::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 999px;
+  background: rgba(8, 10, 14, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.mapboxMarker__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(243, 159, 90, 0.28);
+  transform: scale(0.82);
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.mapboxMarker__badge {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  background: rgba(12, 13, 16, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.mapboxMarker:hover,
+.mapboxMarker.is-active {
+  z-index: 3;
 }
 
 .mapboxMarker.is-active .mapboxMarker__dot {
-  background: #ffffff;
+  background: linear-gradient(180deg, #f39f5a 0%, #ae445a 100%);
+  box-shadow: 0 0 0 4px rgba(174, 68, 90, 0.18), 0 16px 28px rgba(0, 0, 0, 0.34);
+}
+
+.mapboxMarker.is-active .mapboxMarker__pulse {
+  opacity: 1;
+  transform: scale(1.65);
+}
+
+.mapboxMarker.is-active .mapboxMarker__badge,
+.mapboxMarker:hover .mapboxMarker__badge {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.mapboxMarker:focus-visible .mapboxMarker__badge {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.spotlightCard__eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.spotlightCard__eyebrowTag,
+.spotlightCard__eyebrowText {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.spotlightCard__eyebrowTag {
+  background: rgba(243, 159, 90, 0.14);
+  color: #f39f5a;
+}
+
+.spotlightCard__eyebrowText {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .spotlightCard,
@@ -537,8 +1431,93 @@
   margin-top: 16px;
 }
 
+.spotlightCard--floating {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 98px;
+  z-index: 5;
+  margin-top: 0;
+  background: rgba(12, 13, 16, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.3);
+}
+
+.spotlightCard--floating .spotlightCard__title,
+.spotlightCard--floating .spotlightCard__meta {
+  color: #ffffff;
+}
+
+.spotlightCard--floating .tag {
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .mapPanel__catalogButton {
   margin-top: 16px;
+}
+
+.mapPanel__overlay {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  gap: 10px;
+}
+
+.mapPanel__overlay--topLeft {
+  top: max(170px, calc(env(safe-area-inset-top) + 154px));
+  left: 16px;
+}
+
+.mapPanel__overlay--topRight {
+  top: max(170px, calc(env(safe-area-inset-top) + 154px));
+  right: 16px;
+}
+
+.mapFloatingButton,
+.mapStatsPill {
+  min-height: 42px;
+  border-radius: 14px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 13, 16, 0.9);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.mapFloatingButton--muted {
+  background: rgba(12, 13, 16, 0.78);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mapStatsPill {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .mapPanel__toolbar {
+    top: max(86px, calc(env(safe-area-inset-top) + 70px));
+  }
+
+  .mapPanel__overlay--topLeft,
+  .mapPanel__overlay--topRight {
+    top: max(154px, calc(env(safe-area-inset-top) + 138px));
+  }
+
+  .mapVacancySheet {
+    top: auto;
+    left: 12px;
+    right: 12px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: auto;
+    border-radius: 24px;
+  }
 }
 
 .vacancyList,
@@ -549,8 +1528,8 @@
 }
 
 .vacancyCard.is-active {
-  border-color: rgba(255, 208, 0, 0.32);
-  background: rgba(255, 208, 0, 0.08);
+  border-color: rgba(243, 159, 90, 0.32);
+  background: rgba(243, 159, 90, 0.08);
 }
 
 .tagRow {
@@ -566,9 +1545,344 @@
   margin-bottom: 18px;
 }
 
+.catalogShowcase {
+  display: grid;
+  gap: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.catalogHero {
+  display: grid;
+  gap: 18px;
+}
+
+.catalogSearch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.catalogSearch__field {
+  min-width: 0;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.catalogSearch__icon,
+.catalogWidget__icon {
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.56);
+  display: inline-flex;
+}
+
+.catalogSearch__icon svg,
+.catalogWidget__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.catalogSearch__input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  outline: none;
+}
+
+.catalogSearch__input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.catalogFilterBar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(156px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.catalogSearch .responsiveFilters,
+.catalogSearch .filtersDesktop {
+  min-width: 0;
+}
+
+.catalogSearch__submit,
+.catalogJobCard__footer .primaryButton {
+  min-height: 56px;
+  border-radius: 18px;
+  padding-inline: 26px;
+  background: linear-gradient(180deg, #f39f5a 0%, #ae445a 100%);
+  color: #fff;
+  box-shadow: 0 16px 30px rgba(174, 68, 90, 0.28);
+}
+
+.catalogQuickFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.catalogQuickFilters__chip {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-weight: 800;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
+}
+
+.catalogQuickFilters__chip:hover,
+.catalogPromoCard__link:hover,
+.catalogJobCard__fav:hover {
+  transform: translateY(-1px);
+}
+
+.catalogQuickFilters__chip.is-active {
+  background: #ffffff;
+  color: #080a0f;
+  border-color: transparent;
+}
+
+.catalogLayout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.catalogSidebar,
+.catalogFeed {
+  min-width: 0;
+}
+
+.catalogSidebar {
+  display: grid;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+}
+
+.catalogWidget,
+.catalogPromoCard,
+.catalogFeed__header,
+.catalogJobCard {
+  border-radius: 24px;
+  background: rgba(15, 18, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.26);
+}
+
+.catalogWidget,
+.catalogPromoCard,
+.catalogFeed__header {
+  padding: 18px;
+}
+
+.catalogWidget {
+  display: grid;
+  gap: 4px;
+}
+
+.catalogWidget__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.catalogWidget__item + .catalogWidget__item {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.catalogWidget__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.catalogWidget__value {
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.catalogWidget__value--accent {
+  color: #61d39f;
+}
+
+.catalogWidget__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #61d39f 0%, #25b372 100%);
+  box-shadow: 0 0 0 5px rgba(97, 211, 159, 0.12);
+}
+
+.catalogPromoCard {
+  display: grid;
+  gap: 10px;
+}
+
+.catalogPromoCard__title,
+.catalogFeed__title,
+.catalogJobCard__title,
+.catalogJobCard__salary {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.catalogPromoCard__text,
+.catalogFeed__subtitle,
+.catalogJobCard__location,
+.catalogJobCard__company {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.catalogPromoCard__link {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #f39f5a;
+  font: inherit;
+  font-weight: 800;
+}
+
+.catalogFeed {
+  display: grid;
+  gap: 16px;
+}
+
+.catalogFeed__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.catalogFeed__headerMain {
+  min-width: 0;
+}
+
+.catalogFeed__title {
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  margin-bottom: 6px;
+}
+
+.catalogFeed__citySelect {
+  width: min(240px, 100%);
+  flex: 0 0 auto;
+}
+
+.catalogCards {
+  display: grid;
+  gap: 16px;
+}
+
+.catalogJobCard {
+  display: grid;
+  gap: 20px;
+  padding: 22px;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  cursor: pointer;
+}
+
+.catalogJobCard--empty {
+  text-align: center;
+  place-items: center;
+  cursor: default;
+}
+
+.catalogJobCard:hover {
+  transform: translateY(-1px);
+  border-color: rgba(61, 126, 255, 0.32);
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.32);
+}
+
+.catalogJobCard__main {
+  display: grid;
+  gap: 16px;
+}
+
+.catalogJobCard__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.catalogJobCard__title {
+  font-size: clamp(1.15rem, 2vw, 1.8rem);
+  margin-bottom: 8px;
+}
+
+.catalogJobCard__salary {
+  font-size: 1.1rem;
+}
+
+.catalogJobCard__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.catalogJobCard__company {
+  font-weight: 700;
+}
+
+.catalogJobCard__location {
+  font-size: 14px;
+}
+
+.catalogJobCard__footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.catalogJobCard__fav {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.catalogJobCard__fav span {
+  width: 14px;
+  height: 14px;
+  display: block;
+  border-right: 2px solid rgba(255, 255, 255, 0.6);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+  transform: rotate(45deg);
+  margin-top: -3px;
+}
+
 @media (min-width: 920px) {
   .catalogFilters {
-    grid-template-columns: 1.5fr 1fr 1fr;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
   }
 }
 
@@ -579,7 +1893,57 @@
   align-items: center;
 }
 
+.panelHeader__title,
+.vacancyCard__title,
+.spotlightCard__title,
+.reviewCard__text,
+.catalogRow__type,
+.vacancyCard__meta {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 920px) {
+  .vacancyDetailLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogShowcase {
+    padding: 0;
+  }
+
+  .catalogSearch {
+    grid-template-columns: 1fr auto;
+  }
+
+  .catalogFilterBar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalogSearch__submit {
+    grid-column: 1 / -1;
+  }
+
+  .catalogLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogSidebar {
+    order: 2;
+    position: static;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .catalogFeed {
+    order: 1;
+  }
+
+  .catalogWidget,
+  .catalogPromoCard {
+    display: grid;
+    width: 100%;
+  }
+
   .catalogRow {
     flex-direction: column;
     align-items: flex-start;
@@ -597,13 +1961,174 @@
 }
 
 .reviewCard__rating {
-  color: #ffd000;
+  color: #f39f5a;
   margin-bottom: 10px;
   font-size: 18px;
 }
 
 .reviewCard__text {
   line-height: 1.6;
+}
+
+.reviewCard--interactive,
+.vacancyDetailRelated__card {
+  cursor: pointer;
+}
+
+.profileEditor {
+  display: grid;
+  gap: 18px;
+}
+
+.profileEditor__grid {
+  display: grid;
+  gap: 14px;
+}
+
+.profileEditor__actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.vacancyDetailPage {
+  display: grid;
+  gap: 20px;
+}
+
+.vacancyDetailLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.vacancyDetailMain,
+.vacancyDetailSidebar,
+.vacancyDetailRelated__list {
+  display: grid;
+  gap: 16px;
+}
+
+.vacancyDetailCard,
+.vacancyDetailSection,
+.vacancyDetailCompany,
+.vacancyDetailPromo,
+.vacancyDetailRelated__card {
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(29, 26, 57, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vacancyDetailCard__title,
+.vacancyDetailPromo__value,
+.vacancyDetailRelated__title,
+.vacancyDetailCompany__name {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.vacancyDetailCard__title {
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  margin-bottom: 10px;
+}
+
+.vacancyDetailCard__salary {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.vacancyDetailFacts {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.vacancyDetailFacts__item,
+.vacancyDetailCompany__meta,
+.vacancyDetailPromo__label,
+.vacancyDetailPromo__text,
+.vacancyDetailText {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.vacancyDetailActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.vacancyDetailActions__primary {
+  min-width: 220px;
+}
+
+.vacancyDetailMapButton {
+  margin-top: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #f39f5a;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+}
+
+.vacancyDetailMapCard {
+  width: 100%;
+  margin-top: 14px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.vacancyDetailMap {
+  min-height: 260px;
+  height: 260px;
+}
+
+.vacancyDetailText {
+  line-height: 1.7;
+}
+
+.vacancyDetailText p {
+  margin: 0 0 14px;
+}
+
+.vacancyDetailText p:last-child {
+  margin-bottom: 0;
+}
+
+.vacancyDetailPromo {
+  background: linear-gradient(135deg, rgba(111, 0, 255, 0.82), rgba(255, 71, 87, 0.82));
+}
+
+.vacancyDetailPromo__label {
+  color: rgba(255, 255, 255, 0.84);
+  margin-bottom: 12px;
+}
+
+.vacancyDetailPromo__value {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.vacancyDetailRelated__title {
+  font-size: 1.4rem;
+}
+
+.vacancyDetailRelated__card {
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.vacancyDetailRelated__card:hover,
+.reviewCard--interactive:hover {
+  transform: translateY(-1px);
+  border-color: rgba(243, 159, 90, 0.28);
 }
 
 .footer2 {
@@ -647,4 +2172,439 @@
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .guestLanding,
+  .authPage,
+  .onboardingPage {
+    padding: 20px 14px 104px;
+  }
+
+  .guestLanding__inner,
+  .authCard,
+  .onboardingCard,
+  .catalogPage,
+  .reviewsPage {
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .roleTabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .roleTabs__item {
+    width: 100%;
+  }
+
+  .choiceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .onboardingCard__actions {
+    flex-direction: column-reverse;
+  }
+
+  .onboardingCard__actions .ghostButton,
+  .onboardingCard__actions .primaryButton {
+    width: 100%;
+  }
+
+  .appMain {
+    padding: 16px 16px 100px;
+  }
+
+  .appTopbar:not(.appTopbar--overlay) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .appTopbar__shell {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding: 10px 12px;
+  }
+
+  .appTopbar__right {
+    display: none;
+  }
+
+  .appTopbar__left {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .appBrand__title--header {
+    display: none;
+  }
+
+  .appHeaderNav {
+    display: none;
+  }
+
+  .appTopbar__mobileActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .appTopbar__mobileCity {
+    display: block;
+    min-width: 0;
+  }
+
+  .appTopbar__mobileIcon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .appTopbar__mobileIcon.is-active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+  }
+
+  .appTopbar__mobileIconGlyph {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+  }
+
+  .appTopbar__mobileIconGlyph svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .bottomNav {
+    display: none;
+  }
+
+  .statusBadge {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+
+  .heroStrip {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .bottomNav {
+    left: 50%;
+    right: auto;
+    width: min(280px, calc(100vw - 36px));
+    transform: translateX(-50%);
+    bottom: 12px;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 16px;
+  }
+
+  .bottomNav__item {
+    min-height: 46px;
+    padding: 8px 10px;
+    gap: 5px;
+    font-size: 11px;
+  }
+
+  .catalogRow,
+  .reviewCard,
+  .spotlightCard,
+  .vacancyCard {
+    padding: 16px;
+  }
+
+  .catalogShowcase {
+    padding: 0;
+  }
+
+  .catalogFeed__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .catalogFeed__citySelect {
+    width: 100%;
+  }
+
+  .vacancyDetailCard,
+  .vacancyDetailSection,
+  .vacancyDetailCompany,
+  .vacancyDetailPromo,
+  .vacancyDetailRelated__card {
+    border-radius: 20px;
+    padding: 16px;
+  }
+
+  .vacancyDetailActions {
+    flex-direction: column;
+  }
+
+  .vacancyDetailActions__primary {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .catalogSearch {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogSearch__field,
+  .catalogSearch__submit {
+    min-height: 52px;
+  }
+
+  .catalogQuickFilters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .catalogQuickFilters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .catalogQuickFilters__chip {
+    white-space: nowrap;
+  }
+
+  .catalogWidget,
+  .catalogPromoCard,
+  .catalogFeed__header,
+  .catalogJobCard {
+    border-radius: 20px;
+  }
+
+  .catalogJobCard {
+    padding: 18px;
+  }
+
+  .catalogJobCard__head {
+    flex-direction: column;
+  }
+
+  .catalogJobCard__fav {
+    width: 38px;
+    height: 38px;
+  }
+
+  .catalogRow__side,
+  .catalogRow__side .tagRow {
+    width: 100%;
+  }
+
+  .mapPanel__toolbar {
+    left: 12px;
+    right: 12px;
+  }
+
+  .mapToolbar {
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .filtersDesktop {
+    display: none;
+  }
+
+  .filtersMobile {
+    display: block;
+  }
+
+  .filtersMobile__body .catalogFilters,
+  .filtersMobile__body .mapToolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .mapPanel__toolbar .filtersMobile__toggle {
+    width: auto;
+    min-width: 116px;
+    padding: 0 18px;
+    background: rgba(12, 13, 16, 0.92);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .mapboxCanvas .mapboxgl-ctrl-top-right {
+    bottom: 210px;
+    right: 12px;
+  }
+
+  .mapPanel__overlay {
+    gap: 8px;
+    max-width: calc(100vw - 24px);
+    flex-wrap: wrap;
+  }
+
+  .mapPanel__overlay--topLeft {
+    left: 12px;
+    right: 12px;
+  }
+
+  .mapPanel__overlay--topRight {
+    left: 12px;
+    right: 12px;
+    justify-content: flex-start;
+  }
+
+  .mapFloatingButton,
+  .mapStatsPill {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .spotlightCard--floating {
+    left: 12px;
+    right: 12px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    border-radius: 22px 22px 0 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .guestLanding__title,
+  .authCard__title {
+    font-size: clamp(1.7rem, 8vw, 2.4rem);
+  }
+
+  .brand__mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .appBrand__subtitle {
+    display: none;
+  }
+
+  .appTopbar--overlay {
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .appTopbar__right {
+    gap: 8px;
+  }
+
+  .appTopbar__shell {
+    padding: 8px 10px;
+  }
+
+  .appTopbar__mobileActions {
+    gap: 4px;
+  }
+
+  .appTopbar__mobileCityTrigger {
+    max-width: 104px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .appTopbar__mobileIcon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .appTopbar__mobileIconGlyph {
+    width: 20px;
+    height: 20px;
+  }
+
+  .statusBadge {
+    max-width: calc(100vw - 92px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bottomNav__item {
+    min-height: 44px;
+  }
+
+  .bottomNav__item span:last-child {
+    font-size: 11px;
+  }
+
+  .mapPanel__toolbar {
+    top: max(70px, calc(env(safe-area-inset-top) + 56px));
+  }
+
+  .mapPanel__overlay--topLeft,
+  .mapPanel__overlay--topRight {
+    top: max(142px, calc(env(safe-area-inset-top) + 128px));
+  }
+
+  .mapPanel__overlay--topRight {
+    left: 12px;
+    right: 12px;
+  }
+
+  .mapFloatingButton,
+  .mapStatsPill {
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  .mapboxCanvas .mapboxgl-ctrl-top-right {
+    bottom: 196px;
+  }
+
+  .mapVacancySheet__content {
+    padding: 18px;
+  }
+
+  .mapVacancySheet__title {
+    font-size: 1.08rem;
+  }
+
+  .mapVacancySheet__company,
+  .mapVacancySheet__meta {
+    font-size: 13px;
+  }
+
+  .mapVacancyPopup {
+    width: min(248px, calc(100vw - 36px));
+    padding: 14px;
+  }
+
+  .mapVacancyPopup__title {
+    font-size: 0.95rem;
+  }
+
+  .mapVacancyPopup__company,
+  .mapVacancyPopup__meta {
+    font-size: 12px;
+  }
+
+  .mapboxMarker__badge {
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .spotlightCard__eyebrow {
+    flex-wrap: wrap;
+  }
+
+  .spotlightCard--floating {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
 }

@@ -1,4 +1,4 @@
-export function GuestLandingPage({ onEnter }) {
+export function GuestLandingPage({ onLogin, onRegister }) {
   return (
     <section className="guestLanding">
       <div className="guestLanding__inner">
@@ -7,9 +7,14 @@ export function GuestLandingPage({ onEnter }) {
         <p className="guestLanding__lead">
           После входа откроется рабочее приложение: роли пользователь/работодатель, onboarding, карта вакансий, каталог и отзывы.
         </p>
-        <button className="primaryButton" onClick={onEnter}>
-          Войти
-        </button>
+        <div className="appActions">
+          <button className="ghostButton" onClick={onLogin}>
+            Войти
+          </button>
+          <button className="primaryButton" onClick={onRegister}>
+            Зарегистрироваться
+          </button>
+        </div>
       </div>
     </section>
   )

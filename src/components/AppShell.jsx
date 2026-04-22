@@ -1,57 +1,96 @@
 import { Icon } from './Icon'
 import { Logo } from './Logo'
+import { CustomSelect } from './CustomSelect'
 
-export function AppShell({ currentUser, currentSection, onNavigate, onLogout, children }) {
+export function AppShell({ currentUser, currentSection, onNavigate, children, cityOptions, selectedCity, onCityChange }) {
+  const isMapSection = currentSection === 'map'
   const roleLabel = currentUser.role === 'employer' ? 'Работодатель' : currentUser.role === 'admin' ? 'Админ' : 'Пользователь'
+  const primaryActionLabel = currentUser.role === 'employer' ? 'Разместить смену' : 'Создать резюме'
 
   return (
     <div className="appFrame">
-      <div className="appMain">
-        <header className="appTopbar appTopbar--flat">
-          <button className="appBrand appBrand--button" onClick={() => onNavigate('/app/map')}>
-            <span className="brand__mark" aria-hidden>
-              <Logo size={26} className="brand__img" />
-            </span>
-            <div>
-              <div className="appBrand__title">Рядом</div>
-              <div className="appBrand__subtitle">вакансии на один день</div>
-            </div>
-          </button>
+      <div className={`appMain ${isMapSection ? 'appMain--map' : ''}`}>
+        <header className={`appTopbar appTopbar--flat ${isMapSection ? 'appTopbar--overlay' : ''}`}>
+          <div className="appTopbar__shell">
+            <div className="appTopbar__left">
+              <button className="appBrand appBrand--button appBrand--header" onClick={() => onNavigate('/')}>
+                <div className="appBrand__title appBrand__title--header">Smena.by</div>
+              </button>
 
-          <div className="appTopbar__right">
-            <div className="statusBadge">{roleLabel}</div>
-            <button className={`profileIconButton ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/app/profile')}>
-              <Icon name="user" />
-            </button>
+              <nav className="appHeaderNav" aria-label="Основная навигация">
+                <button className={`appHeaderNav__item ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')}>
+                  Вакансии
+                </button>
+                <button className={`appHeaderNav__item ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')}>
+                  Карта
+                </button>
+                <button className={`appHeaderNav__item ${currentSection === 'applications' ? 'is-active' : ''}`} onClick={() => onNavigate('/applications')}>
+                  Отклики
+                </button>
+              </nav>
+            </div>
+
+            <div className="appTopbar__right">
+              <button className="appTopbar__utility" type="button" onClick={() => onNavigate('/')}>
+                <Icon name="search" className="appTopbar__utilityIcon" />
+                <span>Поиск</span>
+              </button>
+
+              <div className="appTopbar__city">
+                <CustomSelect
+                  value={selectedCity}
+                  options={cityOptions}
+                  onChange={onCityChange}
+                  triggerClassName="appTopbar__cityTrigger"
+                  menuClassName="appTopbar__cityMenu"
+                />
+              </div>
+
+              
+
+              <button className={`profileIconButton ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')}>
+                <Icon name="user" />
+              </button>
+            </div>
+
+            <div className="appTopbar__mobileActions" aria-label="Мобильная навигация">
+              <div className="appTopbar__mobileCity">
+                <CustomSelect
+                  value={selectedCity}
+                  options={cityOptions}
+                  onChange={onCityChange}
+                  triggerClassName="appTopbar__mobileCityTrigger"
+                  menuClassName="appTopbar__cityMenu"
+                />
+              </div>
+              <button className={`appTopbar__mobileIcon ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')} aria-label="Каталог">
+                <Icon name="briefcase" className="appTopbar__mobileIconGlyph" />
+              </button>
+              <button className={`appTopbar__mobileIcon ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')} aria-label="Карта">
+                <Icon name="mapPin" className="appTopbar__mobileIconGlyph" />
+              </button>
+              <button className={`appTopbar__mobileIcon ${currentSection === 'applications' ? 'is-active' : ''}`} onClick={() => onNavigate('/applications')} aria-label="Отклики">
+                <Icon name="spark" className="appTopbar__mobileIconGlyph" />
+              </button>
+              <button className={`appTopbar__mobileIcon ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')} aria-label="Профиль">
+                <Icon name="user" className="appTopbar__mobileIconGlyph" />
+              </button>
+            </div>
           </div>
         </header>
 
-        <div className="appContent">{children}</div>
+        <div className={`appContent ${isMapSection ? 'appContent--map' : ''}`}>{children}</div>
 
-        <nav className="bottomNav" aria-label="Основная навигация">
-          <button className={`bottomNav__item ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/app/catalog')}>
+        <nav className={`bottomNav ${isMapSection ? 'bottomNav--map' : ''}`} aria-label="Основная навигация">
+          <button className={`bottomNav__item ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')}>
             <Icon name="briefcase" />
             <span>Каталог</span>
           </button>
-          <button className={`bottomNav__item ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/app/map')}>
+          <button className={`bottomNav__item ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')}>
             <Icon name="mapPin" />
             <span>Карта</span>
           </button>
-          <button className={`bottomNav__item ${currentSection === 'reviews' ? 'is-active' : ''}`} onClick={() => onNavigate('/app/reviews')}>
-            <span className="appNav__dot" aria-hidden />
-            <span>Отзывы</span>
-          </button>
         </nav>
-
-        <div className="appActions">
-          <div className="userCard">
-            <div className="userCard__name">{currentUser.companyName || currentUser.fullName}</div>
-            <div className="userCard__meta">{roleLabel}</div>
-          </div>
-          <button className="ghostButton" onClick={onLogout}>
-            Выйти
-          </button>
-        </div>
       </div>
     </div>
   )

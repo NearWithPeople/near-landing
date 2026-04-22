@@ -7,15 +7,15 @@
 }
 
 :root {
-  --near-gold: #ffd000;
-  --near-gold-soft: rgba(255, 208, 0, 0.12);
-  --near-gold-dark: #e0b900;
-  --near-ink: #ffffff;
-  --near-muted: rgba(255, 255, 255, 0.72);
-  --near-bg: #0a0b0d;
+  --near-gold: #f39f5a;
+  --near-gold-soft: rgba(243, 159, 90, 0.12);
+  --near-gold-dark: #ae445a;
+  --near-ink: #fff7f5;
+  --near-muted: rgba(232, 188, 185, 0.78);
+  --near-bg: #1d1a39;
   --near-white: #ffffff;
   --near-green: #22c55e;
-  --near-blue: #3b82f6;
+  --near-blue: #ae445a;
   --radius: 16px;
   --radius-lg: 24px;
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
