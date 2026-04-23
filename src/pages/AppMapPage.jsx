@@ -77,7 +77,7 @@ export function AppMapPage({
     <section className="mapExperience mapExperience--fullscreen">
       <div className="mapPanel mapPanel--full">
         <div className="mapPanel__toolbar">
-          <ResponsiveFilters buttonLabel="Фильтры" desktopClassName="mapToolbar">
+          <ResponsiveFilters buttonLabel="Фильтры" desktopClassName="mapToolbar" className="responsiveFilters--map">
             <CustomSelect
               value={filters.category}
               options={CATEGORY_OPTIONS}

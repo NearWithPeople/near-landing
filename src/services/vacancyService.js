@@ -1,27 +1,37 @@
 import { getCityNameFromAddress, getCityOption } from '../constants/belarusCities'
 import { haversineKm } from '../utils/common'
-import { getDatabase } from './storageService'
+import { apiRequest } from './apiClient'
+
+const FALLBACK_SHIFT_DATE = 'Дата уточняется'
+
+function normalizeShiftDate(shiftDate) {
+  const value = String(shiftDate || '').trim()
+  return value || FALLBACK_SHIFT_DATE
+}
+
+function normalizeVacancy(vacancy) {
+  return {
+    ...vacancy,
+    shiftDate: normalizeShiftDate(vacancy?.shiftDate),
+  }
+}
 
 function enrichVacancy(vacancy, userPoint, applicationCountMap) {
   const distanceKm = userPoint ? haversineKm(userPoint, { lat: vacancy.lat, lng: vacancy.lng }) : 0
   return {
-    ...vacancy,
+    ...normalizeVacancy(vacancy),
     distanceKm,
-    applicationCount: applicationCountMap.get(vacancy.id) || 0,
+    applicationCount: applicationCountMap.get(vacancy.id) || vacancy.applicationCount || 0,
   }
 }
 
-export function listVacancies({ userPoint, city = 'all', query = '', payMin = 0, category = 'all', shiftDate = 'all', sortBy = 'relevant' }) {
-  const db = getDatabase()
+export function listVacancies({ vacancies = [], userPoint, city = 'all', query = '', payMin = 0, category = 'all', shiftDate = 'all', sortBy = 'relevant' }) {
   const normalizedQuery = query.trim().toLowerCase()
   const selectedCity = getCityOption(city)
   const applicationCountMap = new Map()
 
-  ;(db.applications || []).forEach((application) => {
-    applicationCountMap.set(application.vacancyId, (applicationCountMap.get(application.vacancyId) || 0) + 1)
-  })
-
-  const items = db.vacancies
+  const items = (vacancies || [])
+    .map((vacancy) => normalizeVacancy(vacancy))
     .filter((vacancy) => vacancy.status === 'open')
     .filter((vacancy) => (selectedCity.value === 'all' ? true : getCityNameFromAddress(vacancy.address) === selectedCity.label))
     .filter((vacancy) => (category === 'all' ? true : vacancy.type === category))
@@ -36,18 +46,22 @@ export function listVacancies({ userPoint, city = 'all', query = '', payMin = 0,
 
   if (sortBy === 'distance') return items.sort((a, b) => a.distanceKm - b.distanceKm)
   if (sortBy === 'salary') return items.sort((a, b) => b.payFrom - a.payFrom)
-  if (sortBy === 'date') return items.sort((a, b) => a.shiftDate.localeCompare(b.shiftDate))
+  if (sortBy === 'date') return items.sort((a, b) => normalizeShiftDate(a.shiftDate).localeCompare(normalizeShiftDate(b.shiftDate)))
   return items.sort((a, b) => b.payFrom - a.payFrom || a.distanceKm - b.distanceKm)
 }
 
-export function getVacancyById(vacancyId, userPoint) {
-  const db = getDatabase()
-  const vacancy = (db.vacancies || []).find((item) => item.id === vacancyId)
+export function getVacancyById(vacancies, vacancyId, userPoint) {
+  const vacancy = (vacancies || []).find((item) => item.id === vacancyId)
   if (!vacancy) return null
-  const applicationCountMap = new Map()
-  ;(db.applications || []).forEach((application) => {
-    applicationCountMap.set(application.vacancyId, (applicationCountMap.get(application.vacancyId) || 0) + 1)
+  return enrichVacancy(vacancy, userPoint, new Map())
+}
+
+export async function createVacancy(payload) {
+  const response = await apiRequest('/app/vacancies', {
+    method: 'POST',
+    body: payload,
   })
-  return enrichVacancy(vacancy, userPoint, applicationCountMap)
+
+  return response.vacancy
 }
 

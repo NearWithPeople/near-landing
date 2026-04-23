@@ -2,8 +2,9 @@ import { Icon } from './Icon'
 import { Logo } from './Logo'
 import { CustomSelect } from './CustomSelect'
 
-export function AppShell({ currentUser, currentSection, onNavigate, children, cityOptions, selectedCity, onCityChange }) {
+export function AppShell({ currentUser, currentSection, onNavigate, children, cityOptions, selectedCity, onCityChange, onCreateVacancy }) {
   const isMapSection = currentSection === 'map'
+  const keepBottomNavOnAdaptive = currentSection === 'map' || currentSection === 'vacancy'
   const roleLabel = currentUser.role === 'employer' ? 'Работодатель' : currentUser.role === 'admin' ? 'Админ' : 'Пользователь'
   const primaryActionLabel = currentUser.role === 'employer' ? 'Разместить смену' : 'Создать резюме'
 
@@ -14,7 +15,7 @@ export function AppShell({ currentUser, currentSection, onNavigate, children, ci
           <div className="appTopbar__shell">
             <div className="appTopbar__left">
               <button className="appBrand appBrand--button appBrand--header" onClick={() => onNavigate('/')}>
-                <div className="appBrand__title appBrand__title--header">Smena.by</div>
+                <div className="appBrand__title appBrand__title--header">NEAR.by</div>
               </button>
 
               <nav className="appHeaderNav" aria-label="Основная навигация">
@@ -46,7 +47,11 @@ export function AppShell({ currentUser, currentSection, onNavigate, children, ci
                 />
               </div>
 
-              
+              {currentUser.role === 'employer' ? (
+                <button className="primaryButton appTopbar__cta" type="button" onClick={onCreateVacancy}>
+                  {primaryActionLabel}
+                </button>
+              ) : null}
 
               <button className={`profileIconButton ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')}>
                 <Icon name="user" />
@@ -63,6 +68,11 @@ export function AppShell({ currentUser, currentSection, onNavigate, children, ci
                   menuClassName="appTopbar__cityMenu"
                 />
               </div>
+              {currentUser.role === 'employer' ? (
+                <button className="appTopbar__mobileCta" type="button" onClick={onCreateVacancy}>
+                  Смена
+                </button>
+              ) : null}
               <button className={`appTopbar__mobileIcon ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')} aria-label="Каталог">
                 <Icon name="briefcase" className="appTopbar__mobileIconGlyph" />
               </button>
@@ -81,7 +91,7 @@ export function AppShell({ currentUser, currentSection, onNavigate, children, ci
 
         <div className={`appContent ${isMapSection ? 'appContent--map' : ''}`}>{children}</div>
 
-        <nav className={`bottomNav ${isMapSection ? 'bottomNav--map' : ''}`} aria-label="Основная навигация">
+        <nav className={`bottomNav ${isMapSection ? 'bottomNav--map' : ''} ${keepBottomNavOnAdaptive ? 'bottomNav--adaptive' : ''}`.trim()} aria-label="Основная навигация">
           <button className={`bottomNav__item ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')}>
             <Icon name="briefcase" />
             <span>Каталог</span>

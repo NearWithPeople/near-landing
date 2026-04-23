@@ -1,175 +1,119 @@
-import { getDatabase, getSession, saveDatabase, saveSession, clearSession } from './storageService'
+import { splitFullName } from '../utils/common'
+import { apiRequest } from './apiClient'
+import { clearAuthSession, getAuthSession, saveAuthSession } from './storageService'
 
-export function getCurrentUser() {
-  const db = getDatabase()
-  const session = getSession()
-  return db.users.find((user) => user.id === session.currentUserId) || null
-}
-
-export function loginAccount({ role, phone = '', email = '' }) {
-  const db = getDatabase()
-  const normalizedEmail = String(email || '').trim().toLowerCase()
-  const normalizedPhone = String(phone || '').trim()
-
-  const user = db.users.find((item) => {
-    if (item.role !== role) return false
-    if (normalizedPhone && item.phone === normalizedPhone) return true
-    if (normalizedEmail && String(item.email || '').trim().toLowerCase() === normalizedEmail) return true
-    return false
-  })
-
+function normalizeUser(user) {
   if (!user) return null
 
-  saveSession({ currentUserId: user.id })
-  return user
+  return {
+    id: String(user.id ?? ''),
+    role: user.role || user.accountType || 'user',
+    fullName: user.fullName || '',
+    companyName: user.companyName || '',
+    age: user.age ?? null,
+    phone: user.phone || '',
+    email: user.email || '',
+    telegramUsername: user.telegramUsername || '',
+    review: user.review || user.about || '',
+    onboardingCompleted: Boolean(user.onboardingCompleted),
+    onboardingData: user.onboardingData || {},
+    createdAt: user.createdAt,
+  }
 }
 
-export function registerAccount(payload) {
+function persistSession(jwt, user) {
+  const normalizedUser = normalizeUser(user)
+  saveAuthSession({ jwt, user: normalizedUser })
+  return normalizedUser
+}
+
+export function getCurrentUser() {
+  return getAuthSession().user || null
+}
+
+export async function loginAccount({ role, phone = '', email = '', password = '' }) {
+  const identifier = String(phone || email || '').trim()
+  if (!identifier || !password) return null
+
+  try {
+    const payload = await apiRequest('/auth/local', {
+      method: 'POST',
+      body: {
+        identifier,
+        password,
+      },
+      headers: {
+        Authorization: '',
+      },
+    })
+
+    const user = normalizeUser(payload?.user)
+    if (!user || user.role !== role) {
+      clearAuthSession()
+      return null
+    }
+
+    return persistSession(payload.jwt, user)
+  } catch {
+    return null
+  }
+}
+
+export async function registerAccount(payload) {
   if (!['user', 'employer'].includes(payload.role)) {
     throw new Error('Самостоятельная регистрация доступна только для пользователя и работодателя.')
   }
 
-  const db = getDatabase()
-  const id = `${payload.role}_${Date.now()}`
-  const record = {
-    id,
-    role: payload.role,
-    fullName: payload.fullName,
-    companyName: payload.companyName || '',
-    age: payload.role === 'user' ? payload.age : null,
-    phone: payload.phone,
-    email: payload.email,
-    telegramUsername: payload.telegramUsername || '',
-    review: payload.review || '',
-    onboardingCompleted: false,
-    onboardingData: {},
-    createdAt: new Date().toISOString(),
-  }
+  const nameParts = splitFullName(payload.fullName)
 
-  db.users = [record, ...db.users]
-
-  if (payload.role === 'user') {
-    db.applications = [
-      {
-        id: `app_${id}_1`,
-        vacancyId: 'vac_3',
-        vacancyTitle: 'Промоутер на выходные',
-        applicantId: id,
-        applicantName: payload.fullName,
-        employerName: 'Promo Lab',
-        status: 'pending',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-      },
-      ...(db.applications || []),
-    ]
-    db.completedTasks = [
-      {
-        id: `done_${id}_1`,
-        userId: id,
-        title: 'Сборщик заказов',
-        employerName: 'MarketHub',
-        completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-        pay: 72,
-        duration: '1 день',
-        address: 'Минск, Каменная горка',
-        summary: 'Собрал 26 заказов за смену и сдал без расхождений.',
-      },
-      {
-        id: `done_${id}_2`,
-        userId: id,
-        title: 'Курьер на вечер',
-        employerName: 'QuickBox',
-        completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
-        pay: 65,
-        duration: '1 день',
-        address: 'Минск, Немига',
-        summary: 'Закрыл вечернюю смену и доставил все заказы в срок.',
-      },
-      ...(db.completedTasks || []),
-    ]
-  }
-
-  if (payload.role === 'employer') {
-    db.vacancies = [
-      {
-        id: `vac_${id}_1`,
-        title: 'Разовая смена на складе',
-        companyName: payload.companyName || payload.fullName,
-        ownerId: id,
-        payFrom: 70,
-        address: 'Минск, Кунцевщина',
-        lat: 53.9062,
-        lng: 27.4552,
-        type: 'Склад',
-        duration: '1 день',
-        shiftDate: 'Сегодня',
-        schedule: 'Смена 1 день',
-        status: 'open',
-        tags: ['разовая смена', 'быстрый выход'],
-      },
-      ...(db.vacancies || []),
-    ]
-  }
-
-  saveDatabase(db)
-  saveSession({ currentUserId: id })
-  return record
-}
-
-export function completeUserOnboarding(userId, onboardingData) {
-  const db = getDatabase()
-  db.users = db.users.map((user) =>
-    user.id === userId
-      ? {
-          ...user,
-          onboardingCompleted: true,
-          onboardingData,
-        }
-      : user
-  )
-  saveDatabase(db)
-  return db.users.find((user) => user.id === userId) || null
-}
-
-export function updateUserProfile(userId, payload) {
-  const db = getDatabase()
-  let updatedUser = null
-
-  db.users = db.users.map((user) => {
-    if (user.id !== userId) return user
-
-    updatedUser = {
-      ...user,
-      fullName: payload.fullName ?? user.fullName,
-      age: payload.age ?? user.age,
-      phone: payload.phone ?? user.phone,
-      email: payload.email ?? user.email,
-      telegramUsername: payload.telegramUsername ?? user.telegramUsername,
-      companyName: payload.companyName ?? user.companyName,
-      review: payload.review ?? user.review,
-    }
-
-    return updatedUser
+  const response = await apiRequest('/auth/local/register', {
+    method: 'POST',
+    body: {
+      username: payload.phone || payload.email.trim().toLowerCase(),
+      email: payload.email.trim().toLowerCase(),
+      password: payload.password,
+      accountType: payload.role,
+      fullName: payload.fullName,
+      firstName: nameParts.firstName,
+      lastName: nameParts.lastName,
+      middleName: nameParts.middleName,
+      companyName: payload.companyName || '',
+      phone: payload.phone,
+      age: payload.role === 'user' ? payload.age : null,
+      telegramUsername: payload.telegramUsername || '',
+      about: payload.review || '',
+      onboardingCompleted: false,
+      onboardingData: {},
+    },
+    headers: {
+      Authorization: '',
+    },
   })
 
-  if (!updatedUser) {
-    throw new Error('Пользователь не найден.')
-  }
+  return persistSession(response.jwt, response.user)
+}
 
-  db.applications = (db.applications || []).map((application) =>
-    application.applicantId === userId
-      ? {
-          ...application,
-          applicantName: updatedUser.fullName,
-        }
-      : application
-  )
+export async function completeUserOnboarding(_userId, onboardingData) {
+  const response = await apiRequest('/app/onboarding', {
+    method: 'POST',
+    body: {
+      onboardingData,
+    },
+  })
 
-  saveDatabase(db)
-  return updatedUser
+  return persistSession(getAuthSession().jwt, response.user)
+}
+
+export async function updateUserProfile(_userId, payload) {
+  const response = await apiRequest('/app/profile', {
+    method: 'PUT',
+    body: payload,
+  })
+
+  return persistSession(getAuthSession().jwt, response.user)
 }
 
 export function logoutUser() {
-  clearSession()
+  clearAuthSession()
 }
 

@@ -1,8 +1,17 @@
 import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
 
 function getVacancyDescription(vacancy) {
+  if (vacancy.description?.trim()) {
+    return vacancy.description
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean)
+  }
+
+  const shiftDateLabel = String(vacancy.shiftDate || 'Дата уточняется').trim().toLowerCase()
+
   return [
-    `${vacancy.companyName} ищет специалиста на позицию "${vacancy.title}". Это смена в формате "${vacancy.schedule}" с оплатой от ${vacancy.payFrom} BYN и выходом ${vacancy.shiftDate.toLowerCase()}.`,
+    `${vacancy.companyName} ищет специалиста на позицию "${vacancy.title}". Это смена в формате "${vacancy.schedule}" с оплатой от ${vacancy.payFrom} BYN и выходом ${shiftDateLabel}.`,
     `Работа проходит по адресу ${vacancy.address}. Подойдет кандидатам, которым важны понятные задачи, быстрый старт и прозрачные условия на один день.`,
     `Работодатель ожидает вовлеченность, пунктуальность и готовность выйти на смену по профилю "${vacancy.type}". Если формат тебе подходит, можно откликнуться прямо со страницы вакансии.`,
   ]

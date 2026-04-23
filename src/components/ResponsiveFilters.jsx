@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', desktopClassName = '' }) {
+export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', desktopClassName = '', className = '' }) {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', de
   }, [isOpen])
 
   return (
-    <div className={`responsiveFilters ${isOpen ? 'is-open' : ''}`.trim()}>
+    <div className={`responsiveFilters ${className} ${isOpen ? 'is-open' : ''}`.trim()}>
       <div className={`filtersDesktop ${desktopClassName}`.trim()}>{children}</div>
 
       <div className="filtersMobile">

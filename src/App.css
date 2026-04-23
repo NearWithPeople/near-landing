@@ -610,6 +610,10 @@
   display: none;
 }
 
+.appTopbar__mobileCta {
+  display: none;
+}
+
 .appHeaderNav {
   display: flex;
   align-items: center;
@@ -767,7 +771,7 @@
 }
 
 .bottomNav--map {
-  z-index: 55;
+  z-index: 45;
 }
 
 @media (min-width: 980px) {
@@ -907,7 +911,7 @@
   top: max(94px, calc(env(safe-area-inset-top) + 78px));
   left: 16px;
   right: 16px;
-  z-index: 7;
+  z-index: 60;
 }
 
 @media (min-width: 1100px) {
@@ -918,6 +922,35 @@
 }
 
 @media (max-width: 1100px) and (min-width: 761px) {
+  .bottomNav--adaptive {
+    display: grid;
+  }
+
+  .responsiveFilters--map .filtersDesktop {
+    display: none;
+  }
+
+  .responsiveFilters--map .filtersMobile {
+    display: block;
+  }
+
+  .responsiveFilters--map .filtersMobile__body .mapToolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .responsiveFilters--map .filtersMobile__sheet {
+    inset: 0 0 92px 0;
+  }
+
+  .responsiveFilters--map .filtersMobile__toggle {
+    width: auto;
+    min-width: 116px;
+    padding: 0 18px;
+    background: rgba(12, 13, 16, 0.92);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  }
+
   .appMain {
     padding: 18px 18px 28px;
   }
@@ -975,16 +1008,15 @@
   }
 
   .appTopbar__cta {
-    display: none;
+    display: inline-flex;
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 13px;
   }
 
   .profileIconButton {
     width: 40px;
     height: 40px;
-  }
-
-  .bottomNav--map {
-    display: none;
   }
 
   .mapPanel__toolbar {
@@ -1176,7 +1208,7 @@
   position: absolute;
   top: max(222px, calc(env(safe-area-inset-top) + 206px));
   left: 16px;
-  z-index: 6;
+  z-index: 65;
   width: min(360px, calc(100vw - 32px));
   border-radius: 28px;
   background: rgba(29, 26, 57, 0.94);
@@ -1460,7 +1492,7 @@
 
 .mapPanel__overlay {
   position: absolute;
-  z-index: 6;
+  z-index: 50;
   display: flex;
   gap: 10px;
 }
@@ -1514,9 +1546,14 @@
     top: auto;
     left: 12px;
     right: 12px;
-    bottom: max(16px, env(safe-area-inset-bottom));
+    bottom: max(92px, calc(env(safe-area-inset-bottom) + 76px));
     width: auto;
     border-radius: 24px;
+  }
+
+  .vacancyFormLayout,
+  .vacancyFormGrid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1980,6 +2017,52 @@
   gap: 18px;
 }
 
+.profileSummary,
+.profileSummary__grid,
+.profileSummary__about {
+  display: grid;
+  gap: 16px;
+}
+
+.profileSummary__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.profileSummary__grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.profileSummary__item,
+.profileSummary__about {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profileSummary__label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.profileSummary__value,
+.profileSummary__text {
+  color: #ffffff;
+  line-height: 1.55;
+}
+
+.profileSummary__value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .profileEditor__grid {
   display: grid;
   gap: 14px;
@@ -1988,6 +2071,111 @@
 .profileEditor__actions {
   display: flex;
   justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.vacancyFormPage {
+  display: grid;
+  gap: 20px;
+}
+
+.vacancyFormLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+.vacancyFormMain,
+.vacancyFormSidebar,
+.vacancyApplicantCard__facts {
+  display: grid;
+  gap: 16px;
+}
+
+.vacancyFormCard {
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(29, 26, 57, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 16px;
+}
+
+.vacancyFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.vacancyFormGrid__full {
+  grid-column: 1 / -1;
+}
+
+.vacancyFormSelect {
+  justify-content: flex-start;
+}
+
+.vacancyAddressSearch {
+  position: relative;
+}
+
+.vacancyAddressSearch__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 12;
+  border-radius: 18px;
+  background: rgba(29, 26, 57, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.vacancyAddressSearch__option,
+.vacancyAddressSearch__status {
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
+}
+
+.vacancyAddressSearch__option {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+}
+
+.vacancyAddressSearch__option + .vacancyAddressSearch__option,
+.vacancyAddressSearch__status + .vacancyAddressSearch__option {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vacancyAddressSearch__option:hover {
+  background: rgba(243, 159, 90, 0.1);
+}
+
+.vacancyAddressSearch__status {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.vacancyFormMap {
+  min-height: 320px;
+  height: 320px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.vacancyApplicantCard {
+  border-radius: 20px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 12px;
 }
 
 .vacancyDetailPage {
@@ -2256,6 +2444,22 @@
     margin-left: auto;
   }
 
+  .appTopbar__mobileCta {
+    min-height: 38px;
+    padding: 0 12px;
+    border: 1px solid rgba(243, 159, 90, 0.24);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(243, 159, 90, 0.14);
+    color: #f39f5a;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
   .appTopbar__mobileCity {
     display: block;
     min-width: 0;
@@ -2290,6 +2494,11 @@
 
   .bottomNav {
     display: none;
+  }
+
+  .bottomNav--adaptive {
+    display: grid;
+    z-index: 45;
   }
 
   .statusBadge {
@@ -2359,6 +2568,24 @@
     min-width: 0;
   }
 
+  .vacancyDetailRelated__list {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .vacancyDetailRelated__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vacancyDetailRelated__card {
+    flex: 0 0 min(280px, calc(100vw - 56px));
+    scroll-snap-align: start;
+  }
+
   .catalogSearch {
     grid-template-columns: 1fr;
   }
@@ -2386,12 +2613,33 @@
   .catalogWidget,
   .catalogPromoCard,
   .catalogFeed__header,
-  .catalogJobCard {
+  .catalogJobCard,
+  .vacancyFormCard,
+  .vacancyApplicantCard {
     border-radius: 20px;
   }
 
   .catalogJobCard {
     padding: 18px;
+  }
+
+  .vacancyFormCard,
+  .vacancyApplicantCard {
+    padding: 16px;
+  }
+
+  .vacancyFormPage {
+    gap: 16px;
+  }
+
+  .vacancyFormMap,
+  .vacancyDetailMap {
+    min-height: 240px;
+    height: 240px;
+  }
+
+  .vacancyFormSidebar {
+    gap: 12px;
   }
 
   .catalogJobCard__head {
@@ -2440,6 +2688,10 @@
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
   }
 
+  .responsiveFilters--map .filtersMobile__sheet {
+    inset: 0 0 84px 0;
+  }
+
   .mapboxCanvas .mapboxgl-ctrl-top-right {
     bottom: 210px;
     right: 12px;
@@ -2467,6 +2719,17 @@
     min-height: 38px;
     padding: 0 12px;
     font-size: 13px;
+  }
+
+  .mapStatsPill {
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .mapVacancySheet {
+    max-height: min(52vh, 420px);
+    overflow: auto;
   }
 
   .spotlightCard--floating {
@@ -2509,6 +2772,12 @@
 
   .appTopbar__mobileActions {
     gap: 4px;
+  }
+
+  .appTopbar__mobileCta {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 
   .appTopbar__mobileCityTrigger {
@@ -2568,6 +2837,17 @@
 
   .mapVacancySheet__content {
     padding: 18px;
+  }
+
+  .vacancyFormCard,
+  .vacancyApplicantCard {
+    padding: 14px;
+  }
+
+  .vacancyFormMap,
+  .vacancyDetailMap {
+    min-height: 220px;
+    height: 220px;
   }
 
   .mapVacancySheet__title {

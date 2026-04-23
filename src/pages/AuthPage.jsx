@@ -53,7 +53,7 @@ export function AuthPage({ form, error, onChange, onSubmit }) {
               {!isEmployer ? (
                 <label className="field">
                   <span className="field__label">Возраст</span>
-                  <input className="input input--dark" type="number" min="16" inputMode="numeric" value={form.age} onChange={(e) => onChange('age', e.target.value)} />
+                  <input className="input input--dark" type="number" min="16" max="99" inputMode="numeric" value={form.age} onChange={(e) => onChange('age', e.target.value)} />
                 </label>
               ) : null}
             </>
@@ -62,7 +62,7 @@ export function AuthPage({ form, error, onChange, onSubmit }) {
           <div className="authForm__grid">
             <label className="field">
               <span className="field__label">Телефон</span>
-              <input className="input input--dark" inputMode="tel" value={form.phone} onChange={(e) => onChange('phone', e.target.value)} />
+              <input className="input input--dark" type="tel" inputMode="tel" value={form.phone} onChange={(e) => onChange('phone', e.target.value)} placeholder="+375 29 123 45 67" />
             </label>
             <label className="field">
               <span className="field__label">Email</span>

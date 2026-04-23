@@ -27,6 +27,12 @@ export function normalizePhone(input) {
   return digits.slice(0, 20)
 }
 
+export function isBelarusPhone(input) {
+  const digits = normalizePhone(input)
+  if (!digits) return false
+  return /^(?:375|80)(?:17|25|29|33|44)\d{7}$/.test(digits)
+}
+
 export function splitFullName(input) {
   const parts = String(input || '')
     .trim()

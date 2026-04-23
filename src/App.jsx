@@ -8,16 +8,18 @@ import { BELARUS_CITY_OPTIONS, DEFAULT_CITY_VALUE, getCityOption, getCityPoint }
 import { AuthPage } from './pages/AuthPage'
 import { ApplicationsPage } from './pages/ApplicationsPage'
 import { CatalogPage } from './pages/CatalogPage'
+import { EmployerVacancyFormPage } from './pages/EmployerVacancyFormPage'
+import { EmployerVacancyManagePage } from './pages/EmployerVacancyManagePage'
 import { GuestLandingPage } from './pages/GuestLandingPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { AppMapPage } from './pages/AppMapPage'
 import { VacancyPage } from './pages/VacancyPage'
-import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser } from './services/applicationService'
+import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
 import { completeUserOnboarding, getCurrentUser, loginAccount, logoutUser, registerAccount, updateUserProfile } from './services/authService'
 import { listCompletedTasksForUser, listEmployerVacancies } from './services/taskService'
-import { getVacancyById, listVacancies } from './services/vacancyService'
-import { buildFullName, normalizePhone } from './utils/common'
+import { createVacancy, getVacancyById, listVacancies } from './services/vacancyService'
+import { buildFullName, isBelarusPhone, normalizePhone } from './utils/common'
 import { DEFAULT_ONBOARDING } from './utils/defaults'
 
 const LEGACY_APP_ROUTES = {
@@ -135,6 +137,11 @@ export default function App() {
         return
       }
 
+      if (phone && !isBelarusPhone(phone)) {
+        setAuthError('Укажи телефон в белорусском формате: +375 XX XXX XX XX или 80XX XXX XX XX.')
+        return
+      }
+
       const user = loginAccount({
         role: authForm.role,
         phone,
@@ -175,8 +182,13 @@ export default function App() {
       return
     }
 
-    if (payload.role === 'user' && (!Number.isFinite(payload.age) || payload.age < 16)) {
-      setAuthError('Искать работу через приложение можно с 16 лет.')
+    if (!isBelarusPhone(payload.phone)) {
+      setAuthError('Укажи телефон в белорусском формате: +375 XX XXX XX XX или 80XX XXX XX XX.')
+      return
+    }
+
+    if (payload.role === 'user' && (!Number.isFinite(payload.age) || payload.age < 16 || payload.age > 99)) {
+      setAuthError('Возраст при регистрации должен быть от 16 до 99 лет.')
       return
     }
 
@@ -250,7 +262,7 @@ export default function App() {
     if (!currentUser) return
 
     const isLegacyAppRoute = Object.hasOwn(LEGACY_APP_ROUTES, location.pathname)
-    const isProtectedRoute = ['/', '/catalog', '/map', '/applications', '/profile'].includes(location.pathname) || location.pathname.startsWith('/vacancy/')
+    const isProtectedRoute = ['/', '/catalog', '/map', '/applications', '/profile'].includes(location.pathname) || location.pathname.startsWith('/vacancy/') || location.pathname.startsWith('/employer/')
 
     if (!currentUser.onboardingCompleted && (isProtectedRoute || isLegacyAppRoute)) {
       navigate('/onboarding', { replace: true })
@@ -285,6 +297,7 @@ export default function App() {
         currentUser={currentUser}
         currentSection={section}
         onNavigate={navigate}
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={BELARUS_CITY_OPTIONS.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
@@ -319,7 +332,12 @@ export default function App() {
           />
         ) : null}
         {section === 'applications' ? (
-          <ApplicationsPage currentUser={currentUser} applications={applications} onGoToCatalog={() => navigate('/')} onOpenVacancy={(vacancyId) => navigate(`/vacancy/${vacancyId}`)} />
+          <ApplicationsPage
+            currentUser={currentUser}
+            applications={applications}
+            onGoToCatalog={() => navigate('/')}
+            onOpenVacancy={(vacancyId) => (currentUser.role === 'employer' ? navigate(`/employer/vacancies/${vacancyId}`) : navigate(`/vacancy/${vacancyId}`))}
+          />
         ) : null}
         {section === 'profile' ? (
           <ProfilePage
@@ -327,6 +345,8 @@ export default function App() {
             completedTasks={completedTasks}
             employerVacancies={employerVacancies}
             onGoToCatalog={() => navigate('/')}
+            onOpenEmployerVacancy={(vacancyId) => navigate(`/employer/vacancies/${vacancyId}`)}
+            onCreateVacancy={() => navigate('/employer/vacancies/new')}
             onLogout={handleLogout}
             onSaveProfile={handleProfileSave}
           />
@@ -345,6 +365,7 @@ export default function App() {
         currentUser={currentUser}
         currentSection="vacancy"
         onNavigate={navigate}
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={BELARUS_CITY_OPTIONS.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
@@ -358,6 +379,67 @@ export default function App() {
           onOpenVacancy={(nextVacancyId) => navigate(`/vacancy/${nextVacancyId}`)}
           onShowOnMap={(nextVacancyId) => navigate(`/map?vacancy=${nextVacancyId}`)}
           relatedVacancies={relatedVacancies}
+        />
+      </AppShell>
+    )
+  }
+
+  function handleCreateVacancy(payload) {
+    if (!currentUser || currentUser.role !== 'employer') return
+    const vacancy = createVacancy({
+      ...payload,
+      ownerId: currentUser.id,
+    })
+    setDataVersion((prev) => prev + 1)
+    navigate(`/employer/vacancies/${vacancy.id}`)
+  }
+
+  function EmployerVacancyFormRoute() {
+    if (!currentUser || currentUser.role !== 'employer') {
+      return <Navigate to="/" replace />
+    }
+
+    return (
+      <AppShell
+        currentUser={currentUser}
+        currentSection="profile"
+        onNavigate={navigate}
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
+        cityOptions={BELARUS_CITY_OPTIONS.map(({ value, label }) => ({ value, label }))}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+      >
+        <EmployerVacancyFormPage currentUser={currentUser} selectedCity={selectedCity} onCreateVacancy={handleCreateVacancy} onCancel={() => navigate('/profile')} />
+      </AppShell>
+    )
+  }
+
+  function EmployerVacancyManageRoute() {
+    const { vacancyId } = useParams()
+
+    if (!currentUser || currentUser.role !== 'employer') {
+      return <Navigate to="/" replace />
+    }
+
+    const vacancy = getVacancyById(vacancyId, searchPoint)
+    const applicationsForVacancy = listApplicationsForVacancy(currentUser.id, vacancyId)
+
+    return (
+      <AppShell
+        currentUser={currentUser}
+        currentSection="applications"
+        onNavigate={navigate}
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
+        cityOptions={BELARUS_CITY_OPTIONS.map(({ value, label }) => ({ value, label }))}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+      >
+        <EmployerVacancyManagePage
+          vacancy={vacancy?.ownerId === currentUser.id ? vacancy : null}
+          applications={applicationsForVacancy}
+          onBack={() => navigate('/profile')}
+          onCreateNew={() => navigate('/employer/vacancies/new')}
+          onShowOnMap={(nextVacancyId) => navigate(`/map?vacancy=${nextVacancyId}`)}
         />
       </AppShell>
     )
@@ -385,6 +467,8 @@ export default function App() {
           <Route path="/applications" element={renderAppPage('applications')} />
           <Route path="/profile" element={renderAppPage('profile')} />
           <Route path="/vacancy/:vacancyId" element={<VacancyPageRoute />} />
+          <Route path="/employer/vacancies/new" element={<EmployerVacancyFormRoute />} />
+          <Route path="/employer/vacancies/:vacancyId" element={<EmployerVacancyManageRoute />} />
           <Route path="/app" element={<Navigate to="/" replace />} />
           <Route path="/app/catalog" element={<Navigate to="/" replace />} />
           <Route path="/app/map" element={<Navigate to="/map" replace />} />

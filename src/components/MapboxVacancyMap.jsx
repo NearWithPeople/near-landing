@@ -267,7 +267,6 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, cente
     if (!map || !map.isStyleLoaded()) return
 
     updateSourceData(map, vacancies)
-    updateSelectedFilter(map, selectedVacancyId)
 
     const bounds = new mapboxgl.LngLatBounds()
     vacancies.forEach((vacancy) => {
@@ -276,7 +275,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, cente
 
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds, {
-        padding: getViewportPadding(Boolean(selectedVacancyId)),
+        padding: getViewportPadding(Boolean(selectedVacancyIdRef.current)),
         maxZoom: 12.5,
         duration: 0,
       })
@@ -291,7 +290,14 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, cente
         duration: 0,
       })
     }
-  }, [vacancies, selectedVacancyId, centerPoint])
+  }, [vacancies, centerPoint])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.isStyleLoaded()) return
+
+    updateSelectedFilter(map, selectedVacancyId)
+  }, [selectedVacancyId])
 
   useEffect(() => {
     const map = mapRef.current
