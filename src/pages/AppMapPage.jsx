@@ -3,26 +3,11 @@ import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
 import { CustomSelect } from '../components/CustomSelect'
 import { ResponsiveFilters } from '../components/ResponsiveFilters'
 
-const CATEGORY_OPTIONS = [
-  { value: 'all', label: 'Все категории' },
-  { value: 'Курьер', label: 'Курьер' },
-  { value: 'Склад', label: 'Склад' },
-  { value: 'Промо', label: 'Промо' },
-  { value: 'HoReCa', label: 'HoReCa' },
-]
-
 const SHIFT_DATE_OPTIONS = [
   { value: 'all', label: 'Любой день' },
   { value: 'Сегодня', label: 'Сегодня' },
   { value: 'Завтра', label: 'Завтра' },
   { value: 'Выходные', label: 'Выходные' },
-]
-
-const PAY_OPTIONS = [
-  { value: '0', label: 'Любая ставка' },
-  { value: '40', label: 'От 40 BYN' },
-  { value: '60', label: 'От 60 BYN' },
-  { value: '80', label: 'От 80 BYN' },
 ]
 
 const SORT_OPTIONS = [
@@ -48,6 +33,8 @@ export function AppMapPage({
   autoOpenVacancyId = '',
   filters,
   onFilterChange,
+  categoryOptions,
+  payOptions,
   selectedCityLabel,
   selectedCityPoint,
 }) {
@@ -80,7 +67,7 @@ export function AppMapPage({
           <ResponsiveFilters buttonLabel="Фильтры" desktopClassName="mapToolbar" className="responsiveFilters--map">
             <CustomSelect
               value={filters.category}
-              options={CATEGORY_OPTIONS}
+              options={categoryOptions}
               onChange={(nextValue) => onFilterChange('category', nextValue)}
               triggerClassName="mapToolbar__control"
               isClearable
@@ -102,7 +89,7 @@ export function AppMapPage({
 
             <CustomSelect
               value={String(filters.payMin)}
-              options={PAY_OPTIONS}
+              options={payOptions}
               onChange={(nextValue) => onFilterChange('payMin', Number(nextValue))}
               triggerClassName="mapToolbar__control"
               isClearable

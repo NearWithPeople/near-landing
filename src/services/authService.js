@@ -2,12 +2,16 @@ import { splitFullName } from '../utils/common'
 import { apiRequest } from './apiClient'
 import { clearAuthSession, getAuthSession, saveAuthSession } from './storageService'
 
+function normalizeAccountRole(role) {
+  return role === 'user' ? 'seeker' : role || 'seeker'
+}
+
 function normalizeUser(user) {
   if (!user) return null
 
   return {
     id: String(user.id ?? ''),
-    role: user.role || user.accountType || 'user',
+    role: normalizeAccountRole(user.role || user.accountType),
     fullName: user.fullName || '',
     companyName: user.companyName || '',
     age: user.age ?? null,
@@ -60,7 +64,7 @@ export async function loginAccount({ role, phone = '', email = '', password = ''
 }
 
 export async function registerAccount(payload) {
-  if (!['user', 'employer'].includes(payload.role)) {
+  if (!['seeker', 'employer'].includes(payload.role)) {
     throw new Error('Самостоятельная регистрация доступна только для пользователя и работодателя.')
   }
 
@@ -79,7 +83,7 @@ export async function registerAccount(payload) {
       middleName: nameParts.middleName,
       companyName: payload.companyName || '',
       phone: payload.phone,
-      age: payload.role === 'user' ? payload.age : null,
+      age: payload.role === 'seeker' ? payload.age : null,
       telegramUsername: payload.telegramUsername || '',
       about: payload.review || '',
       onboardingCompleted: false,

@@ -2,21 +2,6 @@ import { Icon } from '../components/Icon'
 import { CustomSelect } from '../components/CustomSelect'
 import { ResponsiveFilters } from '../components/ResponsiveFilters'
 
-const PAY_OPTIONS = [
-  { value: '0', label: 'Любая ставка' },
-  { value: '40', label: 'От 40 BYN' },
-  { value: '60', label: 'От 60 BYN' },
-  { value: '80', label: 'От 80 BYN' },
-]
-
-const CATEGORY_OPTIONS = [
-  { value: 'all', label: 'Все категории' },
-  { value: 'Курьер', label: 'Курьер' },
-  { value: 'Склад', label: 'Склад' },
-  { value: 'Промо', label: 'Промо' },
-  { value: 'HoReCa', label: 'HoReCa' },
-]
-
 const SHIFT_DATE_OPTIONS = [
   { value: 'all', label: 'Любой день' },
   { value: 'Сегодня', label: 'Сегодня' },
@@ -31,15 +16,6 @@ const SORT_OPTIONS = [
   { value: 'date', label: 'По дате смены' },
 ]
 
-const QUICK_FILTERS = [
-  { id: 'all', label: 'Для вас', type: 'category', value: 'all' },
-  { id: 'courier', label: 'Подработка', type: 'category', value: 'Курьер' },
-  { id: 'warehouse', label: 'Склад', type: 'category', value: 'Склад' },
-  { id: 'service', label: 'Сервис', type: 'category', value: 'HoReCa' },
-  { id: 'today', label: 'Сегодня', type: 'shiftDate', value: 'Сегодня' },
-  { id: 'weekend', label: 'Выходные', type: 'shiftDate', value: 'Выходные' },
-]
-
 function formatApplicationCount(count) {
   const mod10 = count % 10
   const mod100 = count % 100
@@ -48,10 +24,35 @@ function formatApplicationCount(count) {
   return `${count} откликов`
 }
 
-export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, selectedCity, cityOptions, onCityChange, selectedCityLabel, currentUser, appliedVacancyIds, onApplyToVacancy, onOpenVacancy }) {
+function getQuickFilters(categoryOptions) {
+  return [
+    { id: 'all', label: 'Для вас', type: 'category', value: 'all' },
+    ...categoryOptions
+      .filter((option) => option.value !== 'all')
+      .slice(0, 3)
+      .map((option) => ({
+        id: `category-${option.value}`,
+        label: option.label,
+        type: 'category',
+        value: option.value,
+      })),
+    { id: 'today', label: 'Сегодня', type: 'shiftDate', value: 'Сегодня' },
+    { id: 'weekend', label: 'Выходные', type: 'shiftDate', value: 'Выходные' },
+  ]
+}
+
+function getVacancyLocation(vacancy, cityOptions, selectedCityLabel) {
+  const cityLabel = cityOptions.find((city) => city.value === vacancy.city || city.label === vacancy.city)?.label || selectedCityLabel
+  if (!cityLabel) return vacancy.address
+  return vacancy.address.includes(cityLabel) ? vacancy.address : `${cityLabel} • ${vacancy.address}`
+}
+
+export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, selectedCity, cityOptions, onCityChange, selectedCityLabel, categoryOptions, payOptions, currentUser, appliedVacancyIds, onApplyToVacancy, onOpenVacancy }) {
   const todayCount = vacancies.filter((vacancy) => vacancy.shiftDate === 'Сегодня').length
-  const nearbyCount = vacancies.filter((vacancy) => vacancy.distanceKm <= 3).length
-  const highPayCount = vacancies.filter((vacancy) => vacancy.payFrom >= 70).length
+  const cityCount = vacancies.length
+  const featuredPayValue = Number(payOptions[payOptions.length - 1]?.value || 70)
+  const highPayCount = vacancies.filter((vacancy) => vacancy.payFrom >= featuredPayValue).length
+  const quickFilters = getQuickFilters(categoryOptions)
 
   function handleQuickFilterClick(filter) {
     if (filter.type === 'category') {
@@ -99,13 +100,13 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
           <ResponsiveFilters buttonLabel="Фильтры" desktopClassName="catalogFilterBar">
             <CustomSelect
               value={String(filters.payMin)}
-              options={PAY_OPTIONS}
+              options={payOptions}
               onChange={(nextValue) => onFilterChange('payMin', Number(nextValue))}
               triggerClassName="input input--dark"
             />
             <CustomSelect
               value={filters.category}
-              options={CATEGORY_OPTIONS}
+              options={categoryOptions}
               onChange={(nextValue) => onFilterChange('category', nextValue)}
               triggerClassName="input input--dark"
             />
@@ -129,7 +130,7 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
         </div>
 
         <div className="catalogQuickFilters" aria-label="Быстрые фильтры">
-          {QUICK_FILTERS.map((filter) => (
+          {quickFilters.map((filter) => (
             <button
               key={filter.id}
               type="button"
@@ -164,15 +165,15 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
             <div className="catalogWidget__item">
               <div className="catalogWidget__meta">
                 <Icon name="mapPin" className="catalogWidget__icon" />
-                <span>Рядом с вами</span>
+                <span>{selectedCity === 'all' ? 'По всей Беларуси' : `По городу ${selectedCityLabel}`}</span>
               </div>
-              <span className="catalogWidget__value">{nearbyCount}</span>
+              <span className="catalogWidget__value">{cityCount}</span>
             </div>
 
             <div className="catalogWidget__item">
               <div className="catalogWidget__meta">
                 <Icon name="spark" className="catalogWidget__icon" />
-                <span>Ставка от 70 BYN</span>
+                <span>Ставка от {featuredPayValue} BYN</span>
               </div>
               <span className="catalogWidget__value">{highPayCount}</span>
             </div>
@@ -240,7 +241,7 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
 
                     <div className="catalogJobCard__company">{vacancy.companyName}</div>
                     <div className="catalogJobCard__location">
-                      {vacancy.address} • {vacancy.distanceKm.toFixed(1)} км от вас
+                      {getVacancyLocation(vacancy, cityOptions, selectedCityLabel)}
                     </div>
                   </div>
 
@@ -248,13 +249,13 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
                     <button
                       className="primaryButton"
                       type="button"
-                      disabled={currentUser.role !== 'user' || appliedVacancyIds.includes(vacancy.id)}
+                      disabled={currentUser.role !== 'seeker' || appliedVacancyIds.includes(vacancy.id)}
                       onClick={(event) => {
                         event.stopPropagation()
                         onApplyToVacancy(vacancy.id)
                       }}
                     >
-                      {currentUser.role !== 'user' ? 'Только для соискателей' : appliedVacancyIds.includes(vacancy.id) ? 'Отклик отправлен' : 'Откликнуться'}
+                      {currentUser.role !== 'seeker' ? 'Только для пользователей' : appliedVacancyIds.includes(vacancy.id) ? 'Отклик отправлен' : 'Откликнуться'}
                     </button>
                   </div>
                 </article>

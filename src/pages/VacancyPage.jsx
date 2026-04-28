@@ -1,4 +1,5 @@
 import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
+import { buildTelHref, buildTelegramHref } from '../utils/contactLinks'
 
 function getVacancyDescription(vacancy) {
   if (vacancy.description?.trim()) {
@@ -25,7 +26,21 @@ function formatApplicationCount(count) {
   return `${count} откликов`
 }
 
-export function VacancyPage({ vacancy, currentUser, hasApplied, onApply, onBackToCatalog, onOpenVacancy, onShowOnMap, relatedVacancies }) {
+function getVacancyCityLabel(vacancy) {
+  return vacancy.city || vacancy.address.split(',')[0]?.trim() || 'Не указан'
+}
+
+export function VacancyPage({
+  vacancy,
+  currentUser,
+  hasApplied,
+  seekerApplication = null,
+  onApply,
+  onBackToCatalog,
+  onOpenVacancy,
+  onShowOnMap,
+  relatedVacancies,
+}) {
   if (!vacancy) {
     return (
       <section className="reviewsPage">
@@ -40,8 +55,10 @@ export function VacancyPage({ vacancy, currentUser, hasApplied, onApply, onBackT
     )
   }
 
-  const canApply = currentUser.role === 'user'
+  const canApply = currentUser?.role === 'seeker'
   const description = getVacancyDescription(vacancy)
+  const telHref = seekerApplication ? buildTelHref(seekerApplication.employerPhone) : ''
+  const tgHref = seekerApplication ? buildTelegramHref(seekerApplication.employerTelegram) : ''
 
   return (
     <section className="vacancyDetailPage">
@@ -57,7 +74,7 @@ export function VacancyPage({ vacancy, currentUser, hasApplied, onApply, onBackT
               <div className="vacancyDetailFacts__item">Дата: {vacancy.shiftDate}</div>
               <div className="vacancyDetailFacts__item">Длительность: {vacancy.duration}</div>
               <div className="vacancyDetailFacts__item">Категория: {vacancy.type}</div>
-              <div className="vacancyDetailFacts__item">Расстояние: {vacancy.distanceKm.toFixed(1)} км</div>
+              <div className="vacancyDetailFacts__item">Город: {getVacancyCityLabel(vacancy)}</div>
               <div className="vacancyDetailFacts__item">Откликнулось: {formatApplicationCount(vacancy.applicationCount)}</div>
             </div>
 
@@ -76,6 +93,36 @@ export function VacancyPage({ vacancy, currentUser, hasApplied, onApply, onBackT
               </button>
             </div>
           </article>
+
+          {hasApplied && canApply ? (
+            <article className="vacancyDetailSection">
+              <div className="panelHeader__title">Связаться с работодателем</div>
+              <div className="vacancyDetailText">
+                {seekerApplication ? (
+                  <>
+                    {seekerApplication.employerName ? <p>{seekerApplication.employerName}</p> : null}
+                    {telHref ? (
+                      <p>
+                        <a href={telHref}>{seekerApplication.employerPhone}</a>
+                      </p>
+                    ) : null}
+                    {tgHref ? (
+                      <p>
+                        <a href={tgHref} target="_blank" rel="noreferrer">
+                          Telegram @{String(seekerApplication.employerTelegram || '').replace(/^@+/, '')}
+                        </a>
+                      </p>
+                    ) : null}
+                    {!telHref && !tgHref ? (
+                      <p>Контактные данные появятся, когда работодатель укажет телефон или Telegram в профиле или в карточке смены.</p>
+                    ) : null}
+                  </>
+                ) : (
+                  <p>Загружаем контакты работодателя…</p>
+                )}
+              </div>
+            </article>
+          ) : null}
 
           <article className="vacancyDetailSection">
             <div className="panelHeader__title">Описание вакансии</div>
@@ -119,7 +166,7 @@ export function VacancyPage({ vacancy, currentUser, hasApplied, onApply, onBackT
         <aside className="vacancyDetailSidebar">
           <article className="vacancyDetailCompany">
             <div className="vacancyDetailCompany__name">{vacancy.companyName}</div>
-            <div className="vacancyDetailCompany__meta">Опубликовано для соискателей платформы "Рядом"</div>
+            <div className="vacancyDetailCompany__meta">Опубликовано для пользователей платформы "Рядом"</div>
           </article>
 
           <div className="vacancyDetailRelated">

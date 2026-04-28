@@ -1,7 +1,7 @@
 export const DB_SCHEMA = {
   version: 2,
   summary: 'Unified role-based schema for vacancy web app',
-  roles: ['user', 'employer', 'admin'],
+  roles: ['seeker', 'employer', 'admin'],
   tables: {
     users: ['id', 'role', 'fullName', 'companyName', 'age', 'phone', 'email', 'telegramUsername', 'review', 'onboardingCompleted', 'onboardingData', 'createdAt'],
     vacancies: ['id', 'ownerId', 'title', 'companyName', 'description', 'payFrom', 'address', 'lat', 'lng', 'type', 'duration', 'shiftDate', 'schedule', 'status', 'tags'],

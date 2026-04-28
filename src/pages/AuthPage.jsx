@@ -1,4 +1,4 @@
-export function AuthPage({ form, error, onChange, onSubmit }) {
+export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
   const isLogin = form.mode === 'login'
   const isEmployer = form.role === 'employer'
 
@@ -12,7 +12,7 @@ export function AuthPage({ form, error, onChange, onSubmit }) {
         </div>
 
         <div className="roleTabs" role="tablist" aria-label="Роль">
-          <button type="button" className={`roleTabs__item ${form.role === 'user' ? 'is-active' : ''}`} onClick={() => onChange('role', 'user')}>
+          <button type="button" className={`roleTabs__item ${form.role === 'seeker' ? 'is-active' : ''}`} onClick={() => onChange('role', 'seeker')}>
             Пользователь
           </button>
           <button
@@ -25,13 +25,6 @@ export function AuthPage({ form, error, onChange, onSubmit }) {
         </div>
 
         <form className="authForm" onSubmit={onSubmit} noValidate>
-          {!isLogin && isEmployer ? (
-            <label className="field">
-              <span className="field__label">Название компании</span>
-              <input className="input input--dark" value={form.companyName} onChange={(e) => onChange('companyName', e.target.value)} />
-            </label>
-          ) : null}
-
           {!isLogin ? (
             <>
               <div className="authForm__grid">
@@ -70,9 +63,14 @@ export function AuthPage({ form, error, onChange, onSubmit }) {
             </label>
           </div>
 
+          <label className="field">
+            <span className="field__label">Пароль</span>
+            <input className="input input--dark" type="password" value={form.password} onChange={(e) => onChange('password', e.target.value)} placeholder="Минимум 6 символов" />
+          </label>
+
           {!isLogin ? (
             <label className="field">
-              <span className="field__label">Telegram username</span>
+              <span className="field__label">Telegram username (необязательно)</span>
               <input
                 className="input input--dark"
                 inputMode="text"
@@ -83,8 +81,8 @@ export function AuthPage({ form, error, onChange, onSubmit }) {
             </label>
           ) : null}
 
-          <button className="primaryButton primaryButton--wide" type="submit">
-            {isLogin ? 'Войти' : 'Зарегистрироваться'}
+          <button className="primaryButton primaryButton--wide" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Подождите...' : isLogin ? 'Войти' : 'Зарегистрироваться'}
           </button>
           <div className="authCard__switch">
             {isLogin ? 'Нет аккаунта?' : 'У вас уже есть аккаунт?'}{' '}

@@ -10,12 +10,12 @@ export const BELARUS_CITY_OPTIONS = [
   { value: 'mogilev', label: 'Могилев', lat: 53.9007, lng: 30.3314, zoom: 11 },
 ]
 
-export function getCityOption(value) {
-  return BELARUS_CITY_OPTIONS.find((city) => city.value === value) || BELARUS_CITY_OPTIONS.find((city) => city.value === DEFAULT_CITY_VALUE)
+export function getCityOption(value, cityOptions = BELARUS_CITY_OPTIONS) {
+  return cityOptions.find((city) => city.value === value) || cityOptions.find((city) => city.value === DEFAULT_CITY_VALUE) || cityOptions[0] || BELARUS_CITY_OPTIONS.find((city) => city.value === DEFAULT_CITY_VALUE)
 }
 
-export function getCityPoint(value) {
-  const city = getCityOption(value)
+export function getCityPoint(value, cityOptions = BELARUS_CITY_OPTIONS) {
+  const city = getCityOption(value, cityOptions)
   return { lat: city.lat, lng: city.lng, zoom: city.zoom }
 }
 

@@ -25,15 +25,26 @@ function enrichVacancy(vacancy, userPoint, applicationCountMap) {
   }
 }
 
-export function listVacancies({ vacancies = [], userPoint, city = 'all', query = '', payMin = 0, category = 'all', shiftDate = 'all', sortBy = 'relevant' }) {
+function matchesCity(vacancy, selectedCity) {
+  if (selectedCity.value === 'all') return true
+
+  const normalizedVacancyCity = String(vacancy.city || '').trim().toLowerCase()
+  const normalizedSelectedValue = String(selectedCity.value || '').trim().toLowerCase()
+  const normalizedSelectedLabel = String(selectedCity.label || '').trim().toLowerCase()
+  const cityFromAddress = getCityNameFromAddress(vacancy.address).toLowerCase()
+
+  return normalizedVacancyCity === normalizedSelectedValue || normalizedVacancyCity === normalizedSelectedLabel || cityFromAddress === normalizedSelectedLabel
+}
+
+export function listVacancies({ vacancies = [], userPoint, city = 'all', cityOptions, query = '', payMin = 0, category = 'all', shiftDate = 'all', sortBy = 'relevant' }) {
   const normalizedQuery = query.trim().toLowerCase()
-  const selectedCity = getCityOption(city)
+  const selectedCity = getCityOption(city, cityOptions)
   const applicationCountMap = new Map()
 
   const items = (vacancies || [])
     .map((vacancy) => normalizeVacancy(vacancy))
     .filter((vacancy) => vacancy.status === 'open')
-    .filter((vacancy) => (selectedCity.value === 'all' ? true : getCityNameFromAddress(vacancy.address) === selectedCity.label))
+    .filter((vacancy) => matchesCity(vacancy, selectedCity))
     .filter((vacancy) => (category === 'all' ? true : vacancy.type === category))
     .filter((vacancy) => (shiftDate === 'all' ? true : vacancy.shiftDate === shiftDate))
     .map((vacancy) => enrichVacancy(vacancy, userPoint, applicationCountMap))
@@ -60,6 +71,14 @@ export async function createVacancy(payload) {
   const response = await apiRequest('/app/vacancies', {
     method: 'POST',
     body: payload,
+  })
+
+  return response.vacancy
+}
+
+export async function archiveVacancy(vacancyId) {
+  const response = await apiRequest(`/app/vacancies/${vacancyId}/archive`, {
+    method: 'PUT',
   })
 
   return response.vacancy

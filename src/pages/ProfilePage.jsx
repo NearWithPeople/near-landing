@@ -16,6 +16,16 @@ function getProfileForm(currentUser) {
   }
 }
 
+function getVacancyStatusLabel(status) {
+  if (status === 'pending_review') return 'На модерации'
+  if (status === 'rejected') return 'Отклонена'
+  if (status === 'archived') return 'В архиве'
+  if (status === 'closed') return 'Закрыта'
+  if (status === 'paused') return 'На паузе'
+  if (status === 'draft') return 'Черновик'
+  return 'Открыта'
+}
+
 export function ProfilePage({ currentUser, completedTasks, employerVacancies, onGoToCatalog, onOpenEmployerVacancy, onCreateVacancy, onLogout, onSaveProfile }) {
   const isEmployer = currentUser.role === 'employer'
   const [profileError, setProfileError] = useState('')
@@ -45,7 +55,7 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
     if (profileError) setProfileError('')
   }
 
-  function handleSave() {
+  async function handleSave() {
     const age = Number(profileForm.age)
     const normalizedPhone = normalizePhone(profileForm.phone)
 
@@ -54,14 +64,18 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
       return
     }
     if (!isEmployer && (!Number.isFinite(age) || age < 16 || age > 99)) {
-      setProfileError('Возраст соискателя должен быть от 16 до 99 лет.')
+      setProfileError('Возраст пользователя должен быть от 16 до 99 лет.')
       return
     }
     if (normalizedPhone && !isBelarusPhone(normalizedPhone)) {
       setProfileError('Укажи телефон в белорусском формате: +375 XX XXX XX XX или 80XX XXX XX XX.')
       return
     }
-    onSaveProfile(profileForm)
+    const error = await onSaveProfile(profileForm)
+    if (error) {
+      setProfileError(error)
+      return
+    }
     setIsEditing(false)
     setProfileError('')
   }
@@ -78,7 +92,7 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
         <div>
           <div className="panelHeader__eyebrow">Профиль</div>
         </div>
-        <div className="statusBadge">{isEmployer ? 'работодатель' : 'исполнитель'}</div>
+        <div className="statusBadge">{isEmployer ? 'работодатель' : 'пользователь'}</div>
       </div>
 
       {!isEmployer ? (
@@ -140,7 +154,7 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
                   <input className="input input--dark" value={profileForm.email} onChange={(event) => handleChange('email', event.target.value)} />
                 </label>
                 <label className="field">
-                  <span className="field__label">Telegram username</span>
+                  <span className="field__label">Telegram username (необязательно)</span>
                   <input className="input input--dark" value={profileForm.telegramUsername} onChange={(event) => handleChange('telegramUsername', event.target.value)} placeholder="@username" />
                 </label>
                 <label className="field">
@@ -220,7 +234,9 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
                   <span className="tag tag--accent">от {vacancy.payFrom} BYN</span>
                   <span className="tag">{vacancy.duration}</span>
                   <span className="tag">{vacancy.schedule}</span>
+                  <span className="tag">{getVacancyStatusLabel(vacancy.status)}</span>
                 </div>
+                {vacancy.moderationReason ? <div className="reviewCard__text">Причина отклонения: {vacancy.moderationReason}</div> : null}
                 <button
                   type="button"
                   className="catalogPromoCard__link"

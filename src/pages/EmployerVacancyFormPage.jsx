@@ -3,19 +3,76 @@ import { CustomSelect } from '../components/CustomSelect'
 import { MapboxPointPicker } from '../components/MapboxPointPicker'
 import { BELARUS_CITY_OPTIONS, getCityPoint } from '../constants/belarusCities'
 import { geocodeBelarusAddress, reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
+import { parseVacancyMessage } from '../services/parserService'
+import { isBelarusPhone, normalizePhone } from '../utils/common'
 
 const CATEGORY_OPTIONS = [
   { value: 'Курьер', label: 'Курьер' },
   { value: 'Склад', label: 'Склад' },
   { value: 'Промо', label: 'Промо' },
   { value: 'HoReCa', label: 'HoReCa' },
+  { value: 'Подсобные', label: 'Подсобные' },
 ]
 
 const SHIFT_DATE_OPTIONS = [
   { value: 'Сегодня', label: 'Сегодня' },
   { value: 'Завтра', label: 'Завтра' },
   { value: 'Выходные', label: 'Выходные' },
+  { value: 'Дата уточняется', label: 'Дата уточняется' },
 ]
+
+const PARSER_FIELD_LABELS = {
+  title: 'название',
+  description: 'описание',
+  payFrom: 'оплата',
+  type: 'категория',
+  shiftDate: 'дата смены',
+  duration: 'длительность',
+  schedule: 'график',
+  city: 'город',
+  addressLine: 'адрес',
+  tags: 'теги',
+}
+
+function getCityValueFromParser(rawCity, cityOptions) {
+  const normalizedCity = String(rawCity || '').trim().toLowerCase()
+  if (!normalizedCity) return ''
+
+  const matchedCity = cityOptions.find((city) => {
+    return city.value.toLowerCase() === normalizedCity || city.label.toLowerCase() === normalizedCity
+  })
+
+  return matchedCity?.value || ''
+}
+
+function buildFormPatch(partialVacancy, cityOptions) {
+  const nextCity = getCityValueFromParser(partialVacancy?.city, cityOptions)
+  const nextTags = Array.isArray(partialVacancy?.tags)
+    ? partialVacancy.tags.map((tag) => String(tag).trim()).filter(Boolean).join(', ')
+    : ''
+
+  return {
+    ...(partialVacancy?.title ? { title: partialVacancy.title } : {}),
+    ...(partialVacancy?.description ? { description: partialVacancy.description } : {}),
+    ...(partialVacancy?.payFrom ? { payFrom: String(partialVacancy.payFrom) } : {}),
+    ...(partialVacancy?.category ? { type: partialVacancy.category } : {}),
+    ...(partialVacancy?.shiftDate ? { shiftDate: partialVacancy.shiftDate } : {}),
+    ...(partialVacancy?.duration ? { duration: partialVacancy.duration } : {}),
+    ...(partialVacancy?.schedule ? { schedule: partialVacancy.schedule } : {}),
+    ...(nextCity ? { city: nextCity } : {}),
+    ...(partialVacancy?.address ? { addressLine: partialVacancy.address } : {}),
+    ...(nextTags ? { tags: nextTags } : {}),
+  }
+}
+
+function getAppliedFieldLabels(formPatch) {
+  return Object.entries(PARSER_FIELD_LABELS)
+    .filter(([key]) => {
+      const value = formPatch[key]
+      return typeof value === 'string' ? Boolean(value.trim()) : Boolean(value)
+    })
+    .map(([, label]) => label)
+}
 
 export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVacancy, onCancel }) {
   const [form, setForm] = useState({
@@ -29,12 +86,18 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
     city: selectedCity === 'all' ? 'minsk' : selectedCity,
     addressLine: '',
     tags: '',
+    contactPhone: '',
+    contactTelegram: '',
   })
   const [point, setPoint] = useState(() => getCityPoint(selectedCity === 'all' ? 'minsk' : selectedCity))
   const [error, setError] = useState('')
   const [addressSuggestions, setAddressSuggestions] = useState([])
   const [isAddressLoading, setIsAddressLoading] = useState(false)
   const [isAddressFocused, setIsAddressFocused] = useState(false)
+  const [parserMessage, setParserMessage] = useState('')
+  const [isParserLoading, setIsParserLoading] = useState(false)
+  const [parserError, setParserError] = useState('')
+  const [parserResult, setParserResult] = useState(null)
   const geocodeRequestIdRef = useRef(0)
 
   const cityOptions = useMemo(() => BELARUS_CITY_OPTIONS.filter((city) => city.value !== 'all').map(({ value, label }) => ({ value, label })), [])
@@ -118,7 +181,7 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     if (!form.title.trim() || !form.description.trim() || !form.addressLine.trim() || !form.schedule.trim() || !form.duration.trim()) {
@@ -137,15 +200,23 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
       return
     }
 
-    onCreateVacancy({
+    const contactDigits = normalizePhone(form.contactPhone)
+    if (contactDigits && !isBelarusPhone(contactDigits)) {
+      setError('Телефон для связи по смене: белорусский формат (+375 …) или оставьте поле пустым — тогда используется телефон из профиля.')
+      return
+    }
+
+    const contactTelegram = form.contactTelegram.trim().replace(/^@+/, '')
+
+    const errorMessage = await onCreateVacancy({
       title: form.title,
       description: form.description,
-      companyName: currentUser.companyName || currentUser.fullName,
       payFrom,
       type: form.type,
       duration: form.duration,
       shiftDate: form.shiftDate,
       schedule: form.schedule,
+      city: form.city,
       address: `${selectedCityOption.label}, ${form.addressLine.trim()}`,
       lat: point.lat,
       lng: point.lng,
@@ -153,7 +224,67 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
         .split(',')
         .map((tag) => tag.trim())
         .filter(Boolean),
+      contactPhone: contactDigits || '',
+      contactTelegram,
     })
+
+    if (errorMessage) {
+      setError(errorMessage)
+    }
+  }
+
+  async function handleParseMessage() {
+    const message = parserMessage.trim()
+    if (!message) {
+      setParserError('Вставь текст вакансии или сообщения для разбора.')
+      return
+    }
+
+    setIsParserLoading(true)
+    setParserError('')
+
+    try {
+      const result = await parseVacancyMessage({
+        message,
+        employerId: currentUser?.id,
+      })
+
+      const formPatch = buildFormPatch(result.partialVacancy, cityOptions)
+      const appliedFields = getAppliedFieldLabels(formPatch)
+      const latitude = Number(result.partialVacancy?.latitude)
+      const longitude = Number(result.partialVacancy?.longitude)
+      const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude)
+      const nextPoint = hasCoordinates
+        ? { lat: latitude, lng: longitude }
+        : formPatch.city
+          ? getCityPoint(formPatch.city)
+          : null
+
+      setForm((prev) => ({ ...prev, ...formPatch }))
+      if (nextPoint) {
+        setPoint(nextPoint)
+      }
+      if (formPatch.city || formPatch.addressLine) {
+        setAddressSuggestions([])
+      }
+      if (error) {
+        setError('')
+      }
+
+      setParserResult({
+        source: result.source,
+        completeness: result.completeness,
+        missingFields: Array.isArray(result.missingFields) ? result.missingFields : [],
+        warnings: Array.isArray(result.warnings) ? result.warnings : [],
+        llmError: result.llmError,
+        appliedFields,
+      })
+    } catch (parseError) {
+      setParserResult(null)
+      setParserError(parseError instanceof Error ? parseError.message : 'Не удалось распарсить сообщение.')
+    } finally {
+      setIsParserLoading(false)
+    }
   }
 
   return (
@@ -165,6 +296,83 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
         </div>
         <div className="statusBadge">Публикация смены</div>
       </div>
+
+      <article className="vacancyFormCard vacancyParserCard">
+        <div className="panelHeader panelHeader--space">
+          <div>
+            <div className="panelHeader__title">Парсер вакансии</div>
+            <div className="vacancyCard__meta">Вставь текст из Telegram, чата или заметки. Парсер попробует заполнить форму автоматически.</div>
+          </div>
+          <div className="statusBadge">{isParserLoading ? 'Идёт разбор' : 'AI + эвристика'}</div>
+        </div>
+
+        <label className="field">
+          <span className="field__label">Исходный текст</span>
+          <textarea
+            className="input input--dark authForm__textarea vacancyParserCard__textarea"
+            rows={6}
+            value={parserMessage}
+            onChange={(event) => {
+              setParserMessage(event.target.value)
+              if (parserError) setParserError('')
+            }}
+            placeholder="Например: Нужен курьер в Минске на сегодня. Оплата 90 BYN за смену, адрес Немига, 3..."
+          />
+        </label>
+
+        <div className="vacancyParserCard__actions">
+          <button type="button" className="primaryButton" onClick={handleParseMessage} disabled={isParserLoading || !parserMessage.trim()}>
+            {isParserLoading ? 'Разбираю сообщение...' : 'Распарсить и заполнить форму'}
+          </button>
+          <button
+            type="button"
+            className="ghostButton"
+            onClick={() => {
+              setParserMessage('')
+              setParserResult(null)
+              setParserError('')
+            }}
+            disabled={isParserLoading || (!parserMessage && !parserResult)}
+          >
+            Очистить
+          </button>
+        </div>
+
+        {parserError ? <div className="formError">{parserError}</div> : null}
+
+        {parserResult ? (
+          <div className="vacancyParserCard__result">
+            <div className="vacancyDetailFacts">
+              <div className="vacancyDetailFacts__item">Источник: {parserResult.source === 'llm' ? 'LLM' : 'Эвристический разбор'}</div>
+              <div className="vacancyDetailFacts__item">Заполненность: {parserResult.completeness || '—'}</div>
+              <div className="vacancyDetailFacts__item">
+                Обновлено в форме: {parserResult.appliedFields.length ? parserResult.appliedFields.join(', ') : 'распознанные поля не найдены'}
+              </div>
+            </div>
+
+            {parserResult.missingFields.length ? (
+              <div className="field">
+                <span className="field__hint">Ещё нужно проверить вручную</span>
+                <div className="tagRow">
+                  {parserResult.missingFields.map((field) => (
+                    <span key={field} className="tag">
+                      {field}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {parserResult.warnings.map((warning) => (
+              <div key={warning} className="vacancyParserCard__hint">
+                {warning}
+              </div>
+            ))}
+
+            {parserResult.llmError ? <div className="vacancyParserCard__hint">LLM недоступен, поэтому использован резервный эвристический разбор.</div> : null}
+          </div>
+        ) : null}
+      </article>
 
       <form className="vacancyFormLayout" onSubmit={handleSubmit}>
         <div className="vacancyFormMain">
@@ -251,6 +459,30 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
                 <span className="field__label">Теги через запятую</span>
                 <input className="input input--dark" value={form.tags} onChange={(event) => handleChange('tags', event.target.value)} placeholder="сегодня, быстрый выход, подработка, без опыта" />
               </label>
+
+              <label className="field vacancyFormGrid__full">
+                <span className="field__label">Телефон для связи по этой смене (необязательно)</span>
+                <input
+                  className="input input--dark"
+                  type="tel"
+                  inputMode="tel"
+                  value={form.contactPhone}
+                  onChange={(event) => handleChange('contactPhone', event.target.value)}
+                  placeholder="Если не указать — используется телефон из профиля"
+                />
+                <span className="field__hint">Удобно, если ответственный по смене — другой человек или отдельная линия.</span>
+              </label>
+
+              <label className="field vacancyFormGrid__full">
+                <span className="field__label">Telegram для этой смены (необязательно)</span>
+                <input
+                  className="input input--dark"
+                  inputMode="text"
+                  value={form.contactTelegram}
+                  onChange={(event) => handleChange('contactTelegram', event.target.value)}
+                  placeholder="@username или оставьте пустым — тогда из профиля"
+                />
+              </label>
             </div>
           </article>
 
@@ -265,10 +497,24 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
           <article className="vacancyFormCard">
             <div className="panelHeader__title">Что будет опубликовано</div>
             <div className="vacancyDetailFacts">
-              <div className="vacancyDetailFacts__item">Компания: {currentUser.companyName || currentUser.fullName}</div>
+              <div className="vacancyDetailFacts__item">Работодатель: {currentUser.companyName || currentUser.fullName}</div>
               <div className="vacancyDetailFacts__item">Адрес: {selectedCityOption.label}{form.addressLine.trim() ? `, ${form.addressLine.trim()}` : ''}</div>
               <div className="vacancyDetailFacts__item">Координаты: {point?.lat?.toFixed(4)}, {point?.lng?.toFixed(4)}</div>
               <div className="vacancyDetailFacts__item">Оплата: от {form.payFrom || '0'} BYN</div>
+              <div className="vacancyDetailFacts__item">
+                Контакт для откликов:{' '}
+                {form.contactPhone.trim()
+                  ? normalizePhone(form.contactPhone)
+                  : currentUser.phone || 'укажите телефон в профиле или поле выше'}
+              </div>
+              <div className="vacancyDetailFacts__item">
+                Telegram для откликов:{' '}
+                {form.contactTelegram.trim()
+                  ? `@${form.contactTelegram.trim().replace(/^@+/, '')}`
+                  : currentUser.telegramUsername
+                    ? `@${String(currentUser.telegramUsername).replace(/^@+/, '')}`
+                    : 'не указан'}
+              </div>
             </div>
 
             <div className="vacancyDetailText">
