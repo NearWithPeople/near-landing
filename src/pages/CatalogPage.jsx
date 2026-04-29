@@ -123,10 +123,6 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
               triggerClassName="input input--dark"
             />
           </ResponsiveFilters>
-
-          <button className="primaryButton catalogSearch__submit" type="button">
-            Найти
-          </button>
         </div>
 
         <div className="catalogQuickFilters" aria-label="Быстрые фильтры">
