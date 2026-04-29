@@ -24,15 +24,17 @@ export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
         <div className="authSplitPage__orb authSplitPage__orb--a" aria-hidden />
         <div className="authSplitPage__orb authSplitPage__orb--b" aria-hidden />
         <div className="authSplitPage__orb authSplitPage__orb--c" aria-hidden />
-        <Link to="/" aria-label="На главную NEAR.by">
 
         <div className="authSplitPage__heroWord" aria-hidden>
+        <Link to="/" aria-label="На главную NEAR.by">
+
           <p className="authSplitPage__wordmark">
             <span className="authSplitPage__wordmarkNear">NEAR</span>
             <span className="authSplitPage__wordmarkBy">.by</span>
           </p>
-        </div>
         </Link>
+
+        </div>
 
       </div>
 

@@ -1,33 +1,104 @@
 @keyframes auth-mesh-shift {
   0%,
   100% {
-    background-position: 0% 40%;
+    background-position: 0% 28%;
   }
 
   50% {
-    background-position: 100% 60%;
+    background-position: 100% 72%;
   }
 }
 
 @keyframes auth-orb-a {
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate(0, 0) scale(1) rotate(0deg);
   }
 
   50% {
-    transform: translate(24px, -18px) scale(1.08);
+    transform: translate(42px, -32px) scale(1.14) rotate(4deg);
   }
 }
 
 @keyframes auth-orb-b {
   0%,
   100% {
-    transform: translate(0, 0) scale(1.05);
+    transform: translate(0, 0) scale(1.08) rotate(0deg);
   }
 
   50% {
-    transform: translate(-22px, 20px) scale(1);
+    transform: translate(-38px, 34px) scale(0.96) rotate(-5deg);
+  }
+}
+
+@keyframes auth-orb-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+
+  33% {
+    transform: translate(28px, 14px) scale(1.12);
+    opacity: 1;
+  }
+
+  66% {
+    transform: translate(-18px, -22px) scale(1.04);
+    opacity: 0.9;
+  }
+}
+
+@keyframes auth-left-veil-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+
+  38% {
+    transform: translate3d(5%, -3%, 0) scale(1.07);
+    opacity: 0.88;
+  }
+
+  72% {
+    transform: translate3d(-3%, 4.5%, 0) scale(1.03);
+    opacity: 0.96;
+  }
+}
+
+@keyframes auth-right-ambient {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    opacity: 0.72;
+  }
+
+  30% {
+    transform: translate3d(-11%, 12%, 0) rotate(-3.5deg) scale(1.06);
+    opacity: 1;
+  }
+
+  62% {
+    transform: translate3d(12%, -9%, 0) rotate(2.8deg) scale(1.02);
+    opacity: 0.82;
+  }
+}
+
+@keyframes auth-right-mesh-breathe {
+  0%,
+  100% {
+    background-position:
+      8% 18%,
+      92% 82%,
+      0 0;
+  }
+
+  50% {
+    background-position:
+      38% 42%,
+      62% 58%,
+      0 0;
   }
 }
 
@@ -55,8 +126,8 @@
     radial-gradient(ellipse 120% 90% at 40% 20%, rgba(91, 112, 101, 0.35), transparent 52%),
     radial-gradient(ellipse 90% 70% at 85% 75%, rgba(48, 64, 64, 0.45), transparent 50%),
     linear-gradient(155deg, #021820 0%, #04202c 38%, #304040 72%, #04202c 100%);
-  background-size: 160% 160%;
-  animation: auth-mesh-shift 18s ease infinite;
+  background-size: 180% 180%;
+  animation: auth-mesh-shift 11s ease-in-out infinite;
 }
 
 .authSplitPage__left::before {
@@ -64,9 +135,10 @@
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle at 22% 35%, rgba(255, 255, 255, 0.07) 0, transparent 42%),
-    radial-gradient(circle at 78% 62%, rgba(201, 209, 200, 0.06) 0, transparent 38%);
+    radial-gradient(circle at 22% 35%, rgba(255, 255, 255, 0.11) 0, transparent 42%),
+    radial-gradient(circle at 78% 62%, rgba(201, 209, 200, 0.1) 0, transparent 38%);
   pointer-events: none;
+  animation: auth-left-veil-drift 17s ease-in-out infinite;
 }
 
 .authSplitPage__orb {
@@ -82,7 +154,7 @@
   left: -12%;
   top: 18%;
   background: radial-gradient(circle, rgba(91, 112, 101, 0.55), transparent 68%);
-  animation: auth-orb-a 16s ease-in-out infinite;
+  animation: auth-orb-a 13s ease-in-out infinite;
 }
 
 .authSplitPage__orb--b {
@@ -91,7 +163,7 @@
   right: -8%;
   bottom: 12%;
   background: radial-gradient(circle, rgba(48, 64, 64, 0.6), transparent 70%);
-  animation: auth-orb-b 14s ease-in-out infinite;
+  animation: auth-orb-b 11s ease-in-out infinite;
 }
 
 .authSplitPage__orb--c {
@@ -99,9 +171,9 @@
   height: min(200px, 45vw);
   left: 38%;
   top: 42%;
-  background: radial-gradient(circle, rgba(201, 209, 200, 0.08), transparent 72%);
+  background: radial-gradient(circle, rgba(201, 209, 200, 0.14), transparent 72%);
   filter: blur(36px);
-  animation: auth-orb-a 22s ease-in-out infinite reverse;
+  animation: auth-orb-c 18s ease-in-out infinite;
 }
 
 .authSplitPage__cornerWordmarkLink {
@@ -188,7 +260,16 @@
   position: relative;
   z-index: 3;
   min-height: 0;
-  background: linear-gradient(180deg, #060e12 0%, #04202c 48%, #061820 100%);
+  background:
+    radial-gradient(ellipse 120% 90% at 8% 8%, rgba(91, 112, 101, 0.26), transparent 52%),
+    radial-gradient(ellipse 90% 70% at 92% 94%, rgba(48, 64, 64, 0.36), transparent 48%),
+    linear-gradient(180deg, #060e12 0%, #04202c 48%, #061820 100%);
+
+  background-position:
+    8% 18%,
+    92% 82%,
+    0 0;
+  animation: auth-right-mesh-breathe 21s ease-in-out infinite;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -199,7 +280,22 @@
   padding: clamp(16px, 3vw, 28px) clamp(18px, 3vw, 24px) calc(16px + env(safe-area-inset-bottom, 0px));
 }
 
+.authSplitPage__right::before {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  background:
+    radial-gradient(ellipse 55% 42% at 18% 14%, rgba(91, 112, 101, 0.42), transparent 58%),
+    radial-gradient(ellipse 48% 44% at 86% 88%, rgba(48, 64, 64, 0.52), transparent 54%),
+    radial-gradient(ellipse 38% 36% at 52% 48%, rgba(91, 112, 101, 0.14), transparent 62%);
+  animation: auth-right-ambient 24s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .authSplitPage__card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
@@ -302,6 +398,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .authSplitPage__left,
+  .authSplitPage__left::before,
+  .authSplitPage__right,
+  .authSplitPage__right::before,
   .authSplitPage__orb {
     animation: none !important;
   }

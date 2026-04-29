@@ -433,12 +433,17 @@ export function GuestLandingPage({ content, onLogin, onRegister }) {
               <CarouselChevron dir="left" />
             </button>
 
-            <div className="landingPromo__carouselTrack">
+            <div
+              key={carouselIndex}
+              className={[
+                'landingPromo__carouselTrack',
+                carouselUsed ? `landingPromo__carouselTrack--reel-${carouselDir}` : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
               <div className="landingPromo__portfolioCircle landingPromo__portfolioCircle--side" aria-hidden>
-                <div
-                  key={`side-prev-${carouselIndex}`}
-                  className={['landingPromo__sideCircleInner', 'landingPromo__sideCircleInner--sidePrev', carouselUsed ? `landingPromo__sideCircleInner--dir-${carouselDir}` : ''].filter(Boolean).join(' ')}
-                >
+                <div key={`side-prev-${carouselIndex}`} className="landingPromo__sideCircleInner">
                   <div className="landingPromo__sideCircleStack">
                     <p className="landingPromo__sideCircleTitle">{CATEGORY_SLIDES[prevSlideIdx].title}</p>
                     <p className="landingPromo__sideCircleSub">{CATEGORY_SLIDES[prevSlideIdx].subtitle}</p>
@@ -447,17 +452,14 @@ export function GuestLandingPage({ content, onLogin, onRegister }) {
               </div>
 
               <div className="landingPromo__portfolioCircle landingPromo__portfolioCircle--lg">
-                <div key={carouselIndex} className={`landingPromo__slideInner landingPromo__slideInner--${carouselDir}`}>
+                <div key={carouselIndex} className="landingPromo__slideInner">
                   <div className="landingPromo__portfolioCircleLabel">{CATEGORY_SLIDES[carouselIndex].title}</div>
                   <div className="landingPromo__portfolioCircleLabel landingPromo__portfolioSub">{CATEGORY_SLIDES[carouselIndex].subtitle}</div>
                 </div>
               </div>
 
               <div className="landingPromo__portfolioCircle landingPromo__portfolioCircle--side" aria-hidden>
-                <div
-                  key={`side-next-${carouselIndex}`}
-                  className={['landingPromo__sideCircleInner', 'landingPromo__sideCircleInner--sideNext', carouselUsed ? `landingPromo__sideCircleInner--dir-${carouselDir}` : ''].filter(Boolean).join(' ')}
-                >
+                <div key={`side-next-${carouselIndex}`} className="landingPromo__sideCircleInner">
                   <div className="landingPromo__sideCircleStack">
                     <p className="landingPromo__sideCircleTitle">{CATEGORY_SLIDES[nextSlideIdx].title}</p>
                     <p className="landingPromo__sideCircleSub">{CATEGORY_SLIDES[nextSlideIdx].subtitle}</p>

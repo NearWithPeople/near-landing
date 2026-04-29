@@ -90,75 +90,87 @@
   }
 }
 
-@keyframes lp-carousel-next {
-  from {
-    opacity: 0;
-    transform: translateX(28px) scale(0.93);
+@keyframes lp-reel-ball-left-next {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes lp-carousel-prev {
-  from {
-    opacity: 0;
-    transform: translateX(-28px) scale(0.93);
+  45% {
+    transform: translate3d(18px, -4px, 0) rotate(16deg) scale(1.03);
   }
 
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 }
 
-@keyframes lp-side-slot-next-left {
-  from {
-    opacity: 0;
-    transform: translateX(24px) scale(0.9);
+@keyframes lp-reel-ball-center-next {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
   }
 
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes lp-side-slot-next-right {
-  from {
-    opacity: 0;
-    transform: translateX(32px) scale(0.88);
+  42% {
+    transform: translate3d(10px, 2px, 0) rotate(-10deg) scale(0.96);
   }
 
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
   }
 }
 
-@keyframes lp-side-slot-prev-left {
-  from {
-    opacity: 0;
-    transform: translateX(-32px) scale(0.88);
+@keyframes lp-reel-ball-right-next {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
+  45% {
+    transform: translate3d(-22px, -3px, 0) rotate(-14deg) scale(1.04);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 }
 
-@keyframes lp-side-slot-prev-right {
-  from {
-    opacity: 0;
-    transform: translateX(-24px) scale(0.9);
+@keyframes lp-reel-ball-left-prev {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
+  45% {
+    transform: translate3d(-22px, -3px, 0) rotate(-16deg) scale(1.04);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes lp-reel-ball-center-prev {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+
+  42% {
+    transform: translate3d(-10px, 2px, 0) rotate(10deg) scale(0.96);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes lp-reel-ball-right-prev {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  45% {
+    transform: translate3d(18px, -4px, 0) rotate(14deg) scale(1.03);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 }
 
@@ -837,6 +849,32 @@
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.12);
   flex-shrink: 0;
+  transform-origin: 50% 55%;
+  backface-visibility: hidden;
+}
+
+.landingPromo__carouselTrack--reel-next .landingPromo__portfolioCircle:nth-child(1) {
+  animation: lp-reel-ball-left-next 0.52s cubic-bezier(0.33, 1.15, 0.48, 1) both;
+}
+
+.landingPromo__carouselTrack--reel-next .landingPromo__portfolioCircle:nth-child(2) {
+  animation: lp-reel-ball-center-next 0.52s cubic-bezier(0.33, 1.15, 0.48, 1) both;
+}
+
+.landingPromo__carouselTrack--reel-next .landingPromo__portfolioCircle:nth-child(3) {
+  animation: lp-reel-ball-right-next 0.52s cubic-bezier(0.33, 1.15, 0.48, 1) both;
+}
+
+.landingPromo__carouselTrack--reel-prev .landingPromo__portfolioCircle:nth-child(1) {
+  animation: lp-reel-ball-left-prev 0.52s cubic-bezier(0.33, 1.15, 0.48, 1) both;
+}
+
+.landingPromo__carouselTrack--reel-prev .landingPromo__portfolioCircle:nth-child(2) {
+  animation: lp-reel-ball-center-prev 0.52s cubic-bezier(0.33, 1.15, 0.48, 1) both;
+}
+
+.landingPromo__carouselTrack--reel-prev .landingPromo__portfolioCircle:nth-child(3) {
+  animation: lp-reel-ball-right-prev 0.52s cubic-bezier(0.33, 1.15, 0.48, 1) both;
 }
 
 .landingPromo__portfolioCircle--side {
@@ -860,22 +898,6 @@
   box-sizing: border-box;
   display: grid;
   place-items: center;
-}
-
-.landingPromo__sideCircleInner--sidePrev.landingPromo__sideCircleInner--dir-next {
-  animation: lp-side-slot-next-left 0.44s cubic-bezier(0.22, 1, 0.35, 1) forwards;
-}
-
-.landingPromo__sideCircleInner--sideNext.landingPromo__sideCircleInner--dir-next {
-  animation: lp-side-slot-next-right 0.44s cubic-bezier(0.22, 1, 0.35, 1) forwards;
-}
-
-.landingPromo__sideCircleInner--sidePrev.landingPromo__sideCircleInner--dir-prev {
-  animation: lp-side-slot-prev-left 0.44s cubic-bezier(0.22, 1, 0.35, 1) forwards;
-}
-
-.landingPromo__sideCircleInner--sideNext.landingPromo__sideCircleInner--dir-prev {
-  animation: lp-side-slot-prev-right 0.44s cubic-bezier(0.22, 1, 0.35, 1) forwards;
 }
 
 .landingPromo__sideCircleStack {
@@ -942,14 +964,6 @@
   gap: 8px;
   place-items: center;
   width: 100%;
-}
-
-.landingPromo__slideInner--next {
-  animation: lp-carousel-next 0.46s cubic-bezier(0.22, 1, 0.32, 1) forwards;
-}
-
-.landingPromo__slideInner--prev {
-  animation: lp-carousel-prev 0.46s cubic-bezier(0.22, 1, 0.32, 1) forwards;
 }
 
 .landingPromo__portfolioCircleLabel {
@@ -1253,9 +1267,8 @@
   .landingPromo__priceCard--featured,
   .landingPromo__pulseRing,
   .landingPromo__bulb,
-  .landingPromo__slideInner,
-  .landingPromo__sideCircleInner--dir-next,
-  .landingPromo__sideCircleInner--dir-prev {
+  .landingPromo__carouselTrack--reel-next .landingPromo__portfolioCircle,
+  .landingPromo__carouselTrack--reel-prev .landingPromo__portfolioCircle {
     animation: none !important;
   }
 
