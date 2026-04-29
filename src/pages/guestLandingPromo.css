@@ -809,6 +809,7 @@
     color 0.2s ease,
     box-shadow 0.2s ease,
     transform 0.15s ease;
+    z-index: 999;
 }
 
 .landingPromo__carouselNav:hover {
