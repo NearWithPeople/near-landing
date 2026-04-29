@@ -5,10 +5,10 @@
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(circle at top center, rgba(255, 255, 255, 0.08), transparent 32%),
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.05), transparent 24%),
-    linear-gradient(180deg, #3a3a3a 0%, #202020 24%, #151515 58%, #050505 100%);
-  color: #fff;
+    radial-gradient(circle at top center, rgba(var(--palette-pine-rgb), 0.14), transparent 34%),
+    radial-gradient(circle at 20% 30%, rgba(var(--palette-evergreen-rgb), 0.28), transparent 26%),
+    linear-gradient(180deg, #304040 0%, #263838 24%, #04202c 58%, #021820 100%);
+  color: var(--palette-mist);
 }
 
 .site__main {
@@ -39,7 +39,6 @@
 }
 
 .guestLanding,
-.authPage,
 .onboardingPage {
   min-height: calc(100dvh - 84px);
   display: grid;
@@ -53,7 +52,7 @@
   width: min(100%, 760px);
   border-radius: 28px;
   padding: 32px;
-  background: rgba(29, 26, 57, 0.82);
+  background: rgba(var(--palette-forest-rgb), 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
@@ -82,7 +81,7 @@
   gap: 16px;
   padding: 16px 20px;
   border-radius: 24px;
-  background: rgba(10, 11, 14, 0.78);
+  background: rgba(var(--palette-evergreen-rgb), 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(20px);
@@ -488,8 +487,8 @@
 }
 
 .primaryButton {
-  background: #ffffff;
-  color: #111;
+  background: var(--palette-pine);
+  color: var(--palette-forest);
 }
 
 .primaryButton:hover,
@@ -506,9 +505,9 @@
 }
 
 .ghostButton {
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(var(--palette-mist-rgb), 0.06);
+  color: var(--palette-mist);
+  border: 1px solid rgba(var(--palette-pine-rgb), 0.35);
 }
 
 .authCard__header,
@@ -1255,7 +1254,7 @@
 .catalogPage,
 .reviewsPage {
   border-radius: 24px;
-  background: rgba(29, 26, 57, 0.82);
+  background: rgba(var(--palette-forest-rgb), 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 20px;
 }
@@ -1588,7 +1587,7 @@
   z-index: 65;
   width: min(360px, calc(100vw - 32px));
   border-radius: 28px;
-  background: rgba(29, 26, 57, 0.94);
+  background: rgba(var(--palette-forest-rgb), 0.94);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(22px);
@@ -1777,7 +1776,7 @@
 }
 
 .mapboxMarker.is-active .mapboxMarker__dot {
-  background: linear-gradient(180deg, #ffffff 0%, #3a3a3a 100%);
+  background: linear-gradient(180deg, #c9d1c8 0%, #304040 100%);
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08), 0 16px 28px rgba(0, 0, 0, 0.34);
 }
 
@@ -2039,7 +2038,7 @@
   min-height: 56px;
   border-radius: 18px;
   padding-inline: 26px;
-  background: linear-gradient(180deg, #ffffff 0%, #3a3a3a 100%);
+  background: linear-gradient(180deg, #c9d1c8 0%, #304040 100%);
   color: #111;
   box-shadow: 0 16px 30px rgba(255, 255, 255, 0.12);
 }
@@ -2498,7 +2497,7 @@
 .vacancyFormCard {
   border-radius: 24px;
   padding: 20px;
-  background: rgba(29, 26, 57, 0.82);
+  background: rgba(var(--palette-forest-rgb), 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: grid;
   gap: 16px;
@@ -2529,7 +2528,7 @@
   right: 0;
   z-index: 12;
   border-radius: 18px;
-  background: rgba(29, 26, 57, 0.98);
+  background: rgba(var(--palette-forest-rgb), 0.98);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3);
   overflow: hidden;
@@ -2605,7 +2604,7 @@
 .vacancyDetailRelated__card {
   border-radius: 24px;
   padding: 20px;
-  background: rgba(29, 26, 57, 0.82);
+  background: rgba(var(--palette-forest-rgb), 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -2692,7 +2691,7 @@
 }
 
 .vacancyDetailPromo {
-  background: linear-gradient(135deg, rgba(111, 0, 255, 0.82), rgba(255, 71, 87, 0.82));
+  background: linear-gradient(135deg, rgba(var(--palette-pine-rgb), 0.9), rgba(var(--palette-evergreen-rgb), 0.92));
 }
 
 .vacancyDetailPromo__label {
@@ -2765,7 +2764,6 @@
 
 @media (max-width: 760px) {
   .guestLanding,
-  .authPage,
   .onboardingPage {
     padding: 20px 14px 104px;
   }

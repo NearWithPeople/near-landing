@@ -1,0 +1,357 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
+
+@keyframes auth-mesh-shift {
+  0%,
+  100% {
+    background-position: 0% 40%;
+  }
+
+  50% {
+    background-position: 100% 60%;
+  }
+}
+
+@keyframes auth-orb-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(24px, -18px) scale(1.08);
+  }
+}
+
+@keyframes auth-orb-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.05);
+  }
+
+  50% {
+    transform: translate(-22px, 20px) scale(1);
+  }
+}
+
+@keyframes auth-frame-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 28px rgba(91, 112, 101, 0.38),
+      0 0 60px rgba(48, 64, 64, 0.28),
+      inset 0 0 42px rgba(4, 32, 44, 0.25);
+    opacity: 0.92;
+  }
+
+  50% {
+    box-shadow:
+      0 0 44px rgba(201, 209, 200, 0.25),
+      0 0 72px rgba(91, 112, 101, 0.35),
+      inset 0 0 52px rgba(48, 64, 64, 0.18);
+    opacity: 1;
+  }
+}
+
+@keyframes auth-shimmer-line {
+  0% {
+    opacity: 0.55;
+    transform: translateX(-12%);
+  }
+
+  50% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0.55;
+    transform: translateX(12%);
+  }
+}
+
+.authSplitPage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(300px, 460px);
+  min-height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.authSplitPage__frame {
+  position: absolute;
+  inset: clamp(14px, 2.8vw, 28px);
+  border-radius: clamp(18px, 2vw, 28px);
+  pointer-events: none;
+  z-index: 6;
+  border: 1px solid rgba(201, 209, 200, 0.28);
+  box-shadow:
+    0 0 36px rgba(91, 112, 101, 0.38),
+    0 0 80px rgba(48, 64, 64, 0.22),
+    inset 0 0 48px rgba(4, 32, 44, 0.2);
+  animation: auth-frame-glow 7s ease-in-out infinite;
+}
+
+.authSplitPage__frameShimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  opacity: 0.35;
+}
+
+.authSplitPage__frameShimmer::after {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    105deg,
+    transparent 36%,
+    rgba(201, 209, 200, 0.12) 48%,
+    rgba(91, 112, 101, 0.35) 52%,
+    transparent 64%
+  );
+  animation: auth-shimmer-line 11s ease-in-out infinite;
+}
+
+.authSplitPage__left {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 120% 90% at 40% 20%, rgba(91, 112, 101, 0.35), transparent 52%),
+    radial-gradient(ellipse 90% 70% at 85% 75%, rgba(48, 64, 64, 0.45), transparent 50%),
+    linear-gradient(155deg, #021820 0%, #04202c 38%, #304040 72%, #04202c 100%);
+  background-size: 160% 160%;
+  animation: auth-mesh-shift 18s ease infinite;
+}
+
+.authSplitPage__left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 22% 35%, rgba(255, 255, 255, 0.07) 0, transparent 42%),
+    radial-gradient(circle at 78% 62%, rgba(201, 209, 200, 0.06) 0, transparent 38%);
+  pointer-events: none;
+}
+
+.authSplitPage__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+}
+
+.authSplitPage__orb--a {
+  width: min(340px, 70vw);
+  height: min(340px, 70vw);
+  left: -12%;
+  top: 18%;
+  background: radial-gradient(circle, rgba(91, 112, 101, 0.55), transparent 68%);
+  animation: auth-orb-a 16s ease-in-out infinite;
+}
+
+.authSplitPage__orb--b {
+  width: min(280px, 55vw);
+  height: min(280px, 55vw);
+  right: -8%;
+  bottom: 12%;
+  background: radial-gradient(circle, rgba(48, 64, 64, 0.6), transparent 70%);
+  animation: auth-orb-b 14s ease-in-out infinite;
+}
+
+.authSplitPage__orb--c {
+  width: min(200px, 45vw);
+  height: min(200px, 45vw);
+  left: 38%;
+  top: 42%;
+  background: radial-gradient(circle, rgba(201, 209, 200, 0.08), transparent 72%);
+  filter: blur(36px);
+  animation: auth-orb-a 22s ease-in-out infinite reverse;
+}
+
+.authSplitPage__cornerBrand {
+  position: absolute;
+  top: clamp(18px, 3vw, 28px);
+  left: clamp(18px, 3vw, 28px);
+  z-index: 2;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(245, 250, 248, 0.88);
+  text-decoration: none;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
+}
+
+.authSplitPage__cornerBrand:hover {
+  color: #fff;
+}
+
+.authSplitPage__heroWord {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  padding: clamp(24px, 6vw, 48px);
+  text-align: center;
+}
+
+.authSplitPage__hello {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: clamp(3.75rem, 14vw, 7rem);
+  line-height: 0.95;
+  color: rgba(245, 250, 248, 0.96);
+  text-shadow:
+    0 4px 40px rgba(0, 0, 0, 0.35),
+    0 0 48px rgba(91, 112, 101, 0.35);
+}
+
+.authSplitPage__helloNear {
+  letter-spacing: -0.02em;
+}
+
+.authSplitPage__helloBy {
+  color: rgba(201, 209, 200, 0.92);
+}
+
+.authSplitPage__right {
+  position: relative;
+  z-index: 3;
+  background: linear-gradient(180deg, #060e12 0%, #04202c 48%, #061820 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.authSplitPage__card {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 44px) clamp(22px, 4vw, 36px) clamp(32px, 6vw, 48px);
+}
+
+.authSplitPage .authCard__title {
+  margin-top: 8px;
+  margin-bottom: 10px;
+  font-size: clamp(1.65rem, 4vw, 2.15rem);
+  letter-spacing: -0.03em;
+  color: rgba(245, 250, 248, 0.96);
+}
+
+.authSplitPage .authCard__eyebrow {
+  background: rgba(91, 112, 101, 0.28);
+  border: 1px solid rgba(201, 209, 200, 0.15);
+}
+
+.authSplitPage .authCard__lead {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+
+.authSplitPage .roleTabs {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.authSplitPage .roleTabs__item {
+  color: rgba(201, 209, 200, 0.82);
+}
+
+.authSplitPage .roleTabs__item.is-active {
+  background: rgba(91, 112, 101, 0.35);
+  border-color: rgba(201, 209, 200, 0.22);
+  color: #fff;
+}
+
+.authSplitPage .field__label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(201, 209, 200, 0.52);
+}
+
+.authSplitPage .input--dark {
+  border-radius: 0;
+  padding: 8px 0 11px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(201, 209, 200, 0.28);
+  font-size: 15px;
+}
+
+.authSplitPage .input--dark:focus {
+  border-bottom-color: rgba(91, 112, 101, 0.95);
+  box-shadow: none;
+}
+
+.authSplitPage .primaryButton {
+  margin-top: 8px;
+  border-radius: 999px;
+  padding: 15px 22px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #5b7065 0%, #304040 52%, #4a6358 100%);
+  color: #eaf0ea;
+}
+
+.authSplitPage .primaryButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6d8278 0%, #3d5454 52%, #5b7065 100%);
+}
+
+.authSplitPage .primaryButton:disabled {
+  opacity: 0.65;
+}
+
+.authSplitPage .authCard__switch {
+  font-size: 13px;
+}
+
+.authSplitPage .authCard__switchButton {
+  color: rgba(201, 209, 200, 0.92);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.authSplitPage .formError {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(120, 48, 48, 0.35);
+  border: 1px solid rgba(255, 120, 120, 0.25);
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .authSplitPage__left,
+  .authSplitPage__orb,
+  .authSplitPage__frame,
+  .authSplitPage__frameShimmer::after {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .authSplitPage {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(200px, 30vh) minmax(0, 1fr);
+  }
+
+  .authSplitPage__left {
+    min-height: 200px;
+  }
+
+  .authSplitPage__hello {
+    font-size: clamp(3rem, 18vw, 4.5rem);
+  }
+
+  .authSplitPage__right {
+    justify-content: flex-start;
+  }
+}

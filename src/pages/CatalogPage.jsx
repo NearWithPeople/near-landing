@@ -124,7 +124,7 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
             />
           </ResponsiveFilters>
         </div>
-
+        
         <div className="catalogQuickFilters" aria-label="Быстрые фильтры">
           {quickFilters.map((filter) => (
             <button

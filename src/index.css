@@ -6,18 +6,34 @@
   box-sizing: border-box;
 }
 
+/* Лесовая палитра: Лес / Вечно-зелёный / Сосна / Туман */
 :root {
-  --near-gold: #f39f5a;
-  --near-gold-soft: rgba(243, 159, 90, 0.12);
-  --near-gold-dark: #ae445a;
-  --near-ink: #fff7f5;
-  --near-muted: rgba(232, 188, 185, 0.78);
-  --near-bg: #1d1a39;
-  --near-white: #ffffff;
-  --near-green: #22c55e;
-  --near-blue: #ae445a;
+  --palette-forest: #04202c;
+  --palette-evergreen: #304040;
+  --palette-pine: #5b7065;
+  --palette-mist: #c9d1c8;
+
+  --palette-forest-rgb: 4, 32, 44;
+  --palette-evergreen-rgb: 48, 64, 64;
+  --palette-pine-rgb: 91, 112, 101;
+  --palette-mist-rgb: 201, 209, 200;
+
+  --palette-pine-hover: #6d8278;
+  --palette-pine-pressed: #4a5d54;
+
+  --near-bg: var(--palette-forest);
+  --near-ink: var(--palette-mist);
+  --near-muted: rgba(var(--palette-mist-rgb), 0.72);
+  --near-gold: var(--palette-pine);
+  --near-gold-soft: rgba(var(--palette-pine-rgb), 0.18);
+  --near-gold-dark: #44554d;
+  --near-white: #f5faf8;
+  --near-green: #7a9488;
+  --near-blue: var(--palette-pine);
+
   --radius: 16px;
   --radius-lg: 24px;
+
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 500;

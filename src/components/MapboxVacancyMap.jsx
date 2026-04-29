@@ -61,7 +61,7 @@ function ensureSourceAndLayers(map) {
       source: SOURCE_ID,
       filter: ['has', 'point_count'],
       paint: {
-        'circle-color': ['step', ['get', 'point_count'], '#2463ea', 5, '#3d7eff', 12, '#7a5cff'],
+        'circle-color': ['step', ['get', 'point_count'], '#5b7065', 5, '#6d8278', 12, '#304040'],
         'circle-radius': ['step', ['get', 'point_count'], 20, 5, 24, 12, 28],
         'circle-stroke-width': 2,
         'circle-stroke-color': 'rgba(255,255,255,0.18)',
@@ -95,9 +95,9 @@ function ensureSourceAndLayers(map) {
       filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-radius': 7,
-        'circle-color': '#f39f5a',
+        'circle-color': '#5b7065',
         'circle-stroke-width': 3,
-        'circle-stroke-color': 'rgba(29, 26, 57, 0.92)',
+        'circle-stroke-color': 'rgba(4, 32, 44, 0.92)',
       },
     })
   }
@@ -110,7 +110,7 @@ function ensureSourceAndLayers(map) {
       filter: ['==', ['get', 'id'], ''],
       paint: {
         'circle-radius': 16,
-        'circle-color': 'rgba(174, 68, 90, 0.24)',
+        'circle-color': 'rgba(91, 112, 101, 0.35)',
       },
     })
   }
@@ -123,7 +123,7 @@ function ensureSourceAndLayers(map) {
       filter: ['==', ['get', 'id'], ''],
       paint: {
         'circle-radius': 9,
-        'circle-color': '#ae445a',
+        'circle-color': '#c9d1c8',
         'circle-stroke-width': 3,
         'circle-stroke-color': 'rgba(255,255,255,0.92)',
       },
