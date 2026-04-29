@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import './authSplit.css'
@@ -6,29 +7,40 @@ export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
   const isLogin = form.mode === 'login'
   const isEmployer = form.role === 'employer'
 
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow
+    const prevBody = document.body.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.documentElement.style.overflow = prevHtml
+      document.body.style.overflow = prevBody
+    }
+  }, [])
+
   return (
     <section className="authSplitPage">
-      <div className="authSplitPage__frame" aria-hidden>
-        <div className="authSplitPage__frameShimmer" />
-      </div>
+      <div className="authSplitPage__left">
+        <div className="authSplitPage__orb authSplitPage__orb--a" aria-hidden />
+        <div className="authSplitPage__orb authSplitPage__orb--b" aria-hidden />
+        <div className="authSplitPage__orb authSplitPage__orb--c" aria-hidden />
+        <Link to="/" aria-label="На главную NEAR.by">
 
-      <div className="authSplitPage__left" aria-hidden>
-        <div className="authSplitPage__orb authSplitPage__orb--a" />
-        <div className="authSplitPage__orb authSplitPage__orb--b" />
-        <div className="authSplitPage__orb authSplitPage__orb--c" />
-        <div className="authSplitPage__heroWord">
-          <p className="authSplitPage__hello">
-            <span className="authSplitPage__helloNear">NEAR</span>
-            <span className="authSplitPage__helloBy">.by</span>
+        <div className="authSplitPage__heroWord" aria-hidden>
+          <p className="authSplitPage__wordmark">
+            <span className="authSplitPage__wordmarkNear">NEAR</span>
+            <span className="authSplitPage__wordmarkBy">.by</span>
           </p>
         </div>
+        </Link>
+
       </div>
 
       <div className="authSplitPage__right">
         <div className="authSplitPage__card">
           <div className="authCard__header">
             <h1 className="authCard__title">{isLogin ? 'Войти в приложение' : 'Создать аккаунт'}</h1>
-            </div>
+          </div>
 
           <div className="roleTabs" role="tablist" aria-label="Роль">
             <button type="button" className={`roleTabs__item ${form.role === 'seeker' ? 'is-active' : ''}`} onClick={() => onChange('role', 'seeker')}>

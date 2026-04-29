@@ -720,13 +720,19 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 20px;
+  font-size: 0;
   background: rgba(91, 112, 101, 0.18);
   border: 1px solid rgba(91, 112, 101, 0.35);
   box-shadow: 0 0 20px rgba(91, 112, 101, 0.2);
   transition:
     box-shadow 0.25s ease,
     transform 0.25s ease;
+}
+
+.landingPromo__stepIconSvg {
+  display: block;
+  flex-shrink: 0;
+  color: rgba(245, 250, 248, 0.94);
 }
 
 .landingPromo__step:hover .landingPromo__stepIcon {

@@ -4,22 +4,22 @@ import './guestLandingPromo.css'
 
 const PROCESS_STEPS = [
   {
-    icon: '🗺️',
+    iconKind: 'map',
     title: 'Карта рядом',
     text: 'Смотрите смены на карте и по расстоянию — быстро понимаете, до чего реально доехать.',
   },
   {
-    icon: '🔎',
+    iconKind: 'filters',
     title: 'Фильтры',
     text: 'Город, категория, ставка и дата смены — отсекаем лишнее и находите формат под себя.',
   },
   {
-    icon: '⚡',
+    iconKind: 'bolt',
     title: 'Отклик',
     text: 'Откликаетесь в пару действий: условия и адрес уже на карточке вакансии.',
   },
   {
-    icon: '📋',
+    iconKind: 'clipboard',
     title: 'Профиль и история',
     text: 'Отклики и выполненные задачи хранятся в одном месте — удобно возвращаться к договорённостям.',
   },
@@ -89,6 +89,51 @@ function CarouselChevron({ dir }) {
       <path fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" d="M10 7l5 5-5 5" />
     </svg>
   )
+}
+
+function ProcessStepIcon({ kind }) {
+  const svgProps = {
+    className: 'landingPromo__stepIconSvg',
+    width: 22,
+    height: 22,
+    viewBox: '0 0 24 24',
+    xmlns: 'http://www.w3.org/2000/svg',
+    'aria-hidden': true,
+  }
+  const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }
+
+  switch (kind) {
+    case 'map':
+      return (
+        <svg {...svgProps}>
+          <path {...stroke} d="M12 21s-6.4-4.6-6.4-10a6.6 6.6 0 1113.2 0c0 5.4-6.8 10-6.8 10z" />
+          <circle {...stroke} cx="12" cy="11" r="2.25" />
+        </svg>
+      )
+    case 'filters':
+      return (
+        <svg {...svgProps}>
+          <circle {...stroke} cx="11" cy="11" r="6.25" />
+          <path {...stroke} d="M16 16l4 4" />
+        </svg>
+      )
+    case 'bolt':
+      return (
+        <svg {...svgProps}>
+          <path fill="currentColor" stroke="none" d="M13 2L4 14h6.5l-1 8L20 8h-7z" />
+        </svg>
+      )
+    case 'clipboard':
+      return (
+        <svg {...svgProps}>
+          <path {...stroke} d="M9 4h6l1 2h3v13a2 2 0 01-2 2H7a2 2 0 01-2-2V6h3l1-2z" />
+          <path {...stroke} d="M9 4v2h6V4" />
+          <path {...stroke} d="M9 12h6M9 16h4" />
+        </svg>
+      )
+    default:
+      return null
+  }
 }
 
 export function GuestLandingPage({ content, onLogin, onRegister }) {
@@ -367,7 +412,9 @@ export function GuestLandingPage({ content, onLogin, onRegister }) {
             <div className="landingPromo__steps">
               {PROCESS_STEPS.map((step) => (
                 <div key={step.title} className="landingPromo__step">
-                  <div className="landingPromo__stepIcon">{step.icon}</div>
+                  <div className="landingPromo__stepIcon">
+                    <ProcessStepIcon kind={step.iconKind} />
+                  </div>
                   <h3 className="landingPromo__stepTitle">{step.title}</h3>
                   <p className="landingPromo__stepText">{step.text}</p>
                 </div>
