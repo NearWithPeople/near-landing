@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../constants/legalPages'
 
 import './guestLandingPromo.css'
 
@@ -499,12 +502,21 @@ export function GuestLandingPage({ content, onLogin, onRegister }) {
 
 
         <footer className="landingPromo__footer landingPromo__reveal">
+          <ul className="landingPromo__footerLegal">
+            <li>
+              <Link to={FAQ_PATH}>FAQ</Link>
+            </li>
+            <li>
+              <Link to={CONTACTS_PATH}>Контакты</Link>
+            </li>
+            <li>
+              <Link to={PRIVACY_PATH}>Политика конфиденциальности</Link>
+            </li>
+          </ul>
           <p style={{ margin: '0 0 8px' }}>
             <a href={`mailto:${email}`}>{email}</a>
           </p>
           <p style={{ margin: 0 }}>© {new Date().getFullYear()} NEAR.by. Все права защищены.</p>
-
-
         </footer>
       </div>
     </section>

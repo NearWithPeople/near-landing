@@ -1180,6 +1180,21 @@
   text-decoration: underline;
 }
 
+.landingPromo__footerLegal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  justify-content: center;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  font-weight: 700;
+}
+
+.landingPromo__footerLegal a {
+  color: rgba(var(--palette-mist-rgb, 201, 209, 200), 0.88);
+}
+
 .landingPromo__crosssell {
   margin-top: 16px;
   padding: 36px 28px;

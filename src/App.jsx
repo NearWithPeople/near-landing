@@ -4,7 +4,9 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import './App.css'
 
 import { AppShell } from './components/AppShell'
+import { MapFiltersToolbar } from './components/MapFiltersToolbar'
 import { BELARUS_CITY_OPTIONS, DEFAULT_CITY_VALUE, getCityOption, getCityPoint } from './constants/belarusCities'
+import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from './constants/legalPages'
 import { AuthPage } from './pages/AuthPage'
 import { ApplicationsPage } from './pages/ApplicationsPage'
 import { CatalogPage } from './pages/CatalogPage'
@@ -14,6 +16,7 @@ import { GuestLandingPage } from './pages/GuestLandingPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { AppMapPage } from './pages/AppMapPage'
+import { StaticInfoPage } from './pages/StaticInfoPage'
 import { VacancyPage } from './pages/VacancyPage'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
 import { completeUserOnboarding, getCurrentUser, loginAccount, logoutUser, registerAccount, updateUserProfile } from './services/authService'
@@ -30,6 +33,9 @@ const LEGACY_APP_ROUTES = {
   '/app/map': '/map',
   '/app/applications': '/applications',
   '/app/profile': '/profile',
+  '/app/faq': FAQ_PATH,
+  '/app/contacts': CONTACTS_PATH,
+  '/app/privacy': PRIVACY_PATH,
 }
 
 const CITY_STORAGE_KEY = 'near_selected_city_v1'
@@ -159,6 +165,7 @@ export default function App() {
     email: '',
     telegramUsername: '',
     password: '',
+    acceptedLegal: false,
   })
   const [selectedCity, setSelectedCity] = useState(() => {
     if (typeof window === 'undefined') return DEFAULT_CITY_VALUE
@@ -327,7 +334,10 @@ export default function App() {
     if (location.pathname !== '/auth') return
     const nextMode = new URLSearchParams(location.search).get('mode')
     if (nextMode !== 'login' && nextMode !== 'register') return
-    setAuthForm((prev) => (prev.mode === nextMode ? prev : { ...prev, mode: nextMode }))
+    setAuthForm((prev) => {
+      if (prev.mode === nextMode) return prev
+      return { ...prev, mode: nextMode, ...(nextMode === 'register' ? { acceptedLegal: false } : {}) }
+    })
   }, [location.pathname, location.search])
 
   async function handleAuthSubmit(e) {
@@ -418,6 +428,11 @@ export default function App() {
         return
       }
 
+      if (!authForm.acceptedLegal) {
+        setAuthError('Подтвердите ознакомление с FAQ, контактами и политикой конфиденциальности.')
+        return
+      }
+
       const user = await registerAccount(payload)
       setCurrentUser(user)
       setAuthError('')
@@ -436,7 +451,11 @@ export default function App() {
     if (field === 'mode') {
       navigate(`/auth?mode=${value}`, { replace: true })
     }
-    setAuthForm((prev) => ({ ...prev, [field]: value }))
+    setAuthForm((prev) => {
+      const next = { ...prev, [field]: value }
+      if (field === 'mode' && value === 'register') next.acceptedLegal = false
+      return next
+    })
     if (authError) setAuthError('')
   }
 
@@ -547,6 +566,16 @@ export default function App() {
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
+        mapFilters={
+          section === 'map' ? (
+            <MapFiltersToolbar
+              filters={catalogFilters}
+              onFilterChange={(field, value) => setCatalogFilters((prev) => ({ ...prev, [field]: value }))}
+              categoryOptions={appFilters.categoryOptions}
+              payOptions={appFilters.payOptions}
+            />
+          ) : null
+        }
       >
         {section === 'map' ? (
           <AppMapPage
@@ -555,10 +584,6 @@ export default function App() {
             onSelect={setActiveVacancyId}
             onOpenVacancy={(vacancyId) => navigate(`/vacancy/${vacancyId}`)}
             autoOpenVacancyId={mapFocusedVacancyId}
-            filters={catalogFilters}
-            onFilterChange={(field, value) => setCatalogFilters((prev) => ({ ...prev, [field]: value }))}
-            categoryOptions={appFilters.categoryOptions}
-            payOptions={appFilters.payOptions}
             selectedCityLabel={selectedCityOption.label}
             selectedCityPoint={selectedCityPoint}
           />
@@ -731,6 +756,9 @@ export default function App() {
               currentUser ? renderAppPage('catalog') : <GuestLandingPage content={siteContent} onLogin={() => navigate('/auth?mode=login')} onRegister={() => navigate('/auth?mode=register')} />
             }
           />
+          <Route path="/faq" element={<StaticInfoPage title="Вопросы и ответы (FAQ)" />} />
+          <Route path="/contacts" element={<StaticInfoPage title="Контакты" />} />
+          <Route path="/privacy" element={<StaticInfoPage title="Политика конфиденциальности" />} />
           <Route path="/auth" element={currentUser ? <Navigate to={currentUser.onboardingCompleted ? '/' : '/onboarding'} replace /> : <AuthPage form={authForm} error={authError} isSubmitting={isAuthSubmitting} onChange={handleAuthFieldChange} onSubmit={handleAuthSubmit} />} />
           <Route
             path="/onboarding"
@@ -750,6 +778,9 @@ export default function App() {
           <Route path="/app/map" element={<Navigate to="/map" replace />} />
           <Route path="/app/applications" element={<Navigate to="/applications" replace />} />
           <Route path="/app/profile" element={<Navigate to="/profile" replace />} />
+          <Route path="/app/faq" element={<Navigate to={FAQ_PATH} replace />} />
+          <Route path="/app/contacts" element={<Navigate to={CONTACTS_PATH} replace />} />
+          <Route path="/app/privacy" element={<Navigate to={PRIVACY_PATH} replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

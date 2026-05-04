@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
+import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../constants/legalPages'
+
 import './authSplit.css'
 
 export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
@@ -114,7 +116,24 @@ export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
               </label>
             ) : null}
 
-            <button className="primaryButton primaryButton--wide" type="submit" disabled={isSubmitting}>
+            {!isLogin ? (
+              <label className="authForm__legal">
+                <input
+                  className="authForm__legalCheckbox"
+                  type="checkbox"
+                  checked={Boolean(form.acceptedLegal)}
+                  onChange={(e) => onChange('acceptedLegal', e.target.checked)}
+                />
+                <span className="authForm__legalText">
+                  Подтверждаю ознакомление с{' '}
+                  <Link to={FAQ_PATH}>FAQ</Link>,{' '}
+                  <Link to={CONTACTS_PATH}>контактами</Link> и{' '}
+                  <Link to={PRIVACY_PATH}>политикой конфиденциальности</Link>. Без согласия регистрация недоступна.
+                </span>
+              </label>
+            ) : null}
+
+            <button className="primaryButton primaryButton--wide" type="submit" disabled={isSubmitting || (!isLogin && !form.acceptedLegal)}>
               {isSubmitting ? 'Подождите...' : isLogin ? 'Войти' : 'Зарегистрироваться'}
             </button>
             <div className="authCard__switch">

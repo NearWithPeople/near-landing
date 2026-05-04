@@ -1,21 +1,24 @@
 import { Icon } from './Icon'
-import { Logo } from './Logo'
 import { CustomSelect } from './CustomSelect'
 
-export function AppShell({ currentUser, currentSection, onNavigate, children, cityOptions, selectedCity, onCityChange, onCreateVacancy }) {
+export function AppShell({ currentUser, currentSection, onNavigate, children, cityOptions, selectedCity, onCityChange, onCreateVacancy, mapFilters = null }) {
   const isMapSection = currentSection === 'map'
   const keepBottomNavOnAdaptive = currentSection === 'map' || currentSection === 'vacancy'
-  const roleLabel = currentUser.role === 'employer' ? 'Работодатель' : currentUser.role === 'admin' ? 'Админ' : 'Пользователь'
   const primaryActionLabel = currentUser.role === 'employer' ? 'Разместить смену' : 'Создать резюме'
+  const mapFiltersSlot = isMapSection ? mapFilters : null
 
   return (
-    <div className="appFrame">
+    <div className={`appFrame ${isMapSection ? '' : 'appFrame--promo'}`}>
       <div className={`appMain ${isMapSection ? 'appMain--map' : ''}`}>
         <header className={`appTopbar appTopbar--flat ${isMapSection ? 'appTopbar--overlay' : ''}`}>
-          <div className="appTopbar__shell">
-            <div className="appTopbar__left">
-              <button className="appBrand appBrand--button appBrand--header" onClick={() => onNavigate('/')}>
-                <div className="appBrand__title appBrand__title--header">NEAR.by</div>
+          <div className={`appTopbar__shell ${mapFiltersSlot ? 'appTopbar__shell--mapFilters' : ''}`}>
+            <div className="appTopbar__mainRow">
+              <div className="appTopbar__left">
+              <button type="button" className="appBrand appBrand--button appBrand--header" onClick={() => onNavigate('/')}>
+                <span className="appWordmark">
+                  <span className="appWordmark__near">NEAR</span>
+                  <span className="appWordmark__by">.by</span>
+                </span>
               </button>
 
               <nav className="appHeaderNav" aria-label="Основная навигация">
@@ -86,10 +89,13 @@ export function AppShell({ currentUser, currentSection, onNavigate, children, ci
                 <Icon name="user" className="appTopbar__mobileIconGlyph" />
               </button>
             </div>
+            </div>
+
+            {mapFiltersSlot ? <div className="appTopbar__filtersRow">{mapFiltersSlot}</div> : null}
           </div>
         </header>
 
-        <div className={`appContent ${isMapSection ? 'appContent--map' : ''}`}>{children}</div>
+        <div className={`appContent ${isMapSection ? 'appContent--map' : 'appContent--promo'}`}>{children}</div>
 
         <nav className={`bottomNav ${isMapSection ? 'bottomNav--map' : ''} ${keepBottomNavOnAdaptive ? 'bottomNav--adaptive' : ''}`.trim()} aria-label="Основная навигация">
           <button className={`bottomNav__item ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')}>

@@ -1,29 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
-import { CustomSelect } from '../components/CustomSelect'
-import { ResponsiveFilters } from '../components/ResponsiveFilters'
-
-const SHIFT_DATE_OPTIONS = [
-  { value: 'all', label: 'Любой день' },
-  { value: 'Сегодня', label: 'Сегодня' },
-  { value: 'Завтра', label: 'Завтра' },
-  { value: 'Выходные', label: 'Выходные' },
-]
-
-const SORT_OPTIONS = [
-  { value: 'relevant', label: 'По релевантности' },
-  { value: 'salary', label: 'По оплате' },
-  { value: 'distance', label: 'По расстоянию' },
-  { value: 'date', label: 'По дате' },
-]
-
-const DEFAULT_FILTERS = {
-  category: 'all',
-  shiftDate: 'all',
-  payMin: 0,
-  sortBy: 'relevant',
-  query: '',
-}
 
 export function AppMapPage({
   vacancies,
@@ -31,10 +8,6 @@ export function AppMapPage({
   onSelect,
   onOpenVacancy,
   autoOpenVacancyId = '',
-  filters,
-  onFilterChange,
-  categoryOptions,
-  payOptions,
   selectedCityLabel,
   selectedCityPoint,
 }) {
@@ -63,68 +36,6 @@ export function AppMapPage({
   return (
     <section className="mapExperience mapExperience--fullscreen">
       <div className="mapPanel mapPanel--full">
-        <div className="mapPanel__toolbar">
-          <ResponsiveFilters buttonLabel="Фильтры" desktopClassName="mapToolbar" className="responsiveFilters--map">
-            <CustomSelect
-              value={filters.category}
-              options={categoryOptions}
-              onChange={(nextValue) => onFilterChange('category', nextValue)}
-              triggerClassName="mapToolbar__control"
-              isClearable
-              isActive={filters.category !== DEFAULT_FILTERS.category}
-              onClear={() => onFilterChange('category', DEFAULT_FILTERS.category)}
-              clearAriaLabel="Сбросить категорию"
-            />
-
-            <CustomSelect
-              value={filters.shiftDate}
-              options={SHIFT_DATE_OPTIONS}
-              onChange={(nextValue) => onFilterChange('shiftDate', nextValue)}
-              triggerClassName="mapToolbar__control"
-              isClearable
-              isActive={filters.shiftDate !== DEFAULT_FILTERS.shiftDate}
-              onClear={() => onFilterChange('shiftDate', DEFAULT_FILTERS.shiftDate)}
-              clearAriaLabel="Сбросить дату смены"
-            />
-
-            <CustomSelect
-              value={String(filters.payMin)}
-              options={payOptions}
-              onChange={(nextValue) => onFilterChange('payMin', Number(nextValue))}
-              triggerClassName="mapToolbar__control"
-              isClearable
-              isActive={filters.payMin !== DEFAULT_FILTERS.payMin}
-              onClear={() => onFilterChange('payMin', DEFAULT_FILTERS.payMin)}
-              clearAriaLabel="Сбросить оплату"
-            />
-
-            <CustomSelect
-              value={filters.sortBy}
-              options={SORT_OPTIONS}
-              onChange={(nextValue) => onFilterChange('sortBy', nextValue)}
-              triggerClassName="mapToolbar__control"
-              isClearable
-              isActive={filters.sortBy !== DEFAULT_FILTERS.sortBy}
-              onClear={() => onFilterChange('sortBy', DEFAULT_FILTERS.sortBy)}
-              clearAriaLabel="Сбросить сортировку"
-            />
-
-            <div className={`mapToolbar__searchWrap ${filters.query ? 'is-active' : ''}`.trim()}>
-              <input
-                className="mapToolbar__search"
-                placeholder="Поиск по вакансиям"
-                value={filters.query}
-                onChange={(e) => onFilterChange('query', e.target.value)}
-              />
-              {filters.query ? (
-                <button type="button" className="mapToolbar__clear" aria-label="Сбросить поиск" onClick={() => onFilterChange('query', DEFAULT_FILTERS.query)}>
-                  <span aria-hidden>&times;</span>
-                </button>
-              ) : null}
-            </div>
-          </ResponsiveFilters>
-        </div>
-
         <MapboxVacancyMap
           vacancies={vacancies}
           selectedVacancyId={selectedVacancyId}
@@ -177,4 +88,3 @@ export function AppMapPage({
     </section>
   )
 }
-

@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../constants/legalPages'
 import { isBelarusPhone, normalizePhone, splitFullName } from '../utils/common'
 
 function getProfileForm(currentUser) {
@@ -261,6 +264,12 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
           )}
         </div>
       )}
+
+      <nav className="profileLegalLinks" aria-label="Справка и документы">
+        <Link to={FAQ_PATH}>FAQ</Link>
+        <Link to={CONTACTS_PATH}>Контакты</Link>
+        <Link to={PRIVACY_PATH}>Политика конфиденциальности</Link>
+      </nav>
 
       <div className="appActions mapPanel__catalogButton">
         <button className="ghostButton" onClick={onLogout}>
