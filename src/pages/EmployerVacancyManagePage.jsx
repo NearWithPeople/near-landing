@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
+import { formatActiveUntil } from '../services/vacancyService'
 import { buildMailtoHref, buildTelHref, buildTelegramHref } from '../utils/contactLinks'
 
 function formatApplicationCount(count) {
@@ -121,15 +122,16 @@ export function EmployerVacancyManagePage({ vacancy, applications, onBack, onCre
       <div className="vacancyDetailLayout">
         <div className="vacancyDetailMain">
           <article className="vacancyDetailCard">
+            <div className="vacancyDetailCard__title">{vacancy.title}</div>
             <div className="vacancyDetailCard__salary">от {vacancy.payFrom} BYN за смену</div>
 
             <div className="vacancyDetailFacts">
               <div className="vacancyDetailFacts__item">Компания: {vacancy.companyName}</div>
               <div className="vacancyDetailFacts__item">Статус: {getVacancyStatusLabel(vacancy.status)}</div>
               <div className="vacancyDetailFacts__item">Дата: {vacancy.shiftDate}</div>
+              <div className="vacancyDetailFacts__item">Активна до: {formatActiveUntil(vacancy.activeUntil)}</div>
               <div className="vacancyDetailFacts__item">Категория: {vacancy.type}</div>
               <div className="vacancyDetailFacts__item">Формат: {vacancy.schedule}</div>
-              <div className="vacancyDetailFacts__item">Длительность: {vacancy.duration}</div>
               <div className="vacancyDetailFacts__item">Адрес: {vacancy.address}</div>
               {vacancy.contactPhone ? (
                 <div className="vacancyDetailFacts__item">Телефон по этой смене: {vacancy.contactPhone}</div>

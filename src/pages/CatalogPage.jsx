@@ -226,7 +226,6 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
                       <span className="tag tag--accent">{vacancy.type}</span>
                       <span className="tag">{vacancy.shiftDate}</span>
                       <span className="tag">{vacancy.schedule}</span>
-                      <span className="tag">{vacancy.duration}</span>
                       <span className="tag">{formatApplicationCount(vacancy.applicationCount)}</span>
                       {(vacancy.tags || []).slice(0, 2).map((tag) => (
                         <span key={tag} className="tag">

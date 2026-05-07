@@ -287,7 +287,6 @@ export function ProfilePage({
                 </div>
                 <div className="tagRow">
                   <span className="tag tag--accent">от {vacancy.payFrom} BYN</span>
-                  <span className="tag">{vacancy.duration}</span>
                   <span className="tag">{vacancy.schedule}</span>
                   <span className="tag">{getVacancyStatusLabel(vacancy.status)}</span>
                 </div>

@@ -703,7 +703,7 @@ export default function App() {
       return <Navigate to="/" replace />
     }
 
-    const vacancy = getVacancyById(remoteData.employerVacancies, vacancyId, searchPoint)
+    const vacancy = getVacancyById(remoteData.employerVacancies, vacancyId, searchPoint, { includeExpired: true })
     const applicationsForVacancy = listApplicationsForVacancy(remoteData.applications, currentUser.id, vacancyId)
 
     return (

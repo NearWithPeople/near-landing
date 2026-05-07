@@ -75,7 +75,6 @@ export function AppMapPage({
               <div className="tagRow mapVacancySheet__tags">
                 <span className="tag">{previewVacancy.shiftDate}</span>
                 <span className="tag">{previewVacancy.schedule}</span>
-                <span className="tag">{previewVacancy.duration}</span>
               </div>
 
               <button type="button" className="primaryButton primaryButton--wide mapVacancySheet__button" onClick={() => onOpenVacancy(previewVacancy.id)}>

@@ -4,7 +4,7 @@ export const DB_SCHEMA = {
   roles: ['seeker', 'employer', 'admin'],
   tables: {
     users: ['id', 'role', 'fullName', 'companyName', 'age', 'phone', 'email', 'telegramUsername', 'review', 'onboardingCompleted', 'onboardingData', 'createdAt'],
-    vacancies: ['id', 'ownerId', 'title', 'companyName', 'description', 'payFrom', 'address', 'lat', 'lng', 'type', 'duration', 'shiftDate', 'schedule', 'status', 'tags'],
+    vacancies: ['id', 'ownerId', 'title', 'companyName', 'description', 'payFrom', 'address', 'lat', 'lng', 'type', 'shiftDate', 'activeUntil', 'schedule', 'status', 'tags'],
     applications: ['id', 'vacancyId', 'vacancyTitle', 'applicantId', 'applicantName', 'employerName', 'status', 'createdAt'],
     reviews: ['id', 'authorName', 'authorRole', 'targetName', 'rating', 'text', 'createdAt'],
     completedTasks: ['id', 'userId', 'vacancyId', 'workerName', 'title', 'employerName', 'completedAt', 'pay', 'duration', 'address', 'summary', 'workerToEmployerRating', 'employerToWorkerRating'],

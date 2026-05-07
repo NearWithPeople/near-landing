@@ -4,6 +4,31 @@ import { apiRequest } from './apiClient'
 
 const FALLBACK_SHIFT_DATE = 'Дата уточняется'
 
+export function getTodayDateValue() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function normalizeActiveUntil(activeUntil) {
+  const value = String(activeUntil || '').trim().slice(0, 10)
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : ''
+}
+
+export function formatActiveUntil(activeUntil) {
+  const normalized = normalizeActiveUntil(activeUntil)
+  if (!normalized) return 'Без срока'
+
+  return new Date(`${normalized}T00:00:00`).toLocaleDateString('ru-RU')
+}
+
+export function isVacancyActive(vacancy, today = getTodayDateValue()) {
+  const activeUntil = normalizeActiveUntil(vacancy?.activeUntil)
+  return !activeUntil || activeUntil >= today
+}
+
 function normalizeShiftDate(shiftDate) {
   const value = String(shiftDate || '').trim()
   return value || FALLBACK_SHIFT_DATE
@@ -13,6 +38,7 @@ function normalizeVacancy(vacancy) {
   return {
     ...vacancy,
     shiftDate: normalizeShiftDate(vacancy?.shiftDate),
+    activeUntil: normalizeActiveUntil(vacancy?.activeUntil),
   }
 }
 
@@ -44,6 +70,7 @@ export function listVacancies({ vacancies = [], userPoint, city = 'all', cityOpt
   const items = (vacancies || [])
     .map((vacancy) => normalizeVacancy(vacancy))
     .filter((vacancy) => vacancy.status === 'open')
+    .filter((vacancy) => isVacancyActive(vacancy))
     .filter((vacancy) => matchesCity(vacancy, selectedCity))
     .filter((vacancy) => (category === 'all' ? true : vacancy.type === category))
     .filter((vacancy) => (shiftDate === 'all' ? true : vacancy.shiftDate === shiftDate))
@@ -61,10 +88,14 @@ export function listVacancies({ vacancies = [], userPoint, city = 'all', cityOpt
   return items.sort((a, b) => b.payFrom - a.payFrom || a.distanceKm - b.distanceKm)
 }
 
-export function getVacancyById(vacancies, vacancyId, userPoint) {
+export function getVacancyById(vacancies, vacancyId, userPoint, options = {}) {
   const vacancy = (vacancies || []).find((item) => item.id === vacancyId)
   if (!vacancy) return null
-  return enrichVacancy(vacancy, userPoint, new Map())
+
+  const normalizedVacancy = enrichVacancy(vacancy, userPoint, new Map())
+  if (!options.includeExpired && !isVacancyActive(normalizedVacancy)) return null
+
+  return normalizedVacancy
 }
 
 export async function createVacancy(payload) {

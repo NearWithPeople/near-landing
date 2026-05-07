@@ -3,6 +3,7 @@ import { CustomSelect } from '../components/CustomSelect'
 import { MapboxPointPicker } from '../components/MapboxPointPicker'
 import { BELARUS_CITY_OPTIONS, getCityPoint } from '../constants/belarusCities'
 import { geocodeBelarusAddress, reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
+import { formatActiveUntil, getTodayDateValue } from '../services/vacancyService'
 import { isBelarusPhone, normalizePhone } from '../utils/common'
 
 const CATEGORY_OPTIONS = [
@@ -20,15 +21,25 @@ const SHIFT_DATE_OPTIONS = [
   { value: 'Дата уточняется', label: 'Дата уточняется' },
 ]
 
+const SCHEDULE_OPTIONS = [
+  { value: 'Дневная', label: 'Дневная' },
+  { value: 'Средняя', label: 'Средняя' },
+  { value: 'Вечерняя', label: 'Вечерняя' },
+  { value: 'Ночная', label: 'Ночная' },
+]
+
+const DEFAULT_ACTIVE_UNTIL = getTodayDateValue()
+const DEFAULT_SCHEDULE = SCHEDULE_OPTIONS[0].value
+
 export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVacancy, onCancel }) {
   const [form, setForm] = useState({
     title: '',
     description: '',
     payFrom: '70',
     type: CATEGORY_OPTIONS[0].value,
-    duration: '1 день',
     shiftDate: SHIFT_DATE_OPTIONS[0].value,
-    schedule: 'Дневная смена',
+    activeUntil: DEFAULT_ACTIVE_UNTIL,
+    schedule: DEFAULT_SCHEDULE,
     city: selectedCity === 'all' ? 'minsk' : selectedCity,
     addressLine: '',
     tags: '',
@@ -44,6 +55,23 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
 
   const cityOptions = useMemo(() => BELARUS_CITY_OPTIONS.filter((city) => city.value !== 'all').map(({ value, label }) => ({ value, label })), [])
   const selectedCityOption = useMemo(() => cityOptions.find((city) => city.value === form.city) || cityOptions[0], [cityOptions, form.city])
+
+  useEffect(() => {
+    setForm((prev) => {
+      const nextActiveUntil = prev.activeUntil || DEFAULT_ACTIVE_UNTIL
+      const nextSchedule = prev.schedule || DEFAULT_SCHEDULE
+
+      if (nextActiveUntil === prev.activeUntil && nextSchedule === prev.schedule) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        activeUntil: nextActiveUntil,
+        schedule: nextSchedule,
+      }
+    })
+  }, [])
 
   useEffect(() => {
     const query = form.addressLine.trim()
@@ -126,8 +154,20 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
   async function handleSubmit(event) {
     event.preventDefault()
 
-    if (!form.title.trim() || !form.description.trim() || !form.addressLine.trim() || !form.schedule.trim() || !form.duration.trim()) {
-      setError('Заполни название, описание, адрес, длительность и график смены.')
+    if (!form.title.trim() || !form.description.trim() || !form.addressLine.trim() || !form.schedule.trim()) {
+      setError('Заполни название, описание, адрес и график смены.')
+      return
+    }
+
+    const activeUntil = form.activeUntil || DEFAULT_ACTIVE_UNTIL
+
+    if (!activeUntil) {
+      setError('Укажи дату, до которой вакансия будет активна.')
+      return
+    }
+
+    if (activeUntil < getTodayDateValue()) {
+      setError('Дата активности вакансии не может быть раньше сегодняшнего дня.')
       return
     }
 
@@ -155,9 +195,9 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
       description: form.description,
       payFrom,
       type: form.type,
-      duration: form.duration,
       shiftDate: form.shiftDate,
-      schedule: form.schedule,
+      activeUntil,
+      schedule: form.schedule || DEFAULT_SCHEDULE,
       city: form.city,
       address: `${selectedCityOption.label}, ${form.addressLine.trim()}`,
       lat: point.lat,
@@ -210,13 +250,13 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
               </label>
 
               <label className="field">
-                <span className="field__label">Длительность</span>
-                <input className="input input--dark" value={form.duration} onChange={(event) => handleChange('duration', event.target.value)} placeholder="1 день" />
+                <span className="field__label">Активна до</span>
+                <input className="input input--dark" type="date" min={getTodayDateValue()} value={form.activeUntil || DEFAULT_ACTIVE_UNTIL} onChange={(event) => handleChange('activeUntil', event.target.value)} />
               </label>
 
               <label className="field">
                 <span className="field__label">График</span>
-                <input className="input input--dark" value={form.schedule} onChange={(event) => handleChange('schedule', event.target.value)} placeholder="Дневная смена" />
+                <CustomSelect value={form.schedule} options={SCHEDULE_OPTIONS} onChange={(nextValue) => handleChange('schedule', nextValue)} triggerClassName="input input--dark vacancyFormSelect" />
               </label>
 
               <label className="field">
@@ -311,6 +351,7 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
               <div className="vacancyDetailFacts__item">Адрес: {selectedCityOption.label}{form.addressLine.trim() ? `, ${form.addressLine.trim()}` : ''}</div>
               <div className="vacancyDetailFacts__item">Координаты: {point?.lat?.toFixed(4)}, {point?.lng?.toFixed(4)}</div>
               <div className="vacancyDetailFacts__item">Оплата: от {form.payFrom || '0'} BYN</div>
+              <div className="vacancyDetailFacts__item">Активна до: {formatActiveUntil(form.activeUntil || DEFAULT_ACTIVE_UNTIL)}</div>
               <div className="vacancyDetailFacts__item">
                 Контакт для откликов:{' '}
                 {form.contactPhone.trim()

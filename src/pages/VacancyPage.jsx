@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
+import { formatActiveUntil } from '../services/vacancyService'
 import { buildTelHref, buildTelegramHref } from '../utils/contactLinks'
 
 function getVacancyDescription(vacancy) {
@@ -83,7 +84,7 @@ export function VacancyPage({
               <div className="vacancyDetailFacts__item">Выплаты: после смены</div>
               <div className="vacancyDetailFacts__item">Формат: {vacancy.schedule}</div>
               <div className="vacancyDetailFacts__item">Дата: {vacancy.shiftDate}</div>
-              <div className="vacancyDetailFacts__item">Длительность: {vacancy.duration}</div>
+              <div className="vacancyDetailFacts__item">Активна до: {formatActiveUntil(vacancy.activeUntil)}</div>
               <div className="vacancyDetailFacts__item">Категория: {vacancy.type}</div>
               <div className="vacancyDetailFacts__item">Город: {getVacancyCityLabel(vacancy)}</div>
               <div className="vacancyDetailFacts__item">Откликнулось: {formatApplicationCount(vacancy.applicationCount)}</div>
