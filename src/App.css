@@ -2805,30 +2805,6 @@
   gap: 20px;
 }
 
-.vacancyParserCard {
-  gap: 18px;
-}
-
-.vacancyParserCard__textarea {
-  min-height: 144px;
-}
-
-.vacancyParserCard__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.vacancyParserCard__result {
-  display: grid;
-  gap: 12px;
-}
-
-.vacancyParserCard__hint {
-  color: rgba(255, 255, 255, 0.72);
-  line-height: 1.5;
-}
-
 .vacancyFormLayout {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) 340px;
@@ -3630,11 +3606,6 @@
 
   .vacancyFormSidebar {
     gap: 12px;
-  }
-
-  .vacancyParserCard__actions {
-    display: grid;
-    grid-template-columns: 1fr;
   }
 
   .catalogJobCard__head {

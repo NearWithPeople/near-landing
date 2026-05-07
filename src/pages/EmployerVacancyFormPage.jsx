@@ -3,7 +3,6 @@ import { CustomSelect } from '../components/CustomSelect'
 import { MapboxPointPicker } from '../components/MapboxPointPicker'
 import { BELARUS_CITY_OPTIONS, getCityPoint } from '../constants/belarusCities'
 import { geocodeBelarusAddress, reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
-import { parseVacancyMessage } from '../services/parserService'
 import { isBelarusPhone, normalizePhone } from '../utils/common'
 
 const CATEGORY_OPTIONS = [
@@ -20,59 +19,6 @@ const SHIFT_DATE_OPTIONS = [
   { value: 'Выходные', label: 'Выходные' },
   { value: 'Дата уточняется', label: 'Дата уточняется' },
 ]
-
-const PARSER_FIELD_LABELS = {
-  title: 'название',
-  description: 'описание',
-  payFrom: 'оплата',
-  type: 'категория',
-  shiftDate: 'дата смены',
-  duration: 'длительность',
-  schedule: 'график',
-  city: 'город',
-  addressLine: 'адрес',
-  tags: 'теги',
-}
-
-function getCityValueFromParser(rawCity, cityOptions) {
-  const normalizedCity = String(rawCity || '').trim().toLowerCase()
-  if (!normalizedCity) return ''
-
-  const matchedCity = cityOptions.find((city) => {
-    return city.value.toLowerCase() === normalizedCity || city.label.toLowerCase() === normalizedCity
-  })
-
-  return matchedCity?.value || ''
-}
-
-function buildFormPatch(partialVacancy, cityOptions) {
-  const nextCity = getCityValueFromParser(partialVacancy?.city, cityOptions)
-  const nextTags = Array.isArray(partialVacancy?.tags)
-    ? partialVacancy.tags.map((tag) => String(tag).trim()).filter(Boolean).join(', ')
-    : ''
-
-  return {
-    ...(partialVacancy?.title ? { title: partialVacancy.title } : {}),
-    ...(partialVacancy?.description ? { description: partialVacancy.description } : {}),
-    ...(partialVacancy?.payFrom ? { payFrom: String(partialVacancy.payFrom) } : {}),
-    ...(partialVacancy?.category ? { type: partialVacancy.category } : {}),
-    ...(partialVacancy?.shiftDate ? { shiftDate: partialVacancy.shiftDate } : {}),
-    ...(partialVacancy?.duration ? { duration: partialVacancy.duration } : {}),
-    ...(partialVacancy?.schedule ? { schedule: partialVacancy.schedule } : {}),
-    ...(nextCity ? { city: nextCity } : {}),
-    ...(partialVacancy?.address ? { addressLine: partialVacancy.address } : {}),
-    ...(nextTags ? { tags: nextTags } : {}),
-  }
-}
-
-function getAppliedFieldLabels(formPatch) {
-  return Object.entries(PARSER_FIELD_LABELS)
-    .filter(([key]) => {
-      const value = formPatch[key]
-      return typeof value === 'string' ? Boolean(value.trim()) : Boolean(value)
-    })
-    .map(([, label]) => label)
-}
 
 export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVacancy, onCancel }) {
   const [form, setForm] = useState({
@@ -94,10 +40,6 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
   const [addressSuggestions, setAddressSuggestions] = useState([])
   const [isAddressLoading, setIsAddressLoading] = useState(false)
   const [isAddressFocused, setIsAddressFocused] = useState(false)
-  const [parserMessage, setParserMessage] = useState('')
-  const [isParserLoading, setIsParserLoading] = useState(false)
-  const [parserError, setParserError] = useState('')
-  const [parserResult, setParserResult] = useState(null)
   const geocodeRequestIdRef = useRef(0)
 
   const cityOptions = useMemo(() => BELARUS_CITY_OPTIONS.filter((city) => city.value !== 'all').map(({ value, label }) => ({ value, label })), [])
@@ -233,60 +175,6 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
     }
   }
 
-  async function handleParseMessage() {
-    const message = parserMessage.trim()
-    if (!message) {
-      setParserError('Вставь текст вакансии или сообщения для разбора.')
-      return
-    }
-
-    setIsParserLoading(true)
-    setParserError('')
-
-    try {
-      const result = await parseVacancyMessage({
-        message,
-        employerId: currentUser?.id,
-      })
-
-      const formPatch = buildFormPatch(result.partialVacancy, cityOptions)
-      const appliedFields = getAppliedFieldLabels(formPatch)
-      const latitude = Number(result.partialVacancy?.latitude)
-      const longitude = Number(result.partialVacancy?.longitude)
-      const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude)
-      const nextPoint = hasCoordinates
-        ? { lat: latitude, lng: longitude }
-        : formPatch.city
-          ? getCityPoint(formPatch.city)
-          : null
-
-      setForm((prev) => ({ ...prev, ...formPatch }))
-      if (nextPoint) {
-        setPoint(nextPoint)
-      }
-      if (formPatch.city || formPatch.addressLine) {
-        setAddressSuggestions([])
-      }
-      if (error) {
-        setError('')
-      }
-
-      setParserResult({
-        source: result.source,
-        completeness: result.completeness,
-        missingFields: Array.isArray(result.missingFields) ? result.missingFields : [],
-        warnings: Array.isArray(result.warnings) ? result.warnings : [],
-        llmError: result.llmError,
-        appliedFields,
-      })
-    } catch (parseError) {
-      setParserResult(null)
-      setParserError(parseError instanceof Error ? parseError.message : 'Не удалось распарсить сообщение.')
-    } finally {
-      setIsParserLoading(false)
-    }
-  }
-
   return (
     <section className="vacancyFormPage">
       <div className="panelHeader panelHeader--space">
@@ -295,83 +183,6 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
           <div className="panelHeader__title">Создать новую задачу</div>
         </div>
       </div>
-
-      <article className="vacancyFormCard vacancyParserCard">
-        <div className="panelHeader panelHeader--space">
-          <div>
-            <div className="panelHeader__title">Парсер вакансии</div>
-            <div className="vacancyCard__meta">Вставь текст из Telegram, чата или заметки. Парсер попробует заполнить форму автоматически.</div>
-          </div>
-          <div className="statusBadge">{isParserLoading ? 'Идёт разбор' : 'AI + эвристика'}</div>
-        </div>
-
-        <label className="field">
-          <span className="field__label">Исходный текст</span>
-          <textarea
-            className="input input--dark authForm__textarea vacancyParserCard__textarea"
-            rows={6}
-            value={parserMessage}
-            onChange={(event) => {
-              setParserMessage(event.target.value)
-              if (parserError) setParserError('')
-            }}
-            placeholder="Например: Нужен курьер в Минске на сегодня. Оплата 90 BYN за смену, адрес Немига, 3..."
-          />
-        </label>
-
-        <div className="vacancyParserCard__actions">
-          <button type="button" className="primaryButton" onClick={handleParseMessage} disabled={isParserLoading || !parserMessage.trim()}>
-            {isParserLoading ? 'Разбираю сообщение...' : 'Распарсить и заполнить форму'}
-          </button>
-          <button
-            type="button"
-            className="ghostButton"
-            onClick={() => {
-              setParserMessage('')
-              setParserResult(null)
-              setParserError('')
-            }}
-            disabled={isParserLoading || (!parserMessage && !parserResult)}
-          >
-            Очистить
-          </button>
-        </div>
-
-        {parserError ? <div className="formError">{parserError}</div> : null}
-
-        {parserResult ? (
-          <div className="vacancyParserCard__result">
-            <div className="vacancyDetailFacts">
-              <div className="vacancyDetailFacts__item">Источник: {parserResult.source === 'llm' ? 'LLM' : 'Эвристический разбор'}</div>
-              <div className="vacancyDetailFacts__item">Заполненность: {parserResult.completeness || '—'}</div>
-              <div className="vacancyDetailFacts__item">
-                Обновлено в форме: {parserResult.appliedFields.length ? parserResult.appliedFields.join(', ') : 'распознанные поля не найдены'}
-              </div>
-            </div>
-
-            {parserResult.missingFields.length ? (
-              <div className="field">
-                <span className="field__hint">Ещё нужно проверить вручную</span>
-                <div className="tagRow">
-                  {parserResult.missingFields.map((field) => (
-                    <span key={field} className="tag">
-                      {field}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {parserResult.warnings.map((warning) => (
-              <div key={warning} className="vacancyParserCard__hint">
-                {warning}
-              </div>
-            ))}
-
-            {parserResult.llmError ? <div className="vacancyParserCard__hint">LLM недоступен, поэтому использован резервный эвристический разбор.</div> : null}
-          </div>
-        ) : null}
-      </article>
 
       <form className="vacancyFormLayout" onSubmit={handleSubmit}>
         <div className="vacancyFormMain">
