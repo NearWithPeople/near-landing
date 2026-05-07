@@ -294,7 +294,6 @@ export function EmployerVacancyFormPage({ currentUser, selectedCity, onCreateVac
           <div className="panelHeader__eyebrow">Работодатель</div>
           <div className="panelHeader__title">Создать новую задачу</div>
         </div>
-        <div className="statusBadge">Публикация смены</div>
       </div>
 
       <article className="vacancyFormCard vacancyParserCard">

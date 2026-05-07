@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
 import { buildTelHref, buildTelegramHref } from '../utils/contactLinks'
 
@@ -60,6 +61,16 @@ export function VacancyPage({
   const telHref = seekerApplication ? buildTelHref(seekerApplication.employerPhone) : ''
   const tgHref = seekerApplication ? buildTelegramHref(seekerApplication.employerTelegram) : ''
 
+  useEffect(() => {
+    if (!hasApplied || !canApply) return
+    const el = document.getElementById('vacancy-contacts')
+    if (!el) return
+    const t = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 120)
+    return () => window.clearTimeout(t)
+  }, [hasApplied, canApply, vacancy?.id])
+
   return (
     <section className="vacancyDetailPage">
       <div className="vacancyDetailLayout">
@@ -95,24 +106,25 @@ export function VacancyPage({
           </article>
 
           {hasApplied && canApply ? (
-            <article className="vacancyDetailSection">
+            <article className="vacancyDetailSection vacancyContactHighlight" id="vacancy-contacts">
+              <div className="vacancyContactHighlight__badge">Контакты работодателя</div>
               <div className="panelHeader__title">Связаться с работодателем</div>
-              <div className="vacancyDetailText">
+              <div className="vacancyDetailText vacancyContactHighlight__body">
                 {seekerApplication ? (
                   <>
                     {seekerApplication.employerName ? <p>{seekerApplication.employerName}</p> : null}
-                    {telHref ? (
-                      <p>
-                        <a href={telHref}>{seekerApplication.employerPhone}</a>
-                      </p>
-                    ) : null}
-                    {tgHref ? (
-                      <p>
-                        <a href={tgHref} target="_blank" rel="noreferrer">
-                          Telegram @{String(seekerApplication.employerTelegram || '').replace(/^@+/, '')}
+                    <div className="applicationContactStrip applicationContactStrip--prominent applicationContactStrip--stack">
+                      {telHref ? (
+                        <a className="applicationContactStrip__link applicationContactStrip__link--block" href={telHref}>
+                          Позвонить: {seekerApplication.employerPhone}
                         </a>
-                      </p>
-                    ) : null}
+                      ) : null}
+                      {tgHref ? (
+                        <a className="applicationContactStrip__link applicationContactStrip__link--block" href={tgHref} target="_blank" rel="noreferrer">
+                          Открыть Telegram @{String(seekerApplication.employerTelegram || '').replace(/^@+/, '')}
+                        </a>
+                      ) : null}
+                    </div>
                     {!telHref && !tgHref ? (
                       <p>Контактные данные появятся, когда работодатель укажет телефон или Telegram в профиле или в карточке смены.</p>
                     ) : null}

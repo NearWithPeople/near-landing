@@ -12,3 +12,10 @@ export function buildTelegramHref(username) {
   if (!u) return ''
   return `https://t.me/${encodeURIComponent(u)}`
 }
+
+/** Minimal mailto — без лишних параметров, чтобы не ломать клиенты. */
+export function buildMailtoHref(email) {
+  const e = String(email || '').trim()
+  if (!e || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return ''
+  return `mailto:${e}`
+}

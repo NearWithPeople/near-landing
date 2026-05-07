@@ -6,7 +6,6 @@ export function ReviewsPage({ reviews, currentUser }) {
           <div className="panelHeader__eyebrow">Отзывы</div>
           <div className="panelHeader__title">Что пишут о платформе</div>
         </div>
-        <div className="statusBadge">{currentUser.role === 'employer' ? 'режим работодателя' : 'режим пользователя'}</div>
       </div>
 
       <div className="reviewsGrid">

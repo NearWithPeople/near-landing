@@ -19,10 +19,12 @@ export function ApplicationsPage({ currentUser, applications, onGoToCatalog, onO
             const telHref = buildTelHref(application.employerPhone)
             const tgHref = buildTelegramHref(application.employerTelegram)
 
+            const hasContacts = Boolean(telHref || tgHref)
+
             return (
               <article
                 key={application.id}
-                className="reviewCard reviewCard--interactive"
+                className={`reviewCard reviewCard--interactive ${!isEmployer && hasContacts ? 'reviewCard--contactHighlight' : ''}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => onOpenVacancy(application.vacancyId)}
@@ -36,15 +38,23 @@ export function ApplicationsPage({ currentUser, applications, onGoToCatalog, onO
                 <div className="vacancyCard__title">{application.vacancyTitle}</div>
                 <div className="vacancyCard__meta">{isEmployer ? application.applicantName : application.employerName}</div>
                 {!isEmployer ? (
-                  <div className="vacancyCard__meta" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
-                    {telHref ? <a href={telHref}>{application.employerPhone}</a> : null}
-                    {telHref && tgHref ? <> · </> : null}
-                    {tgHref ? (
-                      <a href={tgHref} target="_blank" rel="noreferrer">
-                        @{String(application.employerTelegram || '').replace(/^@+/, '')}
+                  <div
+                    className={`applicationContactStrip ${hasContacts ? 'applicationContactStrip--prominent' : ''}`}
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                  >
+                    {telHref ? (
+                      <a className="applicationContactStrip__link" href={telHref}>
+                        {application.employerPhone}
                       </a>
                     ) : null}
-                    {!telHref && !tgHref ? <>Контакты появятся, когда работодатель укажет телефон или Telegram.</> : null}
+                    {telHref && tgHref ? <span className="applicationContactStrip__sep">·</span> : null}
+                    {tgHref ? (
+                      <a className="applicationContactStrip__link" href={tgHref} target="_blank" rel="noreferrer">
+                        Telegram @{String(application.employerTelegram || '').replace(/^@+/, '')}
+                      </a>
+                    ) : null}
+                    {!telHref && !tgHref ? <span className="applicationContactStrip__muted">Контакты появятся, когда работодатель укажет телефон или Telegram.</span> : null}
                   </div>
                 ) : null}
                 <div className="tagRow">

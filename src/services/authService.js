@@ -97,17 +97,6 @@ export async function registerAccount(payload) {
   return persistSession(response.jwt, response.user)
 }
 
-export async function completeUserOnboarding(_userId, onboardingData) {
-  const response = await apiRequest('/app/onboarding', {
-    method: 'POST',
-    body: {
-      onboardingData,
-    },
-  })
-
-  return persistSession(getAuthSession().jwt, response.user)
-}
-
 export async function updateUserProfile(_userId, payload) {
   const response = await apiRequest('/app/profile', {
     method: 'PUT',

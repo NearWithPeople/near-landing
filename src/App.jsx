@@ -13,19 +13,17 @@ import { CatalogPage } from './pages/CatalogPage'
 import { EmployerVacancyFormPage } from './pages/EmployerVacancyFormPage'
 import { EmployerVacancyManagePage } from './pages/EmployerVacancyManagePage'
 import { GuestLandingPage } from './pages/GuestLandingPage'
-import { OnboardingPage } from './pages/OnboardingPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { AppMapPage } from './pages/AppMapPage'
 import { StaticInfoPage } from './pages/StaticInfoPage'
 import { VacancyPage } from './pages/VacancyPage'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
-import { completeUserOnboarding, getCurrentUser, loginAccount, logoutUser, registerAccount, updateUserProfile } from './services/authService'
+import { getCurrentUser, loginAccount, logoutUser, registerAccount, updateUserProfile } from './services/authService'
 import { loadAppBootstrap } from './services/appService'
 import { loadSiteContent } from './services/siteService'
-import { listCompletedTasksForUser, listEmployerVacancies } from './services/taskService'
+import { listCompletedTasksForUser, listEmployerVacancies, rateCompletedTask } from './services/taskService'
 import { archiveVacancy, createVacancy, getVacancyById, listVacancies } from './services/vacancyService'
 import { buildFullName, isBelarusPhone, normalizePhone } from './utils/common'
-import { DEFAULT_ONBOARDING } from './utils/defaults'
 
 const LEGACY_APP_ROUTES = {
   '/app': '/',
@@ -43,7 +41,7 @@ const DEFAULT_SITE_CONTENT = {
   landingPage: {
     guestBadge: 'Гостевой экран',
     guestTitle: 'Веб-приложение для вакансий и подработки рядом',
-    guestLead: 'После входа откроется рабочее приложение: роли пользователь/работодатель, onboarding, карта вакансий, каталог и отзывы.',
+    guestLead: 'После входа откроется рабочее приложение: роли пользователь/работодатель, карта вакансий, каталог и отзывы.',
     loginLabel: 'Войти',
     registerLabel: 'Зарегистрироваться',
   },
@@ -149,6 +147,7 @@ export default function App() {
     vacancies: [],
     applications: [],
     completedTasks: [],
+    employerCompletedTasks: [],
     employerVacancies: [],
   })
   const [siteContent, setSiteContent] = useState(DEFAULT_SITE_CONTENT)
@@ -181,8 +180,6 @@ export default function App() {
     sortBy: 'relevant',
   })
   const [userPoint, setUserPoint] = useState({ lat: 53.9023, lng: 27.5619 }) // Minsk center fallback
-  const [onboarding, setOnboarding] = useState(() => ({ ...DEFAULT_ONBOARDING, ...(initialUser?.onboardingData || {}) }))
-  const [onboardingStep, setOnboardingStep] = useState(0)
   const currentUserId = currentUser?.id || ''
 
   const selectedCityOption = useMemo(() => getCityOption(selectedCity, appFilters.cityOptions), [appFilters.cityOptions, selectedCity])
@@ -215,6 +212,7 @@ export default function App() {
   }, [currentUser, remoteData.applications])
   const completedTasks = useMemo(() => (currentUser ? listCompletedTasksForUser(remoteData.completedTasks, currentUser.id) : []), [currentUser, remoteData.completedTasks])
   const employerVacancies = useMemo(() => (currentUser ? listEmployerVacancies(remoteData.employerVacancies, currentUser.id) : []), [currentUser, remoteData.employerVacancies])
+  const employerCompletedTasks = useMemo(() => [...(remoteData.employerCompletedTasks || [])], [remoteData.employerCompletedTasks])
   const appliedVacancyIds = useMemo(() => userApplications.map((application) => application.vacancyId), [userApplications])
 
   const selectedVacancyId = useMemo(() => {
@@ -273,6 +271,7 @@ export default function App() {
             vacancies: [],
             applications: [],
             completedTasks: [],
+            employerCompletedTasks: [],
             employerVacancies: [],
           })
         }
@@ -290,18 +289,19 @@ export default function App() {
             vacancies: [],
             applications: [],
             completedTasks: [],
+            employerCompletedTasks: [],
             employerVacancies: [],
           })
           return
         }
 
         setCurrentUser(payload.currentUser)
-        setOnboarding({ ...DEFAULT_ONBOARDING, ...(payload.currentUser.onboardingData || {}) })
         setAppFilters(normalizeAppFilters(payload.filters))
         setRemoteData({
           vacancies: payload.vacancies || [],
           applications: payload.applications || [],
           completedTasks: payload.completedTasks || [],
+          employerCompletedTasks: payload.employerCompletedTasks || [],
           employerVacancies: payload.employerVacancies || [],
         })
       } catch {
@@ -383,10 +383,8 @@ export default function App() {
 
         setCurrentUser(user)
         setAuthError('')
-        setOnboarding({ ...DEFAULT_ONBOARDING, ...(user.onboardingData || {}) })
-        setOnboardingStep(0)
         setDataVersion((prev) => prev + 1)
-        navigate(user.onboardingCompleted ? '/' : '/onboarding')
+        navigate('/')
         return
       }
 
@@ -436,10 +434,8 @@ export default function App() {
       const user = await registerAccount(payload)
       setCurrentUser(user)
       setAuthError('')
-      setOnboarding(DEFAULT_ONBOARDING)
-      setOnboardingStep(0)
       setDataVersion((prev) => prev + 1)
-      navigate('/onboarding')
+      navigate('/')
     } catch (error) {
       setAuthError(error.message || 'Не удалось выполнить авторизацию.')
     } finally {
@@ -459,19 +455,6 @@ export default function App() {
     if (authError) setAuthError('')
   }
 
-  async function onboardingFinish() {
-    if (!currentUser) return
-
-    try {
-      const updated = await completeUserOnboarding(currentUser.id, onboarding)
-      setCurrentUser(updated)
-      setDataVersion((prev) => prev + 1)
-      navigate('/')
-    } catch {
-      // Keep the user on onboarding if the API call fails.
-    }
-  }
-
   function handleLogout() {
     logoutUser()
     setCurrentUser(null)
@@ -479,11 +462,15 @@ export default function App() {
       vacancies: [],
       applications: [],
       completedTasks: [],
+      employerCompletedTasks: [],
       employerVacancies: [],
     })
-    setOnboarding(DEFAULT_ONBOARDING)
-    setOnboardingStep(0)
     navigate('/', { replace: true })
+  }
+
+  async function handleRateCompletedTask(taskId, rating) {
+    await rateCompletedTask(taskId, rating)
+    setDataVersion((prev) => prev + 1)
   }
 
   async function handleApplyToVacancy(vacancyId) {
@@ -527,19 +514,13 @@ export default function App() {
     if (!currentUser) return
 
     const isLegacyAppRoute = Object.hasOwn(LEGACY_APP_ROUTES, location.pathname)
-    const isProtectedRoute = ['/', '/catalog', '/map', '/applications', '/profile'].includes(location.pathname) || location.pathname.startsWith('/vacancy/') || location.pathname.startsWith('/employer/')
 
-    if (!currentUser.onboardingCompleted && (isProtectedRoute || isLegacyAppRoute)) {
-      navigate('/onboarding', { replace: true })
-      return
-    }
-
-    if (isLegacyAppRoute && currentUser.onboardingCompleted) {
+    if (isLegacyAppRoute) {
       navigate(LEGACY_APP_ROUTES[location.pathname], { replace: true })
       return
     }
 
-    if (currentUser.onboardingCompleted && (location.pathname === '/auth' || location.pathname === '/onboarding')) {
+    if (location.pathname === '/auth' || location.pathname === '/onboarding') {
       navigate('/', { replace: true })
     }
   }, [currentUser, location.pathname, navigate])
@@ -555,7 +536,6 @@ export default function App() {
 
   function renderAppPage(section) {
     if (!currentUser) return <Navigate to="/" replace />
-    if (!currentUser.onboardingCompleted) return <Navigate to="/onboarding" replace />
 
     return (
       <AppShell
@@ -618,12 +598,14 @@ export default function App() {
           <ProfilePage
             currentUser={currentUser}
             completedTasks={completedTasks}
+            employerCompletedTasks={employerCompletedTasks}
             employerVacancies={employerVacancies}
             onGoToCatalog={() => navigate('/')}
             onOpenEmployerVacancy={(vacancyId) => navigate(`/employer/vacancies/${vacancyId}`)}
             onCreateVacancy={() => navigate('/employer/vacancies/new')}
             onLogout={handleLogout}
             onSaveProfile={handleProfileSave}
+            onRateCompletedTask={handleRateCompletedTask}
           />
         ) : null}
       </AppShell>
@@ -682,11 +664,11 @@ export default function App() {
     }
   }
 
-  async function handleArchiveVacancy(vacancyId) {
+  async function handleArchiveVacancy(vacancyId, shiftClosure) {
     if (!currentUser || currentUser.role !== 'employer') return 'Недостаточно прав для архивации вакансии.'
 
     try {
-      await archiveVacancy(vacancyId)
+      await archiveVacancy(vacancyId, shiftClosure)
       setDataVersion((prev) => prev + 1)
       return ''
     } catch (error) {
@@ -759,13 +741,8 @@ export default function App() {
           <Route path="/faq" element={<StaticInfoPage title="Вопросы и ответы (FAQ)" />} />
           <Route path="/contacts" element={<StaticInfoPage title="Контакты" />} />
           <Route path="/privacy" element={<StaticInfoPage title="Политика конфиденциальности" />} />
-          <Route path="/auth" element={currentUser ? <Navigate to={currentUser.onboardingCompleted ? '/' : '/onboarding'} replace /> : <AuthPage form={authForm} error={authError} isSubmitting={isAuthSubmitting} onChange={handleAuthFieldChange} onSubmit={handleAuthSubmit} />} />
-          <Route
-            path="/onboarding"
-            element={
-              !currentUser ? <Navigate to="/" replace /> : currentUser.onboardingCompleted ? <Navigate to="/" replace /> : <OnboardingPage role={currentUser.role} step={onboardingStep} onStepChange={setOnboardingStep} values={onboarding} onChange={(field, value) => setOnboarding((prev) => ({ ...prev, [field]: value }))} onFinish={onboardingFinish} />
-            }
-          />
+          <Route path="/auth" element={currentUser ? <Navigate to="/" replace /> : <AuthPage form={authForm} error={authError} isSubmitting={isAuthSubmitting} onChange={handleAuthFieldChange} onSubmit={handleAuthSubmit} />} />
+          <Route path="/onboarding" element={<Navigate to="/" replace />} />
           <Route path="/catalog" element={renderAppPage('catalog')} />
           <Route path="/map" element={renderAppPage('map')} />
           <Route path="/applications" element={renderAppPage('applications')} />

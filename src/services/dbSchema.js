@@ -7,7 +7,7 @@ export const DB_SCHEMA = {
     vacancies: ['id', 'ownerId', 'title', 'companyName', 'description', 'payFrom', 'address', 'lat', 'lng', 'type', 'duration', 'shiftDate', 'schedule', 'status', 'tags'],
     applications: ['id', 'vacancyId', 'vacancyTitle', 'applicantId', 'applicantName', 'employerName', 'status', 'createdAt'],
     reviews: ['id', 'authorName', 'authorRole', 'targetName', 'rating', 'text', 'createdAt'],
-    completedTasks: ['id', 'userId', 'title', 'employerName', 'completedAt', 'pay', 'duration', 'address', 'summary'],
+    completedTasks: ['id', 'userId', 'vacancyId', 'workerName', 'title', 'employerName', 'completedAt', 'pay', 'duration', 'address', 'summary', 'workerToEmployerRating', 'employerToWorkerRating'],
   },
 }
 

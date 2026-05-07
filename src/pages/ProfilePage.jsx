@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../constants/legalPages'
+import { ShiftRatingBlock } from '../components/ShiftRatingBlock'
 import { isBelarusPhone, normalizePhone, splitFullName } from '../utils/common'
 
 function getProfileForm(currentUser) {
@@ -29,9 +30,22 @@ function getVacancyStatusLabel(status) {
   return 'Открыта'
 }
 
-export function ProfilePage({ currentUser, completedTasks, employerVacancies, onGoToCatalog, onOpenEmployerVacancy, onCreateVacancy, onLogout, onSaveProfile }) {
+export function ProfilePage({
+  currentUser,
+  completedTasks,
+  employerCompletedTasks = [],
+  employerVacancies,
+  onGoToCatalog,
+  onOpenEmployerVacancy,
+  onCreateVacancy,
+  onLogout,
+  onSaveProfile,
+  onRateCompletedTask,
+}) {
   const isEmployer = currentUser.role === 'employer'
   const [profileError, setProfileError] = useState('')
+  const [rateError, setRateError] = useState('')
+  const [ratingSubmittingId, setRatingSubmittingId] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [profileForm, setProfileForm] = useState(() => getProfileForm(currentUser))
   const profileFacts = useMemo(
@@ -51,7 +65,22 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
     setProfileForm(getProfileForm(currentUser))
     setIsEditing(false)
     setProfileError('')
+    setRateError('')
+    setRatingSubmittingId('')
   }, [currentUser])
+
+  async function handleRateTask(taskId, rating) {
+    if (!onRateCompletedTask) return
+    setRateError('')
+    setRatingSubmittingId(taskId)
+    try {
+      await onRateCompletedTask(taskId, rating)
+    } catch (error) {
+      setRateError(error.message || 'Не удалось сохранить оценку.')
+    } finally {
+      setRatingSubmittingId('')
+    }
+  }
 
   function handleChange(field, value) {
     setProfileForm((prev) => ({ ...prev, [field]: value }))
@@ -95,7 +124,6 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
         <div>
           <div className="panelHeader__eyebrow">Профиль</div>
         </div>
-        <div className="statusBadge">{isEmployer ? 'работодатель' : 'пользователь'}</div>
       </div>
 
       {!isEmployer ? (
@@ -181,6 +209,13 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
 
       {!isEmployer ? (
         <div className="reviewsGrid">
+          {rateError ? <div className="formError profileRateError">{rateError}</div> : null}
+          <div className="profileSummary__header profileSummary__header--flush">
+            <div>
+              <div className="panelHeader__title">Выполненные смены</div>
+              <div className="vacancyCard__meta">Оцените работодателя по завершённой смене и посмотрите его оценку вас.</div>
+            </div>
+          </div>
           {completedTasks.length ? (
             completedTasks.map((task) => (
               <article key={task.id} className="reviewCard">
@@ -194,6 +229,22 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
                   <span className="tag">{new Date(task.completedAt).toLocaleDateString('ru-RU')}</span>
                 </div>
                 <div className="reviewCard__text">{task.summary}</div>
+                {task.workerToEmployerRating != null ? (
+                  <ShiftRatingBlock label="Ваша оценка работодателю" value={task.workerToEmployerRating} />
+                ) : (
+                  <ShiftRatingBlock
+                    label="Оцените работодателя"
+                    value={null}
+                    interactive
+                    disabled={ratingSubmittingId === task.id}
+                    onSelect={(n) => handleRateTask(task.id, n)}
+                  />
+                )}
+                {task.employerToWorkerRating != null ? (
+                  <ShiftRatingBlock label="Оценка работодателя вам" value={task.employerToWorkerRating} />
+                ) : (
+                  <div className="completedTaskRating__pending">Работодатель ещё не оценил эту смену</div>
+                )}
               </article>
             ))
           ) : (
@@ -204,6 +255,7 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
         </div>
       ) : (
         <div className="reviewsGrid">
+          {rateError ? <div className="formError profileRateError">{rateError}</div> : null}
           <div className="profileSummary__header">
             <div>
               <div className="panelHeader__title">Мои задачи</div>
@@ -260,6 +312,49 @@ export function ProfilePage({ currentUser, completedTasks, employerVacancies, on
                   Создать первую задачу
                 </button>
               </div>
+            </article>
+          )}
+
+          <div className="profileSummary__header profileSummary__header--flush profileSummary__header--spaced">
+            <div>
+              <div className="panelHeader__title">Завершённые смены</div>
+              <div className="vacancyCard__meta">Оцените исполнителя и посмотрите его оценку вас.</div>
+            </div>
+          </div>
+          {employerCompletedTasks.length ? (
+            employerCompletedTasks.map((task) => (
+              <article key={task.id} className="reviewCard">
+                <div className="vacancyCard__title">{task.title}</div>
+                <div className="vacancyCard__meta">
+                  {task.workerName || 'Исполнитель'} • {task.address}
+                </div>
+                <div className="tagRow">
+                  <span className="tag tag--accent">{task.pay} BYN</span>
+                  <span className="tag">{task.duration}</span>
+                  <span className="tag">{new Date(task.completedAt).toLocaleDateString('ru-RU')}</span>
+                </div>
+                <div className="reviewCard__text">{task.summary}</div>
+                {task.employerToWorkerRating != null ? (
+                  <ShiftRatingBlock label="Ваша оценка исполнителю" value={task.employerToWorkerRating} />
+                ) : (
+                  <ShiftRatingBlock
+                    label="Оцените исполнителя"
+                    value={null}
+                    interactive
+                    disabled={ratingSubmittingId === task.id}
+                    onSelect={(n) => handleRateTask(task.id, n)}
+                  />
+                )}
+                {task.workerToEmployerRating != null ? (
+                  <ShiftRatingBlock label="Оценка исполнителя вам" value={task.workerToEmployerRating} />
+                ) : (
+                  <div className="completedTaskRating__pending">Исполнитель ещё не оценил эту смену</div>
+                )}
+              </article>
+            ))
+          ) : (
+            <article className="reviewCard">
+              <div className="reviewCard__text">Здесь появятся завершённые смены по вашим вакансиям (после отметки смены в системе).</div>
             </article>
           )}
         </div>

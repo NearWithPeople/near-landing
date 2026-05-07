@@ -76,9 +76,10 @@ export async function createVacancy(payload) {
   return response.vacancy
 }
 
-export async function archiveVacancy(vacancyId) {
+export async function archiveVacancy(vacancyId, shiftClosure) {
   const response = await apiRequest(`/app/vacancies/${vacancyId}/archive`, {
     method: 'PUT',
+    body: shiftClosure ? { shiftClosure } : {},
   })
 
   return response.vacancy

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
+import { buildMailtoHref, buildTelHref, buildTelegramHref } from '../utils/contactLinks'
 
 function formatApplicationCount(count) {
   const mod10 = count % 10
@@ -33,6 +34,9 @@ export function EmployerVacancyManagePage({ vacancy, applications, onBack, onCre
   const [archiveError, setArchiveError] = useState('')
   const [archiveSuccess, setArchiveSuccess] = useState('')
   const [isArchiving, setIsArchiving] = useState(false)
+  const [showShiftClosure, setShowShiftClosure] = useState(false)
+  const [closureApplicantId, setClosureApplicantId] = useState('none')
+  const [closureReview, setClosureReview] = useState('')
 
   const filteredApplications = useMemo(() => {
     const normalizedQuery = candidateQuery.trim().toLowerCase()
@@ -54,11 +58,26 @@ export function EmployerVacancyManagePage({ vacancy, applications, onBack, onCre
   async function handleArchive() {
     if (!vacancy || vacancy.status === 'archived') return
 
+    setShowShiftClosure(true)
+    setArchiveError('')
+    setArchiveSuccess('')
+    setClosureApplicantId('none')
+    setClosureReview('')
+  }
+
+  async function confirmShiftClosure() {
+    if (!vacancy || vacancy.status === 'archived') return
+
     setIsArchiving(true)
     setArchiveError('')
     setArchiveSuccess('')
 
-    const error = await onArchiveVacancy(vacancy.id)
+    const shiftClosure = {
+      applicationId: closureApplicantId === 'none' ? null : closureApplicantId,
+      review: closureReview.trim(),
+    }
+
+    const error = await onArchiveVacancy(vacancy.id, shiftClosure)
 
     if (error) {
       setArchiveError(error)
@@ -66,8 +85,15 @@ export function EmployerVacancyManagePage({ vacancy, applications, onBack, onCre
       return
     }
 
-    setArchiveSuccess('Вакансия закрыта и перенесена в архив.')
+    setShowShiftClosure(false)
+    setArchiveSuccess('Смена закрыта. При выборе исполнителя у него появится запись о выполненной смене.')
     setIsArchiving(false)
+  }
+
+  function cancelShiftClosure() {
+    if (isArchiving) return
+    setShowShiftClosure(false)
+    setArchiveError('')
   }
 
   if (!vacancy) {
@@ -118,13 +144,19 @@ export function EmployerVacancyManagePage({ vacancy, applications, onBack, onCre
                 К моим задачам
               </button>
               <button className="ghostButton" onClick={handleArchive} disabled={isArchiving || vacancy.status === 'archived'}>
-                {vacancy.status === 'archived' ? 'Уже в архиве' : isArchiving ? 'Переносим...' : 'Закрыть и в архив'}
+                {vacancy.status === 'archived' ? 'Уже в архиве' : 'Закрыть и в архив'}
               </button>
               <button className="primaryButton" onClick={onCreateNew}>
                 Разместить ещё одну
               </button>
             </div>
 
+            {vacancy.status === 'archived' && vacancy.closureReview ? (
+              <div className="vacancyClosureNote">
+                <div className="vacancyClosureNote__title">Комментарий при закрытии</div>
+                <div className="vacancyClosureNote__text">{vacancy.closureReview}</div>
+              </div>
+            ) : null}
             {vacancy.status === 'pending_review' ? <div className="vacancyApplicantCard__searchHint">Вакансия отправлена на модерацию и появится на сайте после одобрения.</div> : null}
             {vacancy.moderationReason ? <div className="formError">Причина отклонения: {vacancy.moderationReason}</div> : null}
             {archiveSuccess ? <div className="vacancyApplicantCard__searchHint">{archiveSuccess}</div> : null}
@@ -189,24 +221,63 @@ export function EmployerVacancyManagePage({ vacancy, applications, onBack, onCre
 
             <div className="vacancyDetailRelated__list">
               {filteredApplications.length ? (
-                filteredApplications.map((application) => (
-                  <article key={application.id} className="vacancyApplicantCard">
-                    <div className="vacancyCard__title">{application.applicantName}</div>
-                    <div className="tagRow">
-                      <span className={`tag ${application.status === 'approved' ? 'tag--accent' : ''}`}>{getApplicationStatusLabel(application.status)}</span>
-                      <span className="tag">{new Date(application.createdAt).toLocaleDateString('ru-RU')}</span>
-                    </div>
+                filteredApplications.map((application) => {
+                  const phoneHref = buildTelHref(application.applicantPhone)
+                  const tgHref = buildTelegramHref(application.applicantTelegram)
+                  const mailHref = buildMailtoHref(application.applicantEmail)
 
-                    <div className="vacancyApplicantCard__facts">
-                      {application.applicantAge ? <div className="vacancyCard__meta">Возраст: {application.applicantAge}</div> : null}
-                      {application.applicantPhone ? <div className="vacancyCard__meta">Телефон: {application.applicantPhone}</div> : null}
-                      {application.applicantEmail ? <div className="vacancyCard__meta">Email: {application.applicantEmail}</div> : null}
-                      {application.applicantTelegram ? <div className="vacancyCard__meta">Telegram: {application.applicantTelegram}</div> : null}
-                    </div>
+                  return (
+                    <article key={application.id} className="vacancyApplicantCard">
+                      <div className="vacancyCard__title">{application.applicantName}</div>
+                      <div className="tagRow">
+                        <span className={`tag ${application.status === 'approved' ? 'tag--accent' : ''}`}>{getApplicationStatusLabel(application.status)}</span>
+                        <span className="tag">{new Date(application.createdAt).toLocaleDateString('ru-RU')}</span>
+                      </div>
 
-                    <div className="reviewCard__text">{application.applicantReview || 'Кандидат пока не добавил информацию о себе.'}</div>
-                  </article>
-                ))
+                      <div className="vacancyApplicantCard__facts applicationContactStrip applicationContactStrip--employer">
+                        {application.applicantAge ? <div className="vacancyCard__meta">Возраст: {application.applicantAge}</div> : null}
+                        {application.applicantPhone ? (
+                          <div className="vacancyCard__meta">
+                            Телефон:{' '}
+                            {phoneHref ? (
+                              <a className="applicationContactStrip__link" href={phoneHref}>
+                                {application.applicantPhone}
+                              </a>
+                            ) : (
+                              application.applicantPhone
+                            )}
+                          </div>
+                        ) : null}
+                        {application.applicantEmail ? (
+                          <div className="vacancyCard__meta">
+                            Email:{' '}
+                            {mailHref ? (
+                              <a className="applicationContactStrip__link" href={mailHref}>
+                                {application.applicantEmail}
+                              </a>
+                            ) : (
+                              application.applicantEmail
+                            )}
+                          </div>
+                        ) : null}
+                        {application.applicantTelegram ? (
+                          <div className="vacancyCard__meta">
+                            Telegram:{' '}
+                            {tgHref ? (
+                              <a className="applicationContactStrip__link" href={tgHref} target="_blank" rel="noreferrer">
+                                @{String(application.applicantTelegram).replace(/^@+/, '')}
+                              </a>
+                            ) : (
+                              application.applicantTelegram
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div className="reviewCard__text">{application.applicantReview || 'Кандидат пока не добавил информацию о себе.'}</div>
+                    </article>
+                  )
+                })
               ) : applications.length ? (
                 <article className="reviewCard">
                   <div className="reviewCard__text">По текущему поиску кандидаты не найдены. Попробуй изменить имя, телефон, email или Telegram.</div>
@@ -220,6 +291,65 @@ export function EmployerVacancyManagePage({ vacancy, applications, onBack, onCre
           </div>
         </aside>
       </div>
+
+      {showShiftClosure ? (
+        <div className="shiftClosureModal" role="dialog" aria-modal="true" aria-labelledby="shiftClosureTitle">
+          <button type="button" className="shiftClosureModal__backdrop" aria-label="Закрыть" onClick={cancelShiftClosure} />
+          <div className="shiftClosureModal__panel">
+            <div className="panelHeader__title" id="shiftClosureTitle">
+              Закрытие смены
+            </div>
+            <p className="shiftClosureModal__lead">Укажите, кто выходил на смену (если кто-то выходил), и при желании оставьте короткий отзыв. Если смены не было — выберите «Никого».</p>
+
+            <div className="shiftClosureModal__options">
+              <label className="shiftClosureModal__option">
+                <input
+                  type="radio"
+                  name="closureApplicant"
+                  value="none"
+                  checked={closureApplicantId === 'none'}
+                  onChange={() => setClosureApplicantId('none')}
+                />
+                <span>Никого / смена не состоялась</span>
+              </label>
+              {applications.map((application) => (
+                <label key={application.id} className="shiftClosureModal__option">
+                  <input
+                    type="radio"
+                    name="closureApplicant"
+                    value={application.id}
+                    checked={closureApplicantId === application.id}
+                    onChange={() => setClosureApplicantId(application.id)}
+                  />
+                  <span>{application.applicantName || 'Кандидат'}</span>
+                </label>
+              ))}
+            </div>
+
+            <label className="field shiftClosureModal__field">
+              <span className="field__label">Отзыв (необязательно)</span>
+              <textarea
+                className="input input--dark authForm__textarea"
+                rows={3}
+                value={closureReview}
+                onChange={(event) => setClosureReview(event.target.value)}
+                placeholder="Например, как прошла смена или благодарность."
+              />
+            </label>
+
+            {archiveError ? <div className="formError">{archiveError}</div> : null}
+
+            <div className="shiftClosureModal__actions">
+              <button type="button" className="ghostButton" onClick={cancelShiftClosure} disabled={isArchiving}>
+                Отмена
+              </button>
+              <button type="button" className="primaryButton" onClick={confirmShiftClosure} disabled={isArchiving}>
+                {isArchiving ? 'Закрываем…' : 'Закрыть смену'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

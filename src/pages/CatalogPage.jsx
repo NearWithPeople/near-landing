@@ -243,7 +243,7 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
 
                   <div className="catalogJobCard__footer">
                     <button
-                      className="primaryButton"
+                      className="catalogJobCard__apply"
                       type="button"
                       disabled={currentUser.role !== 'seeker' || appliedVacancyIds.includes(vacancy.id)}
                       onClick={(event) => {
