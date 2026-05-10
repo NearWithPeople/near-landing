@@ -143,9 +143,12 @@ export function ProfilePage({
 
                 <div className="profileSummary__grid">
                   {profileFacts.map((item) => (
-                    <div key={item.label} className="profileSummary__item">
+                    <div
+                      key={item.label}
+                      className={`profileSummary__item ${item.label === 'Email' ? 'profileSummary__item--full' : ''}`.trim()}
+                    >
                       <div className="profileSummary__label">{item.label}</div>
-                      <div className="profileSummary__value">{item.value}</div>
+                      <div className={`profileSummary__value ${item.label === 'Email' ? 'profileSummary__value--email' : ''}`.trim()}>{item.value}</div>
                     </div>
                   ))}
                 </div>
@@ -180,9 +183,9 @@ export function ProfilePage({
                   <span className="field__label">Телефон</span>
                   <input className="input input--dark" type="tel" inputMode="tel" value={profileForm.phone} onChange={(event) => handleChange('phone', event.target.value)} placeholder="+375 29 123 45 67" />
                 </label>
-                <label className="field">
+                <label className="field profileEditor__field--full">
                   <span className="field__label">Email</span>
-                  <input className="input input--dark" value={profileForm.email} onChange={(event) => handleChange('email', event.target.value)} />
+                  <input className="input input--dark" type="email" autoComplete="email" value={profileForm.email} onChange={(event) => handleChange('email', event.target.value)} />
                 </label>
                 <label className="field">
                   <span className="field__label">Telegram username (необязательно)</span>

@@ -2153,6 +2153,7 @@
 .mapPanel__overlay--topRight {
   top: max(138px, calc(env(safe-area-inset-top) + 122px));
   right: 16px;
+  margin-top: 15px;
 }
 
 .mapFloatingButton,
@@ -2198,11 +2199,6 @@
     bottom: var(--map-bottom-nav-clearance);
     width: auto;
     border-radius: 24px;
-  }
-
-  .vacancyFormLayout,
-  .vacancyFormGrid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -2791,6 +2787,15 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.profileSummary__item--full {
+  grid-column: 1 / -1;
+}
+
+.profileSummary__value--email {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .profileSummary__item,
 .profileSummary__about {
   padding: 16px;
@@ -2823,6 +2828,16 @@
   gap: 14px;
 }
 
+.profileEditor__field--full {
+  grid-column: 1 / -1;
+}
+
+.profileEditor__field--full .input {
+  max-width: none;
+  width: 100%;
+  min-width: 0;
+}
+
 .profileEditor__actions {
   display: flex;
   justify-content: flex-start;
@@ -2837,9 +2852,16 @@
 
 .vacancyFormLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) 340px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   align-items: start;
+  min-width: 0;
+}
+
+@media (min-width: 1040px) {
+  .vacancyFormLayout {
+    grid-template-columns: minmax(0, 1.45fr) minmax(260px, 340px);
+  }
 }
 
 .vacancyFormMain,
@@ -2847,6 +2869,7 @@
 .vacancyApplicantCard__facts {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
 .vacancyFormCard {
@@ -2860,12 +2883,35 @@
 
 .vacancyFormGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .vacancyFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .vacancyFormGrid__full {
   grid-column: 1 / -1;
+}
+
+.vacancyFormGrid > .field {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .vacancyFormSidebar .profileEditor__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vacancyFormSidebar .profileEditor__actions .ghostButton,
+  .vacancyFormSidebar .profileEditor__actions .primaryButton {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .vacancyFormSelect {
