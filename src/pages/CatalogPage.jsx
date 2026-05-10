@@ -97,7 +97,7 @@ export function CatalogPage({ filters, onFilterChange, vacancies, onShowMap, sel
             />
           </div>
 
-          <ResponsiveFilters buttonLabel="Фильтры" desktopClassName="catalogFilterBar">
+          <ResponsiveFilters buttonLabel="Фильтры" mobileSheetPosition="top" desktopClassName="catalogFilterBar">
             <CustomSelect
               value={String(filters.payMin)}
               options={payOptions}

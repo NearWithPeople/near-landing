@@ -24,8 +24,22 @@ export const MAP_FILTER_DEFAULTS = {
 }
 
 export function MapFiltersToolbar({ filters, onFilterChange, categoryOptions, payOptions }) {
+  const activeFilterCount = [
+    filters.category !== MAP_FILTER_DEFAULTS.category,
+    filters.shiftDate !== MAP_FILTER_DEFAULTS.shiftDate,
+    filters.payMin !== MAP_FILTER_DEFAULTS.payMin,
+    filters.sortBy !== MAP_FILTER_DEFAULTS.sortBy,
+    filters.query.trim() !== MAP_FILTER_DEFAULTS.query,
+  ].filter(Boolean).length
+
   return (
-    <ResponsiveFilters buttonLabel="Фильтры" desktopClassName="mapToolbar" className="responsiveFilters--map">
+    <ResponsiveFilters
+      buttonLabel="Фильтры"
+      buttonHint={activeFilterCount ? `Выбрано: ${activeFilterCount}` : 'Все вакансии'}
+      mobileSheetPosition="bottom"
+      desktopClassName="mapToolbar"
+      className="responsiveFilters--map"
+    >
       <CustomSelect
         value={filters.category}
         options={categoryOptions}

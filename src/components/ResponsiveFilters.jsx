@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
-export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', desktopClassName = '', className = '' }) {
+export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', buttonHint = '', mobileSheetPosition = 'bottom', desktopClassName = '', className = '' }) {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -25,23 +26,27 @@ export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', de
 
       <div className="filtersMobile">
         <button type="button" className="filtersMobile__toggle" onClick={() => setIsOpen(true)}>
-          {buttonLabel}
+          <span className="filtersMobile__toggleLabel">{buttonLabel}</span>
+          {buttonHint ? <span className="filtersMobile__toggleHint">{buttonHint}</span> : null}
         </button>
 
-        {isOpen ? (
-          <div className="filtersMobile__sheet" role="dialog" aria-modal="true" aria-label={buttonLabel}>
-            <button type="button" className="filtersMobile__backdrop" aria-label="Закрыть фильтры" onClick={() => setIsOpen(false)} />
-            <div className="filtersMobile__panel">
-              <div className="filtersMobile__head">
-                <div className="filtersMobile__title">{buttonLabel}</div>
-                <button type="button" className="filtersMobile__close" onClick={() => setIsOpen(false)}>
-                  Готово
-                </button>
-              </div>
-              <div className="filtersMobile__body">{children}</div>
-            </div>
-          </div>
-        ) : null}
+        {isOpen && typeof document !== 'undefined'
+          ? createPortal(
+              <div className={`filtersMobile__sheet filtersMobile__sheet--${mobileSheetPosition}`.trim()} role="dialog" aria-modal="true" aria-label={buttonLabel}>
+                <button type="button" className="filtersMobile__backdrop" aria-label="Закрыть фильтры" onClick={() => setIsOpen(false)} />
+                <div className={`filtersMobile__panel filtersMobile__panel--${mobileSheetPosition}`.trim()}>
+                  <div className="filtersMobile__head">
+                    <div className="filtersMobile__title">{buttonLabel}</div>
+                    <button type="button" className="filtersMobile__close" onClick={() => setIsOpen(false)}>
+                      Готово
+                    </button>
+                  </div>
+                  <div className="filtersMobile__body">{children}</div>
+                </div>
+              </div>,
+              document.body,
+            )
+          : null}
       </div>
     </div>
   )
