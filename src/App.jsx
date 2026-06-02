@@ -7,16 +7,16 @@ import { AppShell } from './components/AppShell'
 import { MapFiltersToolbar } from './components/MapFiltersToolbar'
 import { BELARUS_CITY_OPTIONS, DEFAULT_CITY_VALUE, getCityOption, getCityPoint } from './constants/belarusCities'
 import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from './constants/legalPages'
-import { AuthPage } from './pages/AuthPage'
-import { ApplicationsPage } from './pages/ApplicationsPage'
-import { CatalogPage } from './pages/CatalogPage'
-import { EmployerVacancyFormPage } from './pages/EmployerVacancyFormPage'
-import { EmployerVacancyManagePage } from './pages/EmployerVacancyManagePage'
-import { GuestLandingPage } from './pages/GuestLandingPage'
-import { ProfilePage } from './pages/ProfilePage'
-import { AppMapPage } from './pages/AppMapPage'
-import { StaticInfoPage } from './pages/StaticInfoPage'
-import { VacancyPage } from './pages/VacancyPage'
+import { AuthPage } from './pages/AuthPage/AuthPage'
+import { ApplicationsPage } from './pages/ApplicationsPage/ApplicationsPage'
+import { CatalogPage } from './pages/CatalogPage/CatalogPage'
+import { EmployerVacancyFormPage } from './pages/EmployerVacancyFormPage/EmployerVacancyFormPage'
+import { EmployerVacancyManagePage } from './pages/EmployerVacancyManagePage/EmployerVacancyManagePage'
+import { GuestLandingPage } from './pages/GuestLandingPage/GuestLandingPage'
+import { ProfilePage } from './pages/ProfilePage/ProfilePage'
+import { AppMapPage } from './pages/AppMapPage/AppMapPage'
+import { StaticInfoPage } from './pages/StaticInfoPage/StaticInfoPage'
+import { VacancyPage } from './pages/VacancyPage/VacancyPage'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
 import { getCurrentUser, loginAccount, logoutUser, registerAccount, updateUserProfile } from './services/authService'
 import { loadAppBootstrap } from './services/appService'
@@ -136,6 +136,99 @@ function normalizeAppFilters(filters) {
   }
 }
 
+const MOCK_VACANCIES = [
+  {
+    id: 'mock-center',
+    title: 'Администратор (тестовая)',
+    companyName: 'NEAR Team',
+    payFrom: 100,
+    address: 'пр. Независимости 1',
+    city: 'minsk',
+    lat: 53.9023,
+    lng: 27.5619,
+    type: 'HoReCa',
+    category: 'HoReCa',
+    shiftDate: 'Сегодня',
+    schedule: 'Гибкий график',
+    status: 'open',
+    applicationCount: 5,
+    description: 'Тестовая вакансия в самом центре Минска для проверки интерфейса.',
+    requirements: ['Пунктуальность', 'Вежливость']
+  },
+  {
+    id: 'mock-1',
+    title: 'Сотрудник бригады ресторана (разнорабочий)',
+    companyName: 'УП «МАК.БАЙ»',
+    payFrom: 70,
+    address: 'пр. Независимости 43к7',
+    city: 'minsk',
+    lat: 53.9188,
+    lng: 27.5235,
+    type: 'HoReCa',
+    category: 'HoReCa',
+    shiftDate: 'Завтра',
+    schedule: 'Дневная смена',
+    status: 'open',
+    applicationCount: 3,
+    description: 'Ночная или дневная смена (8 часов) в качестве сотрудника бригады ресторана быстрого обслуживания Mak.by Вокзальная. Приятная подработка в ведущей сети ресторанов быстрого обслуживания в Беларуси на стабильных условиях, гибким графиком и удобной локацией.',
+    requirements: ['Для работы необходима медсправка*', 'Доступно с 14 лет с согласием законного представителя*']
+  },
+  {
+    id: 'mock-2',
+    title: 'Курьер на личном авто',
+    companyName: 'Доставка Плюс',
+    payFrom: 120,
+    address: 'ул. Сурганова 50',
+    city: 'minsk',
+    lat: 53.9244,
+    lng: 27.552,
+    type: 'Курьер',
+    category: 'Курьер',
+    shiftDate: 'Сегодня',
+    schedule: 'Свободный график',
+    status: 'open',
+    applicationCount: 12,
+    description: 'Доставка заказов по городу. Оплата ежедневно.',
+    requirements: ['Наличие авто', 'Стаж вождения от 1 года']
+  },
+  {
+    id: 'mock-3',
+    title: 'Промоутер',
+    companyName: 'Рекламное Агентство',
+    payFrom: 45,
+    address: 'пр. Победителей 9',
+    city: 'minsk',
+    lat: 53.9084,
+    lng: 27.5638,
+    type: 'Промо',
+    category: 'Промо',
+    shiftDate: 'Сб, 30 мая',
+    schedule: '4 часа',
+    status: 'open',
+    applicationCount: 5,
+    description: 'Раздача листовок возле ТЦ.',
+    requirements: ['Активность', 'Коммуникабельность']
+  },
+  {
+    id: 'mock-4',
+    title: 'Сотрудник склада',
+    companyName: 'Логистик Центр',
+    payFrom: 85,
+    address: 'ул. Притыцкого 29',
+    city: 'minsk',
+    lat: 53.9065,
+    lng: 27.4844,
+    type: 'Склад',
+    category: 'Склад',
+    shiftDate: 'Пн, 1 июня',
+    schedule: 'Ночная смена',
+    status: 'open',
+    applicationCount: 8,
+    description: 'Сортировка и упаковка товаров на теплом складе.',
+    requirements: ['Ответственность', 'Готовность к физическому труду']
+  }
+]
+
 export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -144,7 +237,7 @@ export default function App() {
   const [authError, setAuthError] = useState('')
   const [isAuthSubmitting, setIsAuthSubmitting] = useState(false)
   const [remoteData, setRemoteData] = useState({
-    vacancies: [],
+    vacancies: MOCK_VACANCIES,
     applications: [],
     completedTasks: [],
     employerCompletedTasks: [],
@@ -171,7 +264,8 @@ export default function App() {
     return localStorage.getItem(CITY_STORAGE_KEY) || DEFAULT_CITY_VALUE
   })
   const [dataVersion, setDataVersion] = useState(0)
-  const [activeVacancyId, setActiveVacancyId] = useState('')
+  const [activeVacancyId, setActiveVacancyId] = useState('mock-center')
+  const [currentLocationName, setCurrentLocationName] = useState('Минск')
   const [catalogFilters, setCatalogFilters] = useState({
     query: '',
     payMin: 0,
@@ -268,7 +362,7 @@ export default function App() {
       if (!currentUserId) {
         if (!cancelled) {
           setRemoteData({
-            vacancies: [],
+            vacancies: MOCK_VACANCIES,
             applications: [],
             completedTasks: [],
             employerCompletedTasks: [],
@@ -286,7 +380,7 @@ export default function App() {
           logoutUser()
           setCurrentUser(null)
           setRemoteData({
-            vacancies: [],
+            vacancies: MOCK_VACANCIES,
             applications: [],
             completedTasks: [],
             employerCompletedTasks: [],
@@ -298,14 +392,20 @@ export default function App() {
         setCurrentUser(payload.currentUser)
         setAppFilters(normalizeAppFilters(payload.filters))
         setRemoteData({
-          vacancies: payload.vacancies || [],
+          vacancies: payload.vacancies?.length ? payload.vacancies : MOCK_VACANCIES,
           applications: payload.applications || [],
           completedTasks: payload.completedTasks || [],
           employerCompletedTasks: payload.employerCompletedTasks || [],
           employerVacancies: payload.employerVacancies || [],
         })
       } catch {
-        if (cancelled) return
+        // On error, keep using mock data
+        if (!cancelled) {
+          setRemoteData(prev => ({
+            ...prev,
+            vacancies: prev.vacancies.length ? prev.vacancies : MOCK_VACANCIES
+          }))
+        }
       }
     }
 
@@ -542,6 +642,7 @@ export default function App() {
         currentUser={currentUser}
         currentSection={section}
         onNavigate={navigate}
+        currentLocationName={currentLocationName}
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
@@ -562,6 +663,7 @@ export default function App() {
             vacancies={vacancies}
             selectedVacancyId={selectedVacancyId}
             onSelect={setActiveVacancyId}
+            onLocationChange={setCurrentLocationName}
             onOpenVacancy={(vacancyId) => navigate(`/vacancy/${vacancyId}`)}
             autoOpenVacancyId={mapFocusedVacancyId}
             selectedCityLabel={selectedCityOption.label}
@@ -587,12 +689,13 @@ export default function App() {
           />
         ) : null}
         {section === 'applications' ? (
-          <ApplicationsPage
-            currentUser={currentUser}
-            applications={applications}
-            onGoToCatalog={() => navigate('/')}
-            onOpenVacancy={(vacancyId) => (currentUser.role === 'employer' ? navigate(`/employer/vacancies/${vacancyId}`) : navigate(`/vacancy/${vacancyId}`))}
-          />
+          <div className="placeholder-page">
+            <div className="placeholder-card"></div>
+          </div>
+        ) : null}
+        {section === 'chat' ? (
+          <div className="placeholder-page">
+          </div>
         ) : null}
         {section === 'profile' ? (
           <ProfilePage
@@ -624,6 +727,7 @@ export default function App() {
         currentUser={currentUser}
         currentSection="vacancy"
         onNavigate={navigate}
+        currentLocationName={currentLocationName}
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
@@ -686,6 +790,7 @@ export default function App() {
         currentUser={currentUser}
         currentSection="profile"
         onNavigate={navigate}
+        currentLocationName={currentLocationName}
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
@@ -711,6 +816,7 @@ export default function App() {
         currentUser={currentUser}
         currentSection="applications"
         onNavigate={navigate}
+        currentLocationName={currentLocationName}
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
@@ -735,29 +841,15 @@ export default function App() {
           <Route
             path="/"
             element={
-              currentUser ? renderAppPage('catalog') : <GuestLandingPage content={siteContent} onLogin={() => navigate('/auth?mode=login')} onRegister={() => navigate('/auth?mode=register')} />
+              currentUser ? <Navigate to="/map" replace /> : <GuestLandingPage content={siteContent} onLogin={() => navigate('/auth?mode=login')} onRegister={() => navigate('/auth?mode=register')} />
             }
           />
-          <Route path="/faq" element={<StaticInfoPage title="Вопросы и ответы (FAQ)" />} />
-          <Route path="/contacts" element={<StaticInfoPage title="Контакты" />} />
-          <Route path="/privacy" element={<StaticInfoPage title="Политика конфиденциальности" />} />
-          <Route path="/auth" element={currentUser ? <Navigate to="/" replace /> : <AuthPage form={authForm} error={authError} isSubmitting={isAuthSubmitting} onChange={handleAuthFieldChange} onSubmit={handleAuthSubmit} />} />
-          <Route path="/onboarding" element={<Navigate to="/" replace />} />
-          <Route path="/catalog" element={renderAppPage('catalog')} />
+          <Route path="/auth" element={currentUser ? <Navigate to="/map" replace /> : <AuthPage form={authForm} error={authError} isSubmitting={isAuthSubmitting} onChange={handleAuthFieldChange} onSubmit={handleAuthSubmit} />} />
           <Route path="/map" element={renderAppPage('map')} />
           <Route path="/applications" element={renderAppPage('applications')} />
+          <Route path="/chat" element={renderAppPage('chat')} />
           <Route path="/profile" element={renderAppPage('profile')} />
           <Route path="/vacancy/:vacancyId" element={<VacancyPageRoute />} />
-          <Route path="/employer/vacancies/new" element={<EmployerVacancyFormRoute />} />
-          <Route path="/employer/vacancies/:vacancyId" element={<EmployerVacancyManageRoute />} />
-          <Route path="/app" element={<Navigate to="/" replace />} />
-          <Route path="/app/catalog" element={<Navigate to="/" replace />} />
-          <Route path="/app/map" element={<Navigate to="/map" replace />} />
-          <Route path="/app/applications" element={<Navigate to="/applications" replace />} />
-          <Route path="/app/profile" element={<Navigate to="/profile" replace />} />
-          <Route path="/app/faq" element={<Navigate to={FAQ_PATH} replace />} />
-          <Route path="/app/contacts" element={<Navigate to={CONTACTS_PATH} replace />} />
-          <Route path="/app/privacy" element={<Navigate to={PRIVACY_PATH} replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

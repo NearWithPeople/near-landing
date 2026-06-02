@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../constants/legalPages'
+import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../../constants/legalPages'
 
-import './guestLandingPromo.css'
+import './GuestLandingPage.css'
 
 const PROCESS_STEPS = [
   {

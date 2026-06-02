@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import './StaticInfoPage.css'
 
 export function StaticInfoPage({ title }) {
   return (

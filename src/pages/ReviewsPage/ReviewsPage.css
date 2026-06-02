@@ -1,0 +1,14 @@
+.reviewsGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.reviewCard__rating {
+  color: #ffffff;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.reviewCard__text {
+  line-height: 1.6;
+}

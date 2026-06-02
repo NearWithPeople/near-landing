@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../constants/legalPages'
-import { ShiftRatingBlock } from '../components/ShiftRatingBlock'
-import { isBelarusPhone, normalizePhone, splitFullName } from '../utils/common'
+import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../../constants/legalPages'
+import { ShiftRatingBlock } from '../../components/ShiftRatingBlock'
+import { isBelarusPhone, normalizePhone, splitFullName } from '../../utils/common'
+import './ProfilePage.css'
 
 function getProfileForm(currentUser) {
   const nameParts = splitFullName(currentUser.fullName)

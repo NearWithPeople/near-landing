@@ -1,0 +1,96 @@
+.vacancyFormPage {
+  display: grid;
+  gap: 20px;
+}
+
+.vacancyFormLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  min-width: 0;
+}
+
+@media (min-width: 1040px) {
+  .vacancyFormLayout {
+    grid-template-columns: minmax(0, 1.45fr) minmax(260px, 340px);
+  }
+}
+
+.vacancyFormMain,
+.vacancyFormSidebar {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.vacancyFormCard {
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(var(--palette-forest-rgb), 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 16px;
+}
+
+.vacancyFormGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .vacancyFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.vacancyFormGrid__full {
+  grid-column: 1 / -1;
+}
+
+.vacancyFormSelect {
+  justify-content: flex-start;
+}
+
+.vacancyAddressSearch {
+  position: relative;
+}
+
+.vacancyAddressSearch__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 12;
+  border-radius: 18px;
+  background: rgba(var(--palette-forest-rgb), 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.vacancyAddressSearch__option,
+.vacancyAddressSearch__status {
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
+}
+
+.vacancyAddressSearch__option {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+}
+
+.vacancyAddressSearch__status {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.vacancyFormMap {
+  min-height: 320px;
+  height: 320px;
+  border-radius: 20px;
+  overflow: hidden;
+}

@@ -1,3 +1,5 @@
+import './ReviewsPage.css'
+
 export function ReviewsPage({ reviews, currentUser }) {
   return (
     <section className="reviewsPage">

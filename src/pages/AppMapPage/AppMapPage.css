@@ -1,0 +1,439 @@
+/* Custom Vacancy Marker Styles */
+.custom-vacancy-marker {
+  position: relative;
+  width: 1px;
+  height: 1px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.marker-dot {
+  width: 16px;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border: 2.5px solid rgba(0, 0, 0, 0.25);
+  border-radius: 512px;
+  flex-shrink: 0;
+  z-index: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.marker-container {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: auto;
+}
+
+.custom-vacancy-marker.is-hidden .marker-container {
+  opacity: 0;
+  transform: translateX(-50%) scale(0);
+  pointer-events: none;
+}
+
+.marker-bubble {
+  width: 96px;
+  height: 96px;
+  background: #FFFFFF;
+  border: 2.5px solid rgba(0, 0, 0, 0.25);
+  border-radius: 512px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 1px 2px 0 rgba(0, 0, 0, 0.2),
+    0 3px 6px 0 rgba(0, 0, 0, 0.15);
+  transition: width 0.3s ease, height 0.3s ease, border-width 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  animation: inflate 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes inflate {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.custom-vacancy-marker.is-offscreen .marker-bubble {
+  width: 32px;
+  height: 32px;
+  border-width: 1.5px;
+}
+
+.custom-vacancy-marker.is-offscreen .marker-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.custom-vacancy-marker.is-offscreen .marker-dot {
+  opacity: 0;
+}
+
+.custom-vacancy-marker.is-offscreen .marker-cluster {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  border-width: 1.5px;
+}
+
+.marker-bubble::before {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+  animation: inflate 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.marker-cluster--small { background: #22c55e; } /* Green < 5 */
+.marker-cluster--medium { background: #f97316; } /* Orange 5-10 */
+.marker-cluster--large { background: #ef4444; } /* Red > 10 */
+
+.marker-bubble::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.marker-bubble::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(37.5px);
+  -webkit-backdrop-filter: blur(37.5px);
+  z-index: 2;
+}
+
+.marker-icon {
+  width: 54.1875px;
+  height: 54.1875px;
+  object-fit: contain;
+  position: relative;
+  z-index: 3;
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+/* Group Marker Styles */
+.custom-vacancy-marker.is-group .marker-container {
+  width: 175.75px;
+}
+
+.mapExperience {
+  display: block;
+  min-height: 100dvh;
+}
+
+.mapExperience--fullscreen {
+  width: 100%;
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.mapPanel--full {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mapPlaceholder {
+  flex: 1;
+  min-height: 0;
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+  background: #0b0c0e;
+}
+
+.mapboxCanvas,
+.mapboxFallback {
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
+}
+
+.mapboxFallback {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+  background: #0b0c0e;
+}
+
+.mapboxCanvas .mapboxgl-ctrl-top-right {
+  top: auto;
+  bottom: 218px;
+  right: 16px;
+  transform: none;
+}
+
+.mapboxCanvas .mapboxgl-ctrl-top-right .mapboxgl-ctrl {
+  margin: 0;
+}
+
+.mapVacancySheet--custom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 150;
+  background: #1b283b;
+  border-radius: 40px 40px 0 0;
+  padding: 24px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.vacancySheet__header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.vacancySheet__icon-circle {
+  width: 280px;
+  height: 280px;
+  background: #00000003;
+  backdrop-filter: blur(250px);
+  border: 10px solid #00000040;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.vacancySheet__icon-img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.badge-verified {
+  position: absolute;
+  top: 20px;
+  left: -40px;
+  background: #00ffb2;
+  color: #1b283b;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 20px;
+  transform: rotate(-15deg);
+  box-shadow: 0 10px 30px rgba(0, 255, 178, 0.3);
+}
+
+.badge-applications {
+  position: absolute;
+  top: 60px;
+  right: -40px;
+  background: #6b4fa3;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 16px;
+  transform: rotate(15deg);
+  box-shadow: 0 10px 30px rgba(107, 79, 163, 0.3);
+}
+
+.vacancySheet__title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.vacancySheet__salary {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.vacancySheet__actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.action-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #0000001a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.action-btn img {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+
+.action-btn--km {
+  width: auto;
+  border-radius: 999px;
+  padding: 0 20px;
+  font-weight: 800;
+  color: #ffffff;
+  gap: 8px;
+}
+
+.vacancySheet__description {
+  background: #0000001a;
+  border-radius: 32px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.vacancySheet__desc-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 20px;
+}
+
+.vacancySheet__requirements {
+  display: grid;
+  gap: 12px;
+}
+
+.requirement-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.requirement-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+
+.vacancySheet__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0000001a;
+  border-radius: 32px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+}
+
+.company-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.company-logo {
+  width: 48px;
+  height: 48px;
+  background: #00ffb2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.company-logo img {
+  width: 24px;
+  height: 24px;
+}
+
+.company-name {
+  font-weight: 900;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.company-rating {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+}
+
+.apply-btn-large {
+  width: 100%;
+  background: #6b4fa3;
+  border: none;
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 15px 40px rgba(107, 79, 163, 0.4);
+}
+
+.apply-btn-large img {
+  height: 40px;
+  object-fit: contain;
+}
+
+.spotlightCard--floating {
+  left: 16px;
+  right: auto;
+  width: min(420px, calc(100vw - 32px));
+  bottom: 20px;
+  border-radius: 24px;
+}

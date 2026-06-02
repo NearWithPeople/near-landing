@@ -1,0 +1,126 @@
+.profileLegalLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+}
+
+.profileLegalLinks a {
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.profileEditor {
+  display: grid;
+  gap: 18px;
+}
+
+.profileSummary,
+.profileSummary__grid,
+.profileSummary__about {
+  display: grid;
+  gap: 16px;
+}
+
+.profileSummary__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.profileSummary__header--spaced {
+  margin-top: 28px;
+}
+
+.profileRateError {
+  width: 100%;
+}
+
+.profileSummary__grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.profileSummary__item--full {
+  grid-column: 1 / -1;
+}
+
+.profileSummary__item,
+.profileSummary__about {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profileSummary__label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.profileSummary__value,
+.profileSummary__text {
+  color: #ffffff;
+  line-height: 1.55;
+}
+
+.profileEditor__grid {
+  display: grid;
+  gap: 14px;
+}
+
+.profileEditor__field--full {
+  grid-column: 1 / -1;
+}
+
+.profileEditor__actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.completedTaskRating {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.completedTaskRating__label {
+  font-size: 13px;
+  color: rgba(var(--palette-mist-rgb), 0.72);
+}
+
+.completedTaskRating__stars {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.completedTaskRating__star {
+  font-size: 22px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.22);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.completedTaskRating__star.is-active {
+  color: #e8b84a;
+}
+
+.completedTaskRating__pending {
+  margin-top: 12px;
+  font-size: 13px;
+  color: rgba(var(--palette-mist-rgb), 0.62);
+}

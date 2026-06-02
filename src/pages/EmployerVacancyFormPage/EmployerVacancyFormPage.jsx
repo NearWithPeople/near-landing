@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CustomSelect } from '../components/CustomSelect'
-import { MapboxPointPicker } from '../components/MapboxPointPicker'
-import { BELARUS_CITY_OPTIONS, getCityPoint } from '../constants/belarusCities'
-import { geocodeBelarusAddress, reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
-import { formatActiveUntil, getTodayDateValue } from '../services/vacancyService'
-import { isBelarusPhone, normalizePhone } from '../utils/common'
+import { CustomSelect } from '../../components/CustomSelect'
+import { MapboxPointPicker } from '../../components/MapboxPointPicker'
+import { BELARUS_CITY_OPTIONS, getCityPoint } from '../../constants/belarusCities'
+import { geocodeBelarusAddress, reverseGeocodeBelarusPoint } from '../../services/mapboxGeocoding'
+import { formatActiveUntil, getTodayDateValue } from '../../services/vacancyService'
+import { isBelarusPhone, normalizePhone } from '../../utils/common'
+import './EmployerVacancyFormPage.css'
 
 const CATEGORY_OPTIONS = [
   { value: 'Курьер', label: 'Курьер' },

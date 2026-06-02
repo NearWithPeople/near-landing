@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../constants/legalPages'
+import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../../constants/legalPages'
 
-import './authSplit.css'
+import './AuthPage.css'
 
 export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
   const isLogin = form.mode === 'login'

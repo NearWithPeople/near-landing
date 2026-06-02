@@ -1,4 +1,5 @@
-import { buildTelHref, buildTelegramHref } from '../utils/contactLinks'
+import { buildTelHref, buildTelegramHref } from '../../utils/contactLinks'
+import './ApplicationsPage.css'
 
 export function ApplicationsPage({ currentUser, applications, onGoToCatalog, onOpenVacancy }) {
   const isEmployer = currentUser.role === 'employer'

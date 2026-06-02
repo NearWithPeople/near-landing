@@ -1,6 +1,7 @@
-import { Icon } from '../components/Icon'
-import { CustomSelect } from '../components/CustomSelect'
-import { ResponsiveFilters } from '../components/ResponsiveFilters'
+import { Icon } from '../../components/Icon'
+import { CustomSelect } from '../../components/CustomSelect'
+import { ResponsiveFilters } from '../../components/ResponsiveFilters'
+import './CatalogPage.css'
 
 const SHIFT_DATE_OPTIONS = [
   { value: 'all', label: 'Любой день' },

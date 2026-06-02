@@ -1,112 +1,118 @@
 import { Icon } from './Icon'
 import { CustomSelect } from './CustomSelect'
 
-export function AppShell({ currentUser, currentSection, onNavigate, children, cityOptions, selectedCity, onCityChange, onCreateVacancy, mapFilters = null }) {
+export function AppShell({ currentUser, currentSection, onNavigate, currentLocationName, children, cityOptions, selectedCity, onCityChange, onCreateVacancy, mapFilters = null }) {
   const isMapSection = currentSection === 'map'
-  const keepBottomNavOnAdaptive = currentSection === 'map' || currentSection === 'vacancy'
-  const primaryActionLabel = currentUser.role === 'employer' ? 'Разместить смену' : 'Создать резюме'
-  const mapFiltersSlot = isMapSection ? mapFilters : null
+  const keepBottomNavOnAdaptive = true // Always keep bottom nav as per request
+
+  const getHeaderContent = () => {
+    switch (currentSection) {
+      case 'map':
+        return {
+          title: currentLocationName || 'пр. Независимости',
+          subtitle: '4 вакансии поблизости ›'
+        }
+      case 'applications':
+        return {
+          title: 'Задачи',
+          subtitle: '2 активные задачи'
+        }
+      case 'chat':
+        return {
+          title: 'Чат',
+          subtitle: '4 вакансии поблизости ›'
+        }
+      case 'profile':
+        return {
+          title: 'Профиль',
+          subtitle: currentUser?.fullName || 'Пользователь'
+        }
+      case 'vacancy':
+        return {
+          title: currentLocationName || 'Вакансия',
+          subtitle: 'Детали смены'
+        }
+      default:
+        return {
+          title: 'NEAR',
+          subtitle: 'Вакансии рядом'
+        }
+    }
+  }
+
+  const header = getHeaderContent()
 
   return (
     <div className={`appFrame ${isMapSection ? '' : 'appFrame--promo'}`}>
       <div className={`appMain ${isMapSection ? 'appMain--map' : ''}`}>
-        <header className={`appTopbar appTopbar--flat ${isMapSection ? 'appTopbar--overlay' : ''}`}>
-          <div className={`appTopbar__shell ${mapFiltersSlot ? 'appTopbar__shell--mapFilters' : ''}`}>
-            <div className="appTopbar__mainRow">
-              <div className="appTopbar__left">
-              <button type="button" className="appBrand appBrand--button appBrand--header" onClick={() => onNavigate('/')}>
-                <span className="appWordmark">
-                  <span className="appWordmark__near">NEAR</span>
-                  <span className="appWordmark__by">.by</span>
-                </span>
-              </button>
-
-              <nav className="appHeaderNav" aria-label="Основная навигация">
-                <button className={`appHeaderNav__item ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')}>
-                  Вакансии
-                </button>
-                <button className={`appHeaderNav__item ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')}>
-                  Карта
-                </button>
-                <button className={`appHeaderNav__item ${currentSection === 'applications' ? 'is-active' : ''}`} onClick={() => onNavigate('/applications')}>
-                  Отклики
-                </button>
-              </nav>
-            </div>
-
-            <div className="appTopbar__right">
-              <button className="appTopbar__utility" type="button" onClick={() => onNavigate('/')}>
-                <Icon name="search" className="appTopbar__utilityIcon" />
-                <span>Поиск</span>
-              </button>
-
-              <div className="appTopbar__city">
-                <CustomSelect
-                  value={selectedCity}
-                  options={cityOptions}
-                  onChange={onCityChange}
-                  triggerClassName="appTopbar__cityTrigger"
-                  menuClassName="appTopbar__cityMenu"
-                />
+        {currentSection !== 'landing' && (
+          <header className="appTopbar--custom">
+            <div className="appTopbar__content">
+              <div className="appTopbar__location">
+                <div className="appTopbar__address">{header.title}</div>
+                <div className="appTopbar__nearby">{header.subtitle}</div>
               </div>
-
-              {currentUser.role === 'employer' ? (
-                <button className="primaryButton appTopbar__cta" type="button" onClick={onCreateVacancy}>
-                  {primaryActionLabel}
-                </button>
-              ) : null}
-
-              <button className={`profileIconButton ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')}>
-                <Icon name="user" />
-              </button>
-            </div>
-
-            <div className="appTopbar__mobileActions" aria-label="Мобильная навигация">
-              <div className="appTopbar__mobileCity">
-                <CustomSelect
-                  value={selectedCity}
-                  options={cityOptions}
-                  onChange={onCityChange}
-                  triggerClassName="appTopbar__mobileCityTrigger"
-                  menuClassName="appTopbar__cityMenu"
-                />
+              <div className="appTopbar__balance">
+                9999<span className="balance-dot"></span>
               </div>
-              {currentUser.role === 'employer' ? (
-                <button className="appTopbar__mobileCta" type="button" onClick={onCreateVacancy}>
-                  Смена
-                </button>
-              ) : null}
-              <button className={`appTopbar__mobileIcon ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')} aria-label="Каталог">
-                <Icon name="briefcase" className="appTopbar__mobileIconGlyph" />
-              </button>
-              <button className={`appTopbar__mobileIcon ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')} aria-label="Карта">
-                <Icon name="mapPin" className="appTopbar__mobileIconGlyph" />
-              </button>
-              <button className={`appTopbar__mobileIcon ${currentSection === 'applications' ? 'is-active' : ''}`} onClick={() => onNavigate('/applications')} aria-label="Отклики">
-                <Icon name="spark" className="appTopbar__mobileIconGlyph" />
-              </button>
-              <button className={`appTopbar__mobileIcon ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')} aria-label="Профиль">
-                <Icon name="user" className="appTopbar__mobileIconGlyph" />
-              </button>
             </div>
-            </div>
-
-            {mapFiltersSlot ? <div className="appTopbar__filtersRow">{mapFiltersSlot}</div> : null}
-          </div>
-        </header>
+          </header>
+        )}
 
         <div className={`appContent ${isMapSection ? 'appContent--map' : 'appContent--promo'}`}>{children}</div>
 
-        <nav className={`bottomNav ${isMapSection ? 'bottomNav--map' : ''} ${keepBottomNavOnAdaptive ? 'bottomNav--adaptive' : ''}`.trim()} aria-label="Основная навигация">
-          <button className={`bottomNav__item ${currentSection === 'catalog' ? 'is-active' : ''}`} onClick={() => onNavigate('/')}>
-            <Icon name="briefcase" />
-            <span>Каталог</span>
-          </button>
-          <button className={`bottomNav__item ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')}>
-            <Icon name="mapPin" />
-            <span>Карта</span>
-          </button>
-        </nav>
+        {currentSection !== 'landing' && (
+          <>
+            <div className="bottomNav__page-blur" aria-hidden="true"></div>
+            {isMapSection ? (
+              <>
+                <div className="bottomNav__controls bottomNav__controls--left" aria-hidden="true">
+                  <button type="button" className="bottomNav__controlButton">
+                    <img src="/map-icons/list.png" alt="" />
+                  </button>
+                  <button type="button" className="bottomNav__controlButton">
+                    <img src="/map-icons/losso.png" alt="" />
+                  </button>
+                  <button type="button" className="bottomNav__controlButton">
+                    <img src="/map-icons/message-circle.png" alt="" />
+                  </button>
+                </div>
+                <div className="bottomNav__controls bottomNav__controls--right" aria-hidden="true">
+                  <button type="button" className="bottomNav__controlButton">
+                    <img src="/map-icons/locate-fixed.png" alt="" />
+                  </button>
+                </div>
+              </>
+            ) : null}
+            <nav className="bottomNav--custom" aria-label="Основная навигация">
+              <div 
+                className="bottomNav__active-indicator" 
+                style={{ 
+                  '--bottom-nav-indicator-index': ['map', 'applications', 'chat', 'profile'].indexOf(currentSection)
+                }}
+              >
+                <div className="bottomNav__active-outer"></div>
+                <div className="bottomNav__active-bg"></div>
+              </div>
+              <button className={`bottomNav__item ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')}>
+                <img src="/map-icons/map-pin.png" alt="" className="bottomNav__icon" />
+                <span>Карта</span>
+              </button>
+              <button className={`bottomNav__item ${currentSection === 'applications' ? 'is-active' : ''}`} onClick={() => onNavigate('/applications')}>
+                <img src="/map-icons/notepad-text.png" alt="" className="bottomNav__icon" />
+                <span>Отклики</span>
+              </button>
+              <button className={`bottomNav__item ${currentSection === 'chat' ? 'is-active' : ''}`} onClick={() => onNavigate('/chat')}>
+                <img src="/map-icons/message-circle.png" alt="" className="bottomNav__icon" />
+                <span>Чат</span>
+              </button>
+              <button className={`bottomNav__item ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')}>
+                <div className="bottomNav__icon bottomNav__icon--user"></div>
+                <span>Ты</span>
+              </button>
+            </nav>
+          </>
+        )}
       </div>
     </div>
   )

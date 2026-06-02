@@ -1,0 +1,19 @@
+.staticDocPage {
+  box-sizing: border-box;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: clamp(8px, 2vw, 20px) 0 48px;
+}
+
+.staticDocPage__title {
+  margin: 0 0 16px;
+  font-size: clamp(26px, 4vw, 34px);
+  line-height: 1.15;
+}
+
+.staticDocPage__lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(var(--palette-mist-rgb), 0.72);
+}

@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
-import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
-import { formatActiveUntil } from '../services/vacancyService'
-import { buildTelHref, buildTelegramHref } from '../utils/contactLinks'
+import { MapboxVacancyMap } from '../../components/MapboxVacancyMap'
+import { formatActiveUntil } from '../../services/vacancyService'
+import { buildTelHref, buildTelegramHref } from '../../utils/contactLinks'
+import './VacancyPage.css'
 
 function getVacancyDescription(vacancy) {
   if (vacancy.description?.trim()) {

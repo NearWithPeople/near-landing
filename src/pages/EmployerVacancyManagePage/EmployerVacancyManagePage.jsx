@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { MapboxVacancyMap } from '../components/MapboxVacancyMap'
-import { formatActiveUntil } from '../services/vacancyService'
-import { buildMailtoHref, buildTelHref, buildTelegramHref } from '../utils/contactLinks'
+import { MapboxVacancyMap } from '../../components/MapboxVacancyMap'
+import { formatActiveUntil } from '../../services/vacancyService'
+import { buildMailtoHref, buildTelHref, buildTelegramHref } from '../../utils/contactLinks'
+import './EmployerVacancyManagePage.css'
 
 function formatApplicationCount(count) {
   const mod10 = count % 10
