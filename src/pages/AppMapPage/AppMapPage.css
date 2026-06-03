@@ -24,88 +24,91 @@
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.custom-vacancy-marker.is-expanded .marker-dot {
+  opacity: 1;
 }
 
 .marker-container {
   position: absolute;
-  bottom: 100%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: 10px;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
   transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   pointer-events: auto;
-}
-
-.custom-vacancy-marker.is-hidden .marker-container {
-  opacity: 0;
-  transform: translateX(-50%) scale(0);
-  pointer-events: none;
+  z-index: 2;
 }
 
 .marker-bubble {
-  width: 96px;
-  height: 96px;
+  width: 32px;
+  height: 32px;
   background: #FFFFFF;
-  border: 2.5px solid rgba(0, 0, 0, 0.25);
+  border: 1.5px solid rgba(0, 0, 0, 0.25);
   border-radius: 512px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
-    0 1px 2px 0 rgba(0, 0, 0, 0.2),
-    0 3px 6px 0 rgba(0, 0, 0, 0.15);
-  transition: width 0.3s ease, height 0.3s ease, border-width 0.3s ease, transform 0.3s ease;
+  box-shadow: none;
+  transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              border-width 0.3s ease, 
+              box-shadow 0.3s ease,
+              transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
   position: relative;
-  animation: inflate 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform: translateY(0);
 }
 
-@keyframes inflate {
-  0% { transform: scale(0); opacity: 0; }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
+.custom-vacancy-marker.is-expanded .marker-bubble {
+  width: 96px;
+  height: 96px;
+  border-width: 2.5px;
+  transform: translateY(-58px); /* 48px (half of 96) + 10px gap */
+  box-shadow: 
+    0 1px 2px 0 rgba(0, 0, 0, 0.2),
+    0 3px 6px 0 rgba(0, 0, 0, 0.15),
+    0 0 12px 6px rgba(255, 255, 255, 0.4);
 }
 
-.custom-vacancy-marker.is-offscreen .marker-bubble {
+.custom-vacancy-marker.is-active .marker-bubble {
+  box-shadow: 
+    0 1px 2px 0 rgba(0, 0, 0, 0.2),
+    0 3px 6px 0 rgba(0, 0, 0, 0.15),
+    0 0 16px 8px rgba(255, 255, 255, 0.6);
+  border-color: #6b4fa3;
+}
+
+.marker-cluster {
   width: 32px;
   height: 32px;
-  border-width: 1.5px;
-}
-
-.custom-vacancy-marker.is-offscreen .marker-icon {
-  width: 18px;
-  height: 18px;
-}
-
-.custom-vacancy-marker.is-offscreen .marker-dot {
-  opacity: 0;
-}
-
-.custom-vacancy-marker.is-offscreen .marker-cluster {
-  width: 32px;
-  height: 32px;
-  font-size: 12px;
-  border-width: 1.5px;
-}
-
-.marker-bubble::before {
-  width: 48px;
-  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 900;
+  font-size: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: inflate 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform: translateY(0);
+}
+
+.custom-vacancy-marker.is-expanded .marker-cluster {
+  width: 48px;
+  height: 48px;
   font-size: 16px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-width: 3px;
+  transform: translateY(-34px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
-  animation: inflate 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .marker-cluster--small { background: #22c55e; } /* Green < 5 */
@@ -131,17 +134,21 @@
 }
 
 .marker-icon {
-  width: 54.1875px;
-  height: 54.1875px;
-  object-fit: contain;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
   position: relative;
   z-index: 3;
-  transition: width 0.3s ease, height 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-/* Group Marker Styles */
-.custom-vacancy-marker.is-group .marker-container {
-  width: 175.75px;
+.custom-vacancy-marker.is-expanded .marker-icon {
+  font-size: 48px;
+  width: 54.1875px;
+  height: 54.1875px;
 }
 
 .mapExperience {

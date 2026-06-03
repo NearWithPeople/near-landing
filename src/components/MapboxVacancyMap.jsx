@@ -11,10 +11,6 @@ const POINTS_LAYER_ID = 'vacancy-points'
 const SELECTED_GLOW_LAYER_ID = 'vacancy-selected-glow'
 const SELECTED_LAYER_ID = 'vacancy-selected'
 const BUILDINGS_LAYER_ID = 'vacancy-3d-buildings'
-const MINSK_MODEL_SHADOW_SOURCE_ID = 'minsk-landmark-shadow-source'
-const MINSK_MODEL_SHADOW_LAYER_ID = 'minsk-landmark-shadow-layer'
-const MINSK_MODEL_ORIGIN = [27.5619, 53.9023]
-const MINSK_MODEL_ALTITUDE = 2000
 
 function getViewportPadding(hasSelection = false) {
   if (typeof window === 'undefined') {
@@ -116,80 +112,6 @@ function ensureBuildingsLayer(map) {
   )
 }
 
-function getMinskShadowCoordinates() {
-  const [lng, lat] = MINSK_MODEL_ORIGIN
-  const altitudeMeters = MINSK_MODEL_ALTITUDE
-
-  // Match shadow direction with key light direction (80, -60, 140).
-  const horizontalLength = Math.sqrt(80 * 80 + 60 * 60)
-  const verticalLength = 140
-  // Keep shadow visible near the model even at very high altitude values.
-  const rawShadowDistance = altitudeMeters * (horizontalLength / verticalLength)
-  const shadowDistanceMeters = Math.min(450, rawShadowDistance * 0.22)
-
-  const dirX = -80 / horizontalLength
-  const dirY = 60 / horizontalLength
-  const eastMeters = shadowDistanceMeters * dirX
-  const northMeters = shadowDistanceMeters * dirY
-
-  const metersPerDegreeLat = 111320
-  const metersPerDegreeLng = 111320 * Math.cos((lat * Math.PI) / 180)
-
-  return [
-    lng + eastMeters / metersPerDegreeLng,
-    lat + northMeters / metersPerDegreeLat,
-  ]
-}
-
-function ensureMinskShadowLayer(map) {
-  const shadowData = {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: getMinskShadowCoordinates(),
-        },
-        properties: {},
-      },
-    ],
-  }
-
-  if (!map.getSource(MINSK_MODEL_SHADOW_SOURCE_ID)) {
-    map.addSource(MINSK_MODEL_SHADOW_SOURCE_ID, {
-      type: 'geojson',
-      data: shadowData,
-    })
-  } else {
-    const shadowSource = map.getSource(MINSK_MODEL_SHADOW_SOURCE_ID)
-    shadowSource?.setData(shadowData)
-  }
-
-  if (!map.getLayer(MINSK_MODEL_SHADOW_LAYER_ID)) {
-    map.addLayer({
-      id: MINSK_MODEL_SHADOW_LAYER_ID,
-      type: 'circle',
-      source: MINSK_MODEL_SHADOW_SOURCE_ID,
-      paint: {
-        'circle-radius': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          8, 34,
-          12, 56,
-          16, 84,
-        ],
-        'circle-color': 'rgba(0, 0, 0, 0.36)',
-        'circle-blur': 0.95,
-        'circle-opacity': 0.72,
-        'circle-pitch-alignment': 'map',
-        'circle-pitch-scale': 'map',
-      },
-    })
-  }
-}
-
 function updateSourceData(map, vacancies) {
   const source = map.getSource(SOURCE_ID)
   if (!source) return
@@ -199,11 +121,12 @@ function updateSourceData(map, vacancies) {
 import { reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
 
 function updateBubblePositions(map, markersRef) {
-  if (!map) return
+  if (!map || !map.getCanvas()) return
   
   const width = map.getCanvas().clientWidth
   const height = map.getCanvas().clientHeight
   const centerLngLat = map.getCenter()
+  const zoom = map.getZoom()
 
   markersRef.current.forEach((marker) => {
     const el = marker.getElement()
@@ -213,8 +136,8 @@ function updateBubblePositions(map, markersRef) {
     const lngLat = marker.getLngLat()
     const pos = map.project(lngLat)
     
-    // 1. Distance check (1km rule)
-    // We use a slightly larger buffer for better UX, e.g. 1.5km
+    // 1. Distance check (1km rule) - DISABLED to allow zoom-based shrinking for all markers
+    /*
     const distMeters = centerLngLat.distanceTo(lngLat)
     const MAX_DIST = 1500 
     
@@ -224,25 +147,27 @@ function updateBubblePositions(map, markersRef) {
     } else {
       el.classList.remove('is-hidden')
     }
+    */
 
-    // 2. Clamping and Shrinking logic
+    // 2. Determine if shrunk
     const margin = 32
     const isPointOffscreen = pos.x < 0 || pos.x > width || pos.y < 0 || pos.y > height
     
-    // Determine if we should shrink
-    const containerWidth = container.offsetWidth || 96
-    const containerHeight = container.offsetHeight || 96
-    
-    // Check if bubble would be partially off-screen
+    // Check if bubble (96px) would be partially off-screen
+    const bubbleSize = 96
     const isBubbleOffscreen = 
-      pos.x - containerWidth / 2 < margin || 
-      pos.x + containerWidth / 2 > width - margin || 
-      pos.y - containerHeight - 20 < margin // 20 is gap + dot
+      pos.x - bubbleSize / 2 < margin || 
+      pos.x + bubbleSize / 2 > width - margin || 
+      pos.y - bubbleSize - 20 < margin
       
-    const isShrunk = isPointOffscreen || isBubbleOffscreen
-    el.classList.toggle('is-offscreen', isShrunk)
+    const isZoomedOut = zoom < 16.0
+    const isExpanded = !isPointOffscreen && !isBubbleOffscreen && !isZoomedOut
+    el.classList.toggle('is-expanded', isExpanded)
 
-    if (isShrunk) {
+    if (isExpanded) {
+      // Normal centered position (CSS handles the float up via translateY on bubble)
+      container.style.transform = `translate(-50%, -50%)`
+    } else {
       // Clamp to edges
       const clampedX = Math.max(margin, Math.min(width - margin, pos.x))
       const clampedY = Math.max(margin, Math.min(height - margin, pos.y))
@@ -250,11 +175,8 @@ function updateBubblePositions(map, markersRef) {
       const shiftX = clampedX - pos.x
       const shiftY = clampedY - pos.y
       
-      // Counteract the absolute positioning (bottom: 100%) and center it
-      container.style.transform = `translate(calc(-50% + ${shiftX}px), calc(50% + ${shiftY}px))`
-    } else {
-      // Normal centered position
-      container.style.transform = `translateX(-50%)`
+      // Since container is centered on point, we just apply the shift
+      container.style.transform = `translate(calc(-50% + ${shiftX}px), calc(-50% + ${shiftY}px))`
     }
   })
 }
@@ -358,7 +280,6 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
     map.once('load', () => {
       ensureSourceAndLayers(map)
       ensureBuildingsLayer(map)
-      ensureMinskShadowLayer(map)
       updateSourceData(map, vacanciesRef.current)
 
       map.on('click', handleMapClick)
@@ -366,7 +287,6 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
       // Re-apply 3D buildings on style change
       map.on('styledata', () => {
         ensureBuildingsLayer(map)
-        ensureMinskShadowLayer(map)
       })
     })
 
@@ -382,7 +302,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
 
   const updateMarkers = () => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || !map.isStyleLoaded() || !map.getLayer(CLUSTERS_LAYER_ID)) return
 
     // 1. Get all rendered features (clusters and individual points)
     const features = map.queryRenderedFeatures({ layers: [CLUSTERS_LAYER_ID, POINTS_LAYER_ID] })
@@ -443,17 +363,14 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
           const bubble = document.createElement('div')
           bubble.className = 'marker-bubble'
           
-          const iconMap = {
-            'Курьер': '/map-icons/map-pin.png',
-            'Склад': '/map-icons/notepad-text.png',
-            'Промо': '/map-icons/losso.png',
-            'HoReCa': '/map-icons/list.png',
-            'Подсобные': '/map-icons/notepad-text.png'
-          }
-          
-          const icon = document.createElement('img')
+          const emojis = ['💻', '🚚', '🛒', '📦', '🍽️', '🎨', '🚗', '📚', '🛠️', '📄', '🐶']
+          // Use vacancy ID to pick a stable emoji for this vacancy
+          const emojiIndex = vacancyId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % emojis.length
+          const stableEmoji = emojis[emojiIndex]
+
+          const icon = document.createElement('div')
           icon.className = 'marker-icon'
-          icon.src = iconMap[vacancy.category] || '/map-icons/map-pin.png'
+          icon.textContent = stableEmoji
           
           bubble.appendChild(icon)
           container.appendChild(bubble)
