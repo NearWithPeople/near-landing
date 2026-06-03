@@ -643,6 +643,7 @@ export default function App() {
         currentSection={section}
         onNavigate={navigate}
         currentLocationName={currentLocationName}
+        isVacancySelected={section === 'map' && Boolean(selectedVacancyId)}
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
@@ -689,9 +690,12 @@ export default function App() {
           />
         ) : null}
         {section === 'applications' ? (
-          <div className="placeholder-page">
-            <div className="placeholder-card"></div>
-          </div>
+          <ApplicationsPage
+            currentUser={currentUser}
+            applications={applications}
+            onGoToCatalog={() => navigate('/')}
+            onOpenVacancy={(vacancyId) => navigate(`/vacancy/${vacancyId}`)}
+          />
         ) : null}
         {section === 'chat' ? (
           <div className="placeholder-page">

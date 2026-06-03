@@ -228,7 +228,33 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
       const currentZoom = map.getZoom()
       const center = map.getCenter()
 
-      // 1. Reverse geocoding for top bar label
+      // 1. Auto-select vacancy on high zoom if one is visible and none selected
+      if (currentZoom >= 16.5 && !selectedVacancyIdRef.current) {
+        const features = map.queryRenderedFeatures({ layers: [POINTS_LAYER_ID] })
+        if (features.length > 0) {
+          // Find the one closest to center
+          let closestFeature = features[0]
+          let minDistance = Infinity
+          
+          features.forEach(f => {
+            const fCoords = f.geometry.coordinates
+            const dist = Math.sqrt(
+              Math.pow(fCoords[0] - center.lng, 2) + 
+              Math.pow(fCoords[1] - center.lat, 2)
+            )
+            if (dist < minDistance) {
+              minDistance = dist
+              closestFeature = f
+            }
+          })
+
+          if (closestFeature) {
+            onSelectRef.current(closestFeature.properties.id)
+          }
+        }
+      }
+
+      // 2. Reverse geocoding for top bar label
       if (onLocationChangeRef.current) {
         try {
           const locationData = await reverseGeocodeBelarusPoint({ lat: center.lat, lng: center.lng })

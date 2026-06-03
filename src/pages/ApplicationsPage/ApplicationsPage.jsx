@@ -1,81 +1,113 @@
-import { buildTelHref, buildTelegramHref } from '../../utils/contactLinks'
 import './ApplicationsPage.css'
 
-export function ApplicationsPage({ currentUser, applications, onGoToCatalog, onOpenVacancy }) {
-  const isEmployer = currentUser.role === 'employer'
+const MOCK_APPLICATIONS = [
+  {
+    id: 'app-1',
+    vacancyTitle: 'Грузчик для переезда бренд-офиса',
+    address: 'г. Минск, ул. Громова 30',
+    salary: 'Оплата 45 Br за смену',
+    time: 'с 08:00 по 12:00 2 июня 2026',
+    status: 'active',
+    statusLabel: 'Активен',
+  },
+  {
+    id: 'app-2',
+    vacancyTitle: 'Сотрудник бригады ресторана',
+    address: 'г. Минск, ул. Ленина 15 (ТЦ "Galileo")',
+    salary: 'Оплата от 70 Br за смену + питание',
+    time: 'с 08:00 16 июня 2026 по 21:00 17 июня 2026',
+    status: 'pending',
+    statusLabel: 'Ожидает',
+    requirements: [
+      'Для работы необходима медсправка*',
+      'Доступно с 14 лет с согласием законного представителя*'
+    ]
+  },
+  {
+    id: 'app-3',
+    vacancyTitle: 'Волонтер на фестивале еды в ларьке',
+    status: 'cancelled',
+    statusLabel: 'Отменён',
+  },
+  {
+    id: 'app-4',
+    vacancyTitle: 'Волонтер на марафоне',
+    status: 'cancelled',
+    statusLabel: 'Отменён',
+  },
+  {
+    id: 'app-5',
+    vacancyTitle: 'Работник зеленого строительства',
+    status: 'completed',
+    statusLabel: 'Выполнен',
+  }
+]
+
+export function ApplicationsPage({ currentUser, applications = [], onGoToCatalog, onOpenVacancy }) {
+  const isEmployer = currentUser?.role === 'employer'
+  const displayApplications = applications.length > 0 ? applications : MOCK_APPLICATIONS
 
   return (
-    <section className="reviewsPage">
-      <div className="panelHeader panelHeader--space">
-        <div>
-          <div className="panelHeader__eyebrow">Отклики</div>
-          <div className="panelHeader__title">{isEmployer ? 'Отклики на мои задачи' : 'Мои отклики'}</div>
-        </div>
-        <div className="statusBadge">{applications.length} записей</div>
+    <section className="applicationsPage">
+      <div className="applicationsHeader">
+        <button className="statsButton">
+          <img src="/map-icons/list.png" alt="" className="statsIcon" style={{filter: 'brightness(0) invert(1)'}} />
+          Статистика
+        </button>
+        <button className="archiveButton">
+          <img src="/map-icons/message-circle.png" alt="" className="archiveIcon" style={{filter: 'brightness(0) invert(1)'}} />
+          Архив
+        </button>
       </div>
 
-      <div className="reviewsGrid">
-        {applications.length ? (
-          applications.map((application) => {
-            const telHref = buildTelHref(application.employerPhone)
-            const tgHref = buildTelegramHref(application.employerTelegram)
-
-            const hasContacts = Boolean(telHref || tgHref)
-
-            return (
-              <article
-                key={application.id}
-                className={`reviewCard reviewCard--interactive ${!isEmployer && hasContacts ? 'reviewCard--contactHighlight' : ''}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => onOpenVacancy(application.vacancyId)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault()
-                    onOpenVacancy(application.vacancyId)
-                  }
-                }}
-              >
-                <div className="vacancyCard__title">{application.vacancyTitle}</div>
-                <div className="vacancyCard__meta">{isEmployer ? application.applicantName : application.employerName}</div>
-                {!isEmployer ? (
-                  <div
-                    className={`applicationContactStrip ${hasContacts ? 'applicationContactStrip--prominent' : ''}`}
-                    onClick={(event) => event.stopPropagation()}
-                    onKeyDown={(event) => event.stopPropagation()}
-                  >
-                    {telHref ? (
-                      <a className="applicationContactStrip__link" href={telHref}>
-                        {application.employerPhone}
-                      </a>
-                    ) : null}
-                    {telHref && tgHref ? <span className="applicationContactStrip__sep">·</span> : null}
-                    {tgHref ? (
-                      <a className="applicationContactStrip__link" href={tgHref} target="_blank" rel="noreferrer">
-                        Telegram @{String(application.employerTelegram || '').replace(/^@+/, '')}
-                      </a>
-                    ) : null}
-                    {!telHref && !tgHref ? <span className="applicationContactStrip__muted">Контакты появятся, когда работодатель укажет телефон или Telegram.</span> : null}
+      <div className="applicationsList">
+        {displayApplications.map((app) => (
+          <article key={app.id} className={`applicationCard applicationCard--${app.status}`}>
+            <div className="applicationCard__main">
+              <div className="applicationCard__content">
+                <h3 className="applicationCard__title">{app.vacancyTitle}</h3>
+                
+                {app.address && (
+                  <div className="applicationCard__info">
+                    <img src="/map-icons/map-pin.png" alt="" className="infoIcon" />
+                    <span>{app.address}</span>
                   </div>
-                ) : null}
-                <div className="tagRow">
-                  <span className={`tag ${application.status === 'approved' ? 'tag--accent' : ''}`}>{application.status}</span>
-                  <span className="tag">{new Date(application.createdAt).toLocaleDateString('ru-RU')}</span>
-                </div>
-              </article>
-            )
-          })
-        ) : (
-          <article className="reviewCard">
-            <div className="reviewCard__text">Пока откликов нет. Начни с каталога и одной смены на день.</div>
+                )}
+                
+                {app.salary && (
+                  <div className="applicationCard__info">
+                    <img src="/map-icons/losso.png" alt="" className="infoIcon" />
+                    <span>{app.salary}</span>
+                  </div>
+                )}
+                
+                {app.time && (
+                  <div className="applicationCard__info">
+                    <img src="/map-icons/message-circle.png" alt="" className="infoIcon" />
+                    <span>{app.time}</span>
+                  </div>
+                )}
+
+                {app.requirements?.map((req, idx) => (
+                  <div key={idx} className="applicationCard__requirement">
+                    <img src="/map-icons/notepad-text.png" alt="" className="reqIcon" />
+                    <span>{req}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className={`statusBadge statusBadge--${app.status}`}>
+                <span className="statusDot"></span>
+                <span className="statusText">{app.statusLabel || app.status}</span>
+              </div>
+            </div>
           </article>
-        )}
+        ))}
       </div>
 
-      <button className="primaryButton primaryButton--wide mapPanel__catalogButton" onClick={onGoToCatalog}>
+      <button className="primaryButton primaryButton--wide applicationsCatalogBtn" onClick={onGoToCatalog}>
         Открыть вакансии
       </button>
     </section>
   )
 }
-

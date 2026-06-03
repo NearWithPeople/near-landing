@@ -1,7 +1,7 @@
 import { Icon } from './Icon'
 import { CustomSelect } from './CustomSelect'
 
-export function AppShell({ currentUser, currentSection, onNavigate, currentLocationName, children, cityOptions, selectedCity, onCityChange, onCreateVacancy, mapFilters = null }) {
+export function AppShell({ currentUser, currentSection, onNavigate, currentLocationName, children, cityOptions, selectedCity, onCityChange, onCreateVacancy, mapFilters = null, isVacancySelected = false }) {
   const isMapSection = currentSection === 'map'
   const keepBottomNavOnAdaptive = true // Always keep bottom nav as per request
 
@@ -84,7 +84,7 @@ export function AppShell({ currentUser, currentSection, onNavigate, currentLocat
                 </div>
               </>
             ) : null}
-            <nav className="bottomNav--custom" aria-label="Основная навигация">
+            <nav className={`bottomNav--custom ${isVacancySelected ? 'is-hidden' : 'is-visible'}`} aria-label="Основная навигация">
               <div 
                 className="bottomNav__active-indicator" 
                 style={{ 

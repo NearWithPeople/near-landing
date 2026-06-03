@@ -1,36 +1,172 @@
-.applicationContactStrip {
+.applicationsPage {
+  padding: 20px 16px;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  font-size: 15px;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 100%;
+  background: #0b0c0e;
+}
+
+.applicationsHeader {
+  display: flex;
+  gap: 12px;
+}
+
+.statsButton, .archiveButton {
+  flex: 1;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 32px;
+  color: #fff;
   font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
 }
 
-.applicationContactStrip--prominent {
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(232, 184, 74, 0.12);
-  border: 1px solid rgba(232, 184, 74, 0.35);
+.statsIcon, .archiveIcon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
 }
 
-.applicationContactStrip__sep {
-  opacity: 0.45;
+.applicationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.applicationContactStrip__muted {
-  color: rgba(255, 255, 255, 0.55);
+.applicationCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 40px;
+  padding: 24px;
+  transition: transform 0.2s ease;
+}
+
+.applicationCard__main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.applicationCard__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.applicationCard__title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.applicationCard__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
   font-weight: 600;
 }
 
-.applicationContactStrip__link {
-  color: #fff;
-  font-weight: 900;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.infoIcon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+  opacity: 0.6;
 }
 
-.reviewCard--contactHighlight {
-  border-color: rgba(232, 184, 74, 0.38);
-  box-shadow: inset 0 0 0 1px rgba(232, 184, 74, 0.2);
+.applicationCard__requirement {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.reqIcon {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  filter: brightness(0) invert(1);
+  opacity: 0.4;
+}
+
+/* Status Badges */
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.statusDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Status Specific Styles */
+.statusBadge--active {
+  background: rgba(95, 88, 212, 0.2);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(95, 88, 212, 0.3);
+}
+.statusBadge--active .statusDot {
+  background: #5F58D4;
+  box-shadow: 0 0 10px #5F58D4;
+}
+
+.statusBadge--pending {
+  background: rgba(255, 212, 0, 0.15);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255, 212, 0, 0.2);
+}
+.statusBadge--pending .statusDot {
+  background: #FFD400;
+  box-shadow: 0 0 10px #FFD400;
+}
+
+.statusBadge--cancelled {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+.statusBadge--cancelled .statusDot {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.statusBadge--completed {
+  background: rgba(34, 197, 94, 0.15);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+}
+.statusBadge--completed .statusDot {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+}
+
+/* Card specific adjustments */
+.applicationCard--cancelled {
+  opacity: 0.6;
+}
+
+.applicationsCatalogBtn {
+  margin-top: auto;
+  margin-bottom: 20px;
 }
