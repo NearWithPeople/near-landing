@@ -68,13 +68,13 @@ export function AppShell({ currentUser, currentSection, onNavigate, currentLocat
               <>
                 <div className="bottomNav__controls bottomNav__controls--left" aria-hidden="true">
                   <button type="button" className="bottomNav__controlButton">
+                    <img src="/map-icons/funnel.png" alt="" />
+                  </button>
+                  <button type="button" className="bottomNav__controlButton">
                     <img src="/map-icons/list.png" alt="" />
                   </button>
                   <button type="button" className="bottomNav__controlButton">
                     <img src="/map-icons/losso.png" alt="" />
-                  </button>
-                  <button type="button" className="bottomNav__controlButton">
-                    <img src="/map-icons/message-circle.png" alt="" />
                   </button>
                 </div>
                 <div className="bottomNav__controls bottomNav__controls--right" aria-hidden="true">
