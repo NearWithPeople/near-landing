@@ -12,18 +12,23 @@ import { ApplicationsPage } from './pages/ApplicationsPage/ApplicationsPage'
 import { CatalogPage } from './pages/CatalogPage/CatalogPage'
 import { EmployerVacancyFormPage } from './pages/EmployerVacancyFormPage/EmployerVacancyFormPage'
 import { EmployerVacancyManagePage } from './pages/EmployerVacancyManagePage/EmployerVacancyManagePage'
-import { GuestLandingPage } from './pages/GuestLandingPage/GuestLandingPage'
+import { LaunchLandingPage } from './pages/LaunchLandingPage/LaunchLandingPage'
 import { ProfilePage } from './pages/ProfilePage/ProfilePage'
 import { AppMapPage } from './pages/AppMapPage/AppMapPage'
 import { StaticInfoPage } from './pages/StaticInfoPage/StaticInfoPage'
 import { VacancyPage } from './pages/VacancyPage/VacancyPage'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
-import { getCurrentUser, loginAccount, logoutUser, registerAccount, updateUserProfile } from './services/authService'
+import { getCurrentUser, loginAccount, logoutUser, updateUserProfile } from './services/authService'
 import { loadAppBootstrap } from './services/appService'
 import { loadSiteContent } from './services/siteService'
 import { listCompletedTasksForUser, listEmployerVacancies, rateCompletedTask } from './services/taskService'
 import { archiveVacancy, createVacancy, getVacancyById, listVacancies } from './services/vacancyService'
 import { buildFullName, isBelarusPhone, normalizePhone } from './utils/common'
+import {
+  consumePreLaunchAccessFromSearch,
+  readPreLaunchAccess,
+  stripPreLaunchAccessFromSearch,
+} from './utils/preLaunchAccess'
 
 const LEGACY_APP_ROUTES = {
   '/app': '/',
@@ -246,7 +251,7 @@ export default function App() {
   const [siteContent, setSiteContent] = useState(DEFAULT_SITE_CONTENT)
   const [appFilters, setAppFilters] = useState(() => normalizeAppFilters())
   const [authForm, setAuthForm] = useState({
-    mode: 'register',
+    mode: 'login',
     role: 'seeker',
     lastName: '',
     firstName: '',
@@ -264,7 +269,7 @@ export default function App() {
     return localStorage.getItem(CITY_STORAGE_KEY) || DEFAULT_CITY_VALUE
   })
   const [dataVersion, setDataVersion] = useState(0)
-  const [activeVacancyId, setActiveVacancyId] = useState('mock-center')
+  const [activeVacancyId, setActiveVacancyId] = useState('')
   const [currentLocationName, setCurrentLocationName] = useState('Минск')
   const [catalogFilters, setCatalogFilters] = useState({
     query: '',
@@ -274,6 +279,7 @@ export default function App() {
     sortBy: 'relevant',
   })
   const [userPoint, setUserPoint] = useState({ lat: 53.9023, lng: 27.5619 }) // Minsk center fallback
+  const [preLaunchAccessGranted, setPreLaunchAccessGranted] = useState(() => readPreLaunchAccess())
   const currentUserId = currentUser?.id || ''
 
   const selectedCityOption = useMemo(() => getCityOption(selectedCity, appFilters.cityOptions), [appFilters.cityOptions, selectedCity])
@@ -345,6 +351,24 @@ export default function App() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    if (!consumePreLaunchAccessFromSearch(location.search)) return
+
+    setPreLaunchAccessGranted(true)
+
+    const cleanedSearch = stripPreLaunchAccessFromSearch(location.search)
+    if (cleanedSearch === location.search) return
+
+    navigate({ pathname: location.pathname, search: cleanedSearch }, { replace: true })
+  }, [location.pathname, location.search, navigate])
+
+  useEffect(() => {
+    if (preLaunchAccessGranted) return
+    if (location.pathname === '/') return
+
+    navigate('/', { replace: true })
+  }, [location.pathname, navigate, preLaunchAccessGranted])
 
   useEffect(() => {
     if (!('geolocation' in navigator)) return
@@ -433,12 +457,16 @@ export default function App() {
   useEffect(() => {
     if (location.pathname !== '/auth') return
     const nextMode = new URLSearchParams(location.search).get('mode')
-    if (nextMode !== 'login' && nextMode !== 'register') return
+    if (nextMode === 'register') {
+      navigate('/auth?mode=login', { replace: true })
+      return
+    }
+    if (nextMode !== 'login') return
     setAuthForm((prev) => {
       if (prev.mode === nextMode) return prev
-      return { ...prev, mode: nextMode, ...(nextMode === 'register' ? { acceptedLegal: false } : {}) }
+      return { ...prev, mode: nextMode }
     })
-  }, [location.pathname, location.search])
+  }, [location.pathname, location.search, navigate])
 
   async function handleAuthSubmit(e) {
     e.preventDefault()
@@ -484,58 +512,11 @@ export default function App() {
         setCurrentUser(user)
         setAuthError('')
         setDataVersion((prev) => prev + 1)
-        navigate('/')
+        navigate('/map')
         return
       }
 
-      const fullName = buildFullName({
-        lastName: authForm.lastName,
-        firstName: authForm.firstName,
-        middleName: authForm.middleName,
-      })
-
-      const payload = {
-        role: authForm.role,
-        fullName,
-        companyName: authForm.companyName.trim(),
-        age: authForm.role === 'seeker' ? Number(authForm.age) : null,
-        phone: normalizePhone(authForm.phone),
-        email: authForm.email.trim(),
-        telegramUsername: authForm.telegramUsername.trim(),
-        password: authForm.password.trim(),
-      }
-
-      if (!authForm.lastName.trim() || !authForm.firstName.trim() || !payload.phone || !payload.email) {
-        setAuthError('Заполните все обязательные поля.')
-        return
-      }
-
-      if (!isBelarusPhone(payload.phone)) {
-        setAuthError('Укажи телефон в белорусском формате: +375 XX XXX XX XX или 80XX XXX XX XX.')
-        return
-      }
-
-      if (payload.role === 'seeker' && (!Number.isFinite(payload.age) || payload.age < 16 || payload.age > 99)) {
-        setAuthError('Возраст при регистрации должен быть от 16 до 99 лет.')
-        return
-      }
-
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)
-      if (!emailOk) {
-        setAuthError('Проверьте email.')
-        return
-      }
-
-      if (!authForm.acceptedLegal) {
-        setAuthError('Подтвердите ознакомление с FAQ, контактами и политикой конфиденциальности.')
-        return
-      }
-
-      const user = await registerAccount(payload)
-      setCurrentUser(user)
-      setAuthError('')
-      setDataVersion((prev) => prev + 1)
-      navigate('/')
+      setAuthError('Регистрация временно недоступна.')
     } catch (error) {
       setAuthError(error.message || 'Не удалось выполнить авторизацию.')
     } finally {
@@ -545,13 +526,13 @@ export default function App() {
 
   function handleAuthFieldChange(field, value) {
     if (field === 'mode') {
+      if (value === 'register') {
+        setAuthError('Регистрация временно недоступна.')
+        return
+      }
       navigate(`/auth?mode=${value}`, { replace: true })
     }
-    setAuthForm((prev) => {
-      const next = { ...prev, [field]: value }
-      if (field === 'mode' && value === 'register') next.acceptedLegal = false
-      return next
-    })
+    setAuthForm((prev) => ({ ...prev, [field]: value }))
     if (authError) setAuthError('')
   }
 
@@ -635,6 +616,7 @@ export default function App() {
   }, [location.pathname, location.search, vacancies])
 
   function renderAppPage(section) {
+    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
     if (!currentUser) return <Navigate to="/" replace />
 
     return (
@@ -720,6 +702,8 @@ export default function App() {
   }
 
   function VacancyPageRoute() {
+    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
+
     const { vacancyId } = useParams()
     const rawVacancy = getVacancyById(remoteData.vacancies, vacancyId, searchPoint)
     const canViewNonPublicVacancy = rawVacancy && currentUser?.role === 'employer' && rawVacancy.ownerId === currentUser.id
@@ -785,6 +769,7 @@ export default function App() {
   }
 
   function EmployerVacancyFormRoute() {
+    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
     if (!currentUser || currentUser.role !== 'employer') {
       return <Navigate to="/" replace />
     }
@@ -806,6 +791,8 @@ export default function App() {
   }
 
   function EmployerVacancyManageRoute() {
+    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
+
     const { vacancyId } = useParams()
 
     if (!currentUser || currentUser.role !== 'employer') {
@@ -845,10 +832,28 @@ export default function App() {
           <Route
             path="/"
             element={
-              currentUser ? <Navigate to="/map" replace /> : <GuestLandingPage content={siteContent} onLogin={() => navigate('/auth?mode=login')} onRegister={() => navigate('/auth?mode=register')} />
+              currentUser && preLaunchAccessGranted ? <Navigate to="/map" replace /> : <LaunchLandingPage />
             }
           />
-          <Route path="/auth" element={currentUser ? <Navigate to="/map" replace /> : <AuthPage form={authForm} error={authError} isSubmitting={isAuthSubmitting} onChange={handleAuthFieldChange} onSubmit={handleAuthSubmit} />} />
+          <Route
+            path="/auth"
+            element={
+              !preLaunchAccessGranted ? (
+                <Navigate to="/" replace />
+              ) : currentUser ? (
+                <Navigate to="/map" replace />
+              ) : (
+                <AuthPage
+                  form={authForm}
+                  error={authError}
+                  isSubmitting={isAuthSubmitting}
+                  registrationDisabled
+                  onChange={handleAuthFieldChange}
+                  onSubmit={handleAuthSubmit}
+                />
+              )
+            }
+          />
           <Route path="/map" element={renderAppPage('map')} />
           <Route path="/applications" element={renderAppPage('applications')} />
           <Route path="/chat" element={renderAppPage('chat')} />

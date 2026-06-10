@@ -173,7 +173,7 @@
   margin: 0;
   flex: 1;
   min-height: 0;
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
 }
@@ -187,7 +187,6 @@
   border-radius: 0;
   flex: 1;
   min-height: 0;
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -195,7 +194,6 @@
 .mapPlaceholder {
   flex: 1;
   min-height: 0;
-  height: 100%;
   border-radius: 0;
   position: relative;
   overflow: hidden;
@@ -319,47 +317,53 @@
 
 .badge-verified {
   position: absolute;
-  top: 100px;
-  left: 10%;
-  background: #00ffb2;
-  color: #1b283b;
-  padding: 12px 24px;
-  border-radius: 999px;
+  top: 80px;
+  left: 5%;
+  background: #2DD3A7;
+  color: #00FFBB;
+  padding: 12px 40px;
+  border-radius: 220px;
+  border: 5px solid rgba(0, 0, 0, 0.25);
+  font-family: 'Geologica', sans-serif;
   font-weight: 900;
+  font-style: italic;
   font-size: 20px;
-  transform: rotate(-15deg) scale(0);
-  box-shadow: 0 10px 30px rgba(0, 255, 178, 0.4);
-  z-index: 2;
+  transform: rotate(-10.31deg) scale(0);
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
+  z-index: 4;
   text-align: center;
-  line-height: 1.1;
-  max-width: 160px;
+  line-height: 0.94;
   animation: badgePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.5) 0.5s forwards;
   pointer-events: auto;
 }
 
 .badge-applications-top {
   position: absolute;
-  top: 140px;
-  right: 10%;
+  top: 120px;
+  right: 5%;
   background: #5F58D4;
-  color: #ffffff;
-  padding: 12px 24px;
-  border-radius: 999px;
+  color: #00FFBB;
+  padding: 14px 28px;
+  border-radius: 220px;
+  border: 5px solid rgba(0, 0, 0, 0.25);
+  font-family: 'Geologica', sans-serif;
   font-weight: 900;
+  font-style: italic;
   font-size: 20px;
-  transform: rotate(15deg) scale(0);
-  box-shadow: 0 10px 30px rgba(95, 88, 212, 0.4);
-  z-index: 2;
+  transform: rotate(10.31deg) scale(0);
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
+  z-index: 4;
+  line-height: 0.94;
   animation: badgePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.5) 0.6s forwards;
   pointer-events: auto;
 }
 
 @keyframes badgePop {
-  to { transform: rotate(var(--rot, -15deg)) scale(1); }
+  to { transform: rotate(var(--rot, -10.31deg)) scale(1); }
 }
 
-.badge-verified { --rot: -15deg; }
-.badge-applications-top { --rot: 15deg; }
+.badge-verified { --rot: -10.31deg; }
+.badge-applications-top { --rot: 10.31deg; }
 
 .vacancySheet__quick-actions {
   display: flex;

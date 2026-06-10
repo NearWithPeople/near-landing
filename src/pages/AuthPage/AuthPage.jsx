@@ -5,8 +5,8 @@ import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../../constants/legalPage
 
 import './AuthPage.css'
 
-export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
-  const isLogin = form.mode === 'login'
+export function AuthPage({ form, error, isSubmitting, registrationDisabled = false, onChange, onSubmit }) {
+  const isLogin = registrationDisabled || form.mode === 'login'
   const isEmployer = form.role === 'employer'
 
   useEffect(() => {
@@ -136,12 +136,14 @@ export function AuthPage({ form, error, isSubmitting, onChange, onSubmit }) {
             <button className="primaryButton primaryButton--wide" type="submit" disabled={isSubmitting || (!isLogin && !form.acceptedLegal)}>
               {isSubmitting ? 'Подождите...' : isLogin ? 'Войти' : 'Зарегистрироваться'}
             </button>
-            <div className="authCard__switch">
-              {isLogin ? 'Нет аккаунта?' : 'У вас уже есть аккаунт?'}{' '}
-              <button type="button" className="authCard__switchButton" onClick={() => onChange('mode', isLogin ? 'register' : 'login')}>
-                {isLogin ? 'Зарегистрироваться' : 'Войти'}
-              </button>
-            </div>
+            {!registrationDisabled ? (
+              <div className="authCard__switch">
+                {isLogin ? 'Нет аккаунта?' : 'У вас уже есть аккаунт?'}{' '}
+                <button type="button" className="authCard__switchButton" onClick={() => onChange('mode', isLogin ? 'register' : 'login')}>
+                  {isLogin ? 'Зарегистрироваться' : 'Войти'}
+                </button>
+              </div>
+            ) : null}
             {error ? <div className="formError">{error}</div> : null}
           </form>
         </div>
