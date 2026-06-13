@@ -370,14 +370,14 @@ export default function App() {
     navigate('/', { replace: true })
   }, [location.pathname, navigate, preLaunchAccessGranted])
 
-  useEffect(() => {
-    if (!('geolocation' in navigator)) return
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setUserPoint({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {},
-      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-    )
-  }, [])
+  // useEffect(() => {
+  //   if (!('geolocation' in navigator)) return
+  //   navigator.geolocation.getCurrentPosition(
+  //     (pos) => setUserPoint({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+  //     () => {},
+  //     { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+  //   )
+  // }, [])
 
   useEffect(() => {
     let cancelled = false
