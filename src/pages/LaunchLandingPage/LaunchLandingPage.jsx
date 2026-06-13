@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import './LaunchLandingPage.css'
 
@@ -43,6 +43,41 @@ function useLaunchCountdown(targetDate) {
 
 function padTime(value) {
   return String(value).padStart(2, '0')
+}
+
+function LaunchLandingCard({ card, priority = false }) {
+  const [loaded, setLoaded] = useState(false)
+  const imgRef = useRef(null)
+
+  useEffect(() => {
+    const img = imgRef.current
+    if (img?.complete && img.naturalWidth > 0) {
+      setLoaded(true)
+    }
+  }, [card.image])
+
+  return (
+    <article className={`launchLanding__card${loaded ? ' launchLanding__card--loaded' : ''}`}>
+      <div className="launchLanding__cardVisual">
+        <div className="launchLanding__cardSkeleton" aria-hidden="true">
+          <span className="launchLanding__cardSkeletonShine" />
+        </div>
+        <img
+          ref={imgRef}
+          src={card.image}
+          alt=""
+          className={`launchLanding__cardImage${loaded ? ' launchLanding__cardImage--loaded' : ''}`}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
+        />
+        <div className="launchLanding__cardOverlay">
+          <p className="launchLanding__cardText">{card.text}</p>
+        </div>
+      </div>
+    </article>
+  )
 }
 
 export function LaunchLandingPage() {
@@ -97,19 +132,7 @@ export function LaunchLandingPage() {
 
       <div className="launchLanding__cards">
         {LANDING_CARDS.map((card, index) => (
-          <article key={card.image} className="launchLanding__card">
-            <div className="launchLanding__cardVisual">
-              <img src={card.image} alt="" className="launchLanding__cardImage" loading={index === 0 ? 'eager' : 'lazy'} />
-              <div className="launchLanding__cardOverlay">
-                <div className="launchLanding__cardCopy">
-                  <span className="launchLanding__cardNum" aria-hidden="true">
-                    {index + 1}
-                  </span>
-                  <p className="launchLanding__cardText">{card.text}</p>
-                </div>
-              </div>
-            </div>
-          </article>
+          <LaunchLandingCard key={card.image} card={card} priority={index === 0} />
         ))}
       </div>
     </section>
