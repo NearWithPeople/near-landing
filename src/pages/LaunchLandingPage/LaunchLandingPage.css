@@ -23,15 +23,22 @@
   --launch-logo-bar-height: calc(
     var(--launch-logo-bar-padding-y) * 2 + var(--launch-logo-size) * 128 / 306
   );
-  --launch-top-blur-extra: 10px;
-  --launch-top-blur-fade: 16px;
+  --launch-top-blur-extra: 20px;
   --launch-hero-text-size: calc(128px / var(--launch-timer-scale));
   --launch-card-radius: 15px;
   --launch-card-gap: 5px;
+  --launch-footer-bar-padding-y: clamp(14px, 3.5vw, 20px);
+  --launch-footer-safe-area: env(safe-area-inset-bottom, 0px);
+  --launch-footer-bar-height: calc(
+    var(--launch-footer-bar-padding-y) * 2 + clamp(48px, 12vw, 56px) + clamp(10px, 2.5vw, 14px) +
+      clamp(32px, 8vw, 40px) + var(--launch-footer-safe-area)
+  );
+  --launch-bottom-blur-extra: 20px;
 
   position: relative;
   isolation: isolate;
   min-height: 100dvh;
+  padding-bottom: calc(var(--launch-footer-bar-height) + var(--launch-bottom-blur-extra));
   background: linear-gradient(180deg, var(--launch-bg-top) 0%, var(--launch-bg-bottom) 100%);
   overflow-x: hidden;
 }
@@ -71,19 +78,25 @@
     rgba(233, 231, 255, 0.06) 72%,
     rgba(95, 88, 212, 0.02) 100%
   );
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
   pointer-events: none;
   mask-image: linear-gradient(
     180deg,
     #000 0%,
-    #000 calc(100% - var(--launch-top-blur-fade)),
+    #000 52%,
+    rgba(0, 0, 0, 0.82) 72%,
+    rgba(0, 0, 0, 0.42) 86%,
+    rgba(0, 0, 0, 0.12) 96%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
     180deg,
     #000 0%,
-    #000 calc(100% - var(--launch-top-blur-fade)),
+    #000 52%,
+    rgba(0, 0, 0, 0.82) 72%,
+    rgba(0, 0, 0, 0.42) 86%,
+    rgba(0, 0, 0, 0.12) 96%,
     transparent 100%
   );
 }
@@ -105,6 +118,109 @@
 .launchLanding__logoBar .launchLanding__logoWrap {
   position: relative;
   z-index: 1;
+}
+
+.launchLanding__footerBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 2.5vw, 14px);
+  padding:
+    var(--launch-footer-bar-padding-y)
+    clamp(20px, 5vw, 48px)
+    calc(var(--launch-footer-bar-padding-y) + var(--launch-footer-safe-area));
+  isolation: isolate;
+}
+
+.launchLanding__bottomBlur {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  z-index: 0;
+  width: 100vw;
+  height: calc(100% + var(--launch-bottom-blur-extra));
+  transform: translateX(-50%);
+  background: linear-gradient(
+    0deg,
+    rgba(233, 231, 255, 0.11) 0%,
+    rgba(233, 231, 255, 0.06) 72%,
+    rgba(95, 88, 212, 0.02) 100%
+  );
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  pointer-events: none;
+  mask-image: linear-gradient(
+    0deg,
+    #000 0%,
+    #000 52%,
+    rgba(0, 0, 0, 0.82) 72%,
+    rgba(0, 0, 0, 0.42) 86%,
+    rgba(0, 0, 0, 0.12) 96%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    0deg,
+    #000 0%,
+    #000 52%,
+    rgba(0, 0, 0, 0.82) 72%,
+    rgba(0, 0, 0, 0.42) 86%,
+    rgba(0, 0, 0, 0.12) 96%,
+    transparent 100%
+  );
+}
+
+.launchLanding__cta {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 22rem);
+  padding: clamp(14px, 3.5vw, 18px) clamp(24px, 7vw, 40px);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: clamp(1rem, 3.2vw, 1.125rem);
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.launchLanding__cta:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.launchLanding__cta:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 3px;
+}
+
+.launchLanding__copyright {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 22rem);
+  margin: 0;
+  padding: 0 clamp(4px, 1vw, 8px);
+  color: #fff;
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: clamp(0.68rem, 2.8vw, 0.75rem);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-shadow: 0 1px 8px rgba(28, 22, 90, 0.42);
 }
 
 .launchLanding__hero {

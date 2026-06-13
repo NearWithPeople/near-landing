@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import './LaunchLandingPage.css'
 
 const LAUNCH_TARGET = new Date('2026-06-17T00:00:00')
+const LAUNCH_TELEGRAM_URL = 'https://t.me/nearappby'
 
 const LANDING_CARDS = [
   {
@@ -134,6 +135,19 @@ export function LaunchLandingPage() {
         {LANDING_CARDS.map((card, index) => (
           <LaunchLandingCard key={card.image} card={card} priority={index === 0} />
         ))}
+      </div>
+
+      <div className="launchLanding__footerBar">
+        <div className="launchLanding__bottomBlur" aria-hidden="true" />
+        <a
+          className="launchLanding__cta"
+          href={LAUNCH_TELEGRAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Хочу попробовать!
+        </a>
+        <p className="launchLanding__copyright">© Copyright NEAR.BY 2026. All rights reserved.</p>
       </div>
     </section>
   )
