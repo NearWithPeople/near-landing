@@ -34,7 +34,7 @@ export function AppShell({ currentUser, currentSection, onNavigate, currentLocat
         }
       default:
         return {
-          title: 'NEAR',
+          title: 'near',
           subtitle: 'Вакансии рядом'
         }
     }

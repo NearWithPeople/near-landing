@@ -7,22 +7,16 @@ const LAUNCH_TARGET = new Date('2026-06-17T00:00:00')
 const LANDING_CARDS = [
   {
     image: '/landing-card/card-1.jpg',
-    text: 'Вместо бесконечных чатов мы упаковываем всё в одном месте — для вашего удобства',
+    text: 'Никаких спам-чатов — все предложения в одном месте',
   },
   {
     image: '/landing-card/card-2.jpg',
-    text: 'Зарабатывайте там, где живёте или учитесь — мы поможем найти подработку рядом',
+    text: 'Зарабатывайте здесь и сейчас — найдём подработку рядом',
   },
   {
     image: '/landing-card/card-3.jpg',
-    text: 'Платформа защищает\nвашу репутацию, страхует от необоснованных отмен и формирует личный рейтинг',
+    text: 'Страхуем от отмен, заботимся о репутации и атмосфере',
   },
-]
-
-const LANDING_HIGHLIGHTS = [
-  'Подработки в вашем районе',
-  'Без бесконечных чатов',
-  'Прозрачные условия смены',
 ]
 
 function getCountdownParts(targetDate) {
@@ -56,11 +50,14 @@ export function LaunchLandingPage() {
 
   return (
     <section className="launchLanding" aria-labelledby="launch-landing-title">
-      <header className="launchLanding__hero launchLanding__zone launchLanding__zone--light">
+      <div className="launchLanding__logoBar">
+        <div className="launchLanding__topBlur" aria-hidden="true" />
         <div className="launchLanding__logoWrap">
           <span className="launchLanding__logo" role="img" aria-label="nearby" />
         </div>
+      </div>
 
+      <header className="launchLanding__hero launchLanding__zone launchLanding__zone--light">
         <div className="launchLanding__timer" aria-live="polite" aria-atomic="true">
           {isFinished ? (
             <p className="launchLanding__timerLine launchLanding__timerLine--hours">Скоро запуск</p>
@@ -82,22 +79,21 @@ export function LaunchLandingPage() {
           )}
         </div>
 
-        <p className="launchLanding__caption">...осталось до запуска первого радара подработок</p>
+        <div className="launchLanding__heroCopy">
+          <p className="launchLanding__caption">
+            ...осталось до запуска первого{' '}
+            <span className="launchLanding__captionHighlight">радара подработок</span>
+          </p>
+          <p className="launchLanding__heroLead">
+            и вот почему
+            <br />
+            это стоит попробовать:
+          </p>
+        </div>
         <h1 id="launch-landing-title" className="launchLanding__srOnly">
           Запуск радара подработок nearby
         </h1>
       </header>
-
-      <section className="launchLanding__intro launchLanding__zone launchLanding__zone--light" aria-label="О запуске">
-        <p className="launchLanding__introLead">Первый радар подработок nearby уже на подходе</p>
-        <ul className="launchLanding__highlights">
-          {LANDING_HIGHLIGHTS.map((item) => (
-            <li key={item} className="launchLanding__highlight">
-              {item}
-            </li>
-          ))}
-        </ul>
-      </section>
 
       <div className="launchLanding__cards">
         {LANDING_CARDS.map((card, index) => (
@@ -116,25 +112,6 @@ export function LaunchLandingPage() {
           </article>
         ))}
       </div>
-
-      <section className="launchLanding__pitch launchLanding__zone launchLanding__zone--dark" aria-label="Для кого платформа">
-        <p className="launchLanding__pitchEyebrow">Для кого</p>
-        <div className="launchLanding__pitchGrid">
-          <article className="launchLanding__pitchCard">
-            <h3 className="launchLanding__pitchTitle">Соискателям</h3>
-            <p className="launchLanding__pitchText">Карта смен, быстрый отклик и понятные условия — чтобы находить подработку рядом с домом или учёбой.</p>
-          </article>
-          <article className="launchLanding__pitchCard">
-            <h3 className="launchLanding__pitchTitle">Работодателям</h3>
-            <p className="launchLanding__pitchText">Публикация смен, отклики в одном месте и инструменты, которые экономят время на поиск людей.</p>
-          </article>
-        </div>
-      </section>
-
-      <footer className="launchLanding__footer launchLanding__zone launchLanding__zone--dark">
-        <p className="launchLanding__footerTitle">Скоро откроем доступ</p>
-        <p className="launchLanding__footerText">Следите за таймером — первый радар подработок nearby стартует 17 июня.</p>
-      </footer>
     </section>
   )
 }
