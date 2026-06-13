@@ -369,7 +369,7 @@ export default function App() {
 
     navigate('/', { replace: true })
   }, [location.pathname, navigate, preLaunchAccessGranted])
-
+// сдеоай так чтобы он щапрагивал первый ращ когда нажимаешь чтобы  на карте найти себя а не при взоде на сайт
   // useEffect(() => {
   //   if (!('geolocation' in navigator)) return
   //   navigator.geolocation.getCurrentPosition(
