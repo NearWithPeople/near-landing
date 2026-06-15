@@ -1,113 +1,86 @@
+import {
+  formatApplicationSalary,
+  getDisplayApplications,
+  normalizeApplication,
+} from '../../utils/applicationPresentation'
 import './ApplicationsPage.css'
 
-const MOCK_APPLICATIONS = [
-  {
-    id: 'app-1',
-    vacancyTitle: 'Грузчик для переезда бренд-офиса',
-    address: 'г. Минск, ул. Громова 30',
-    salary: 'Оплата 45 Br за смену',
-    time: 'с 08:00 по 12:00 2 июня 2026',
-    status: 'active',
-    statusLabel: 'Активен',
-  },
-  {
-    id: 'app-2',
-    vacancyTitle: 'Сотрудник бригады ресторана',
-    address: 'г. Минск, ул. Ленина 15 (ТЦ "Galileo")',
-    salary: 'Оплата от 70 Br за смену + питание',
-    time: 'с 08:00 16 июня 2026 по 21:00 17 июня 2026',
-    status: 'pending',
-    statusLabel: 'Ожидает',
-    requirements: [
-      'Для работы необходима медсправка*',
-      'Доступно с 14 лет с согласием законного представителя*'
-    ]
-  },
-  {
-    id: 'app-3',
-    vacancyTitle: 'Волонтер на фестивале еды в ларьке',
-    status: 'cancelled',
-    statusLabel: 'Отменён',
-  },
-  {
-    id: 'app-4',
-    vacancyTitle: 'Волонтер на марафоне',
-    status: 'cancelled',
-    statusLabel: 'Отменён',
-  },
-  {
-    id: 'app-5',
-    vacancyTitle: 'Работник зеленого строительства',
-    status: 'completed',
-    statusLabel: 'Выполнен',
-  }
-]
-
-export function ApplicationsPage({ currentUser, applications = [], onGoToCatalog, onOpenVacancy }) {
-  const isEmployer = currentUser?.role === 'employer'
-  const displayApplications = applications.length > 0 ? applications : MOCK_APPLICATIONS
+export function ApplicationsPage({ currentUser, applications = [], onOpenApplication }) {
+  const displayApplications = getDisplayApplications(applications).map(normalizeApplication)
 
   return (
     <section className="applicationsPage">
-      <div className="applicationsHeader">
-        <button className="statsButton">
-          <img src="/map-icons/list.png" alt="" className="statsIcon" style={{filter: 'brightness(0) invert(1)'}} />
+      <div className="applicationsPage__toolbar">
+        <button type="button" className="applicationsPage__statsBtn">
+          <img src="/map-icons/list.png" alt="" className="applicationsPage__statsIcon" />
           Статистика
         </button>
-        <button className="archiveButton">
-          <img src="/map-icons/message-circle.png" alt="" className="archiveIcon" style={{filter: 'brightness(0) invert(1)'}} />
-          Архив
+        <button type="button" className="applicationsPage__archiveBtn" aria-label="Архив">
+          <span aria-hidden="true">↺</span>
         </button>
       </div>
 
-      <div className="applicationsList">
-        {displayApplications.map((app) => (
-          <article key={app.id} className={`applicationCard applicationCard--${app.status}`}>
-            <div className="applicationCard__main">
-              <div className="applicationCard__content">
-                <h3 className="applicationCard__title">{app.vacancyTitle}</h3>
-                
-                {app.address && (
-                  <div className="applicationCard__info">
-                    <img src="/map-icons/map-pin.png" alt="" className="infoIcon" />
-                    <span>{app.address}</span>
-                  </div>
-                )}
-                
-                {app.salary && (
-                  <div className="applicationCard__info">
-                    <img src="/map-icons/losso.png" alt="" className="infoIcon" />
-                    <span>{app.salary}</span>
-                  </div>
-                )}
-                
-                {app.time && (
-                  <div className="applicationCard__info">
-                    <img src="/map-icons/message-circle.png" alt="" className="infoIcon" />
-                    <span>{app.time}</span>
-                  </div>
-                )}
+      <div className="applicationsPage__list">
+        {displayApplications.map((app) => {
+          const isCompact = app.statusVariant === 'cancelled' || app.statusVariant === 'completed'
 
-                {app.requirements?.map((req, idx) => (
-                  <div key={idx} className="applicationCard__requirement">
-                    <img src="/map-icons/notepad-text.png" alt="" className="reqIcon" />
-                    <span>{req}</span>
+          return (
+            <article
+              key={app.id}
+              className={`applicationCard applicationCard--${app.statusVariant}${isCompact ? ' applicationCard--compact' : ''}`}
+            >
+              <button type="button" className="applicationCard__button" onClick={() => onOpenApplication?.(app.id)}>
+                {isCompact ? (
+                  <div className="applicationCard__compactRow">
+                    <h3 className="applicationCard__title">{app.vacancyTitle}</h3>
+                    <div className={`applicationCard__badge applicationCard__badge--${app.statusVariant}`}>
+                      <span className="applicationCard__badgeDot" aria-hidden="true" />
+                      <span>{app.statusLabel}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <div className="applicationCard__main">
+                    <div className="applicationCard__content">
+                      <h3 className="applicationCard__title">{app.vacancyTitle}</h3>
 
-              <div className={`statusBadge statusBadge--${app.status}`}>
-                <span className="statusDot"></span>
-                <span className="statusText">{app.statusLabel || app.status}</span>
-              </div>
-            </div>
-          </article>
-        ))}
+                      {app.address ? (
+                        <div className="applicationCard__info">
+                          <img src="/map-icons/map-pin.png" alt="" className="applicationCard__infoIcon" />
+                          <span>{app.address}</span>
+                        </div>
+                      ) : null}
+
+                      <div className="applicationCard__info">
+                        <img src="/map-icons/losso.png" alt="" className="applicationCard__infoIcon" />
+                        <span>{app.salary || formatApplicationSalary(null, app)}</span>
+                      </div>
+
+                      {app.time ? (
+                        <div className="applicationCard__info">
+                          <img src="/map-icons/message-circle.png" alt="" className="applicationCard__infoIcon" />
+                          <span>{app.time}</span>
+                        </div>
+                      ) : null}
+
+                      {app.requirements?.map((requirement) => (
+                        <div key={requirement} className="applicationCard__requirement">
+                          <span className="applicationCard__check" aria-hidden="true" />
+                          <span>{requirement}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className={`applicationCard__badge applicationCard__badge--${app.statusVariant}`}>
+                      <span className="applicationCard__badgeDot" aria-hidden="true" />
+                      <span>{app.statusLabel}</span>
+                    </div>
+                  </div>
+                )}
+              </button>
+            </article>
+          )
+        })}
       </div>
-
-      <button className="primaryButton primaryButton--wide applicationsCatalogBtn" onClick={onGoToCatalog}>
-        Открыть вакансии
-      </button>
     </section>
   )
 }

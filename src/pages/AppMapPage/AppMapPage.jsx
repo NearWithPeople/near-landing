@@ -1,7 +1,63 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { MapboxVacancyMap } from '../../components/MapboxVacancyMap'
 import './AppMapPage.css'
+
+function VacancyDescriptionPreview({ description, requirements, onOpenVacancy }) {
+  const openedRef = useRef(false)
+  const touchStartY = useRef(0)
+
+  const openVacancyPage = useCallback(() => {
+    if (openedRef.current) return
+    openedRef.current = true
+    onOpenVacancy()
+  }, [onOpenVacancy])
+
+  useEffect(() => {
+    openedRef.current = false
+  }, [description])
+
+  return (
+    <div
+      className="vacancySheet__description"
+      role="button"
+      tabIndex={0}
+      aria-label="Открыть полное описание вакансии"
+      onClick={openVacancyPage}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          openVacancyPage()
+        }
+      }}
+      onTouchStart={(event) => {
+        touchStartY.current = event.touches[0]?.clientY ?? 0
+      }}
+      onTouchMove={(event) => {
+        const currentY = event.touches[0]?.clientY ?? touchStartY.current
+        if (Math.abs(currentY - touchStartY.current) > 8) {
+          openVacancyPage()
+        }
+      }}
+      onWheel={(event) => {
+        if (Math.abs(event.deltaY) > 0) {
+          event.preventDefault()
+          openVacancyPage()
+        }
+      }}
+    >
+      <div className="vacancySheet__desc-text">{description}</div>
+      <div className="vacancySheet__requirements">
+        {requirements?.map((req) => (
+          <div key={req} className="requirement-item">
+            <img src="/map-icons/notepad-text.png" alt="" className="requirement-icon" />
+            <span>{req}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export function AppMapPage({
   vacancies,
@@ -96,19 +152,11 @@ export function AppMapPage({
                 <span className="vacancySheet__count-tag">уже {previewVacancy.applicationCount} отклика</span>
               </div>
 
-              <div className="vacancySheet__description">
-                <div className="vacancySheet__desc-text">
-                  {previewVacancy.description}
-                </div>
-                <div className="vacancySheet__requirements">
-                  {previewVacancy.requirements?.map((req, idx) => (
-                    <div key={idx} className="requirement-item">
-                      <img src="/map-icons/notepad-text.png" alt="" className="requirement-icon" />
-                      <span>{req}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <VacancyDescriptionPreview
+                description={previewVacancy.description}
+                requirements={previewVacancy.requirements}
+                onOpenVacancy={() => onOpenVacancy(previewVacancy.id)}
+              />
 
               <div className="vacancySheet__footer">
                 <div className="company-info">

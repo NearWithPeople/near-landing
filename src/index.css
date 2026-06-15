@@ -9,12 +9,12 @@
 
 /* Лесовая палитра: Лес / Вечно-зелёный / Сосна / Туман */
 :root {
-  --palette-forest: #04202c;
+  --palette-forest: #1B283B;
   --palette-evergreen: #304040;
   --palette-pine: #5b7065;
   --palette-mist: #c9d1c8;
 
-  --palette-forest-rgb: 4, 32, 44;
+  --palette-forest-rgb: 27, 40, 59;
   --palette-evergreen-rgb: 48, 64, 64;
   --palette-pine-rgb: 91, 112, 101;
   --palette-mist-rgb: 201, 209, 200;

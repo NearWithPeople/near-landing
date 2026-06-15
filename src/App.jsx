@@ -9,6 +9,7 @@ import { BELARUS_CITY_OPTIONS, DEFAULT_CITY_VALUE, getCityOption, getCityPoint }
 import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from './constants/legalPages'
 import { AuthPage } from './pages/AuthPage/AuthPage'
 import { ApplicationsPage } from './pages/ApplicationsPage/ApplicationsPage'
+import { ApplicationDetailPage } from './pages/ApplicationDetailPage/ApplicationDetailPage'
 import { CatalogPage } from './pages/CatalogPage/CatalogPage'
 import { EmployerVacancyFormPage } from './pages/EmployerVacancyFormPage/EmployerVacancyFormPage'
 import { EmployerVacancyManagePage } from './pages/EmployerVacancyManagePage/EmployerVacancyManagePage'
@@ -16,7 +17,6 @@ import { LaunchLandingPage } from './pages/LaunchLandingPage/LaunchLandingPage'
 import { ProfilePage } from './pages/ProfilePage/ProfilePage'
 import { AppMapPage } from './pages/AppMapPage/AppMapPage'
 import { StaticInfoPage } from './pages/StaticInfoPage/StaticInfoPage'
-import { VacancyPage } from './pages/VacancyPage/VacancyPage'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
 import { getCurrentUser, loginAccount, logoutUser, updateUserProfile } from './services/authService'
 import { loadAppBootstrap } from './services/appService'
@@ -29,6 +29,7 @@ import {
   readPreLaunchAccess,
   stripPreLaunchAccessFromSearch,
 } from './utils/preLaunchAccess'
+import { getDisplayApplications, summarizeApplications } from './utils/applicationPresentation'
 
 const LEGACY_APP_ROUTES = {
   '/app': '/',
@@ -310,6 +311,8 @@ export default function App() {
     if (!currentUser) return []
     return currentUser.role === 'employer' ? listApplicationsForEmployer(remoteData.applications, currentUser.id) : listApplicationsForUser(remoteData.applications, currentUser.id)
   }, [currentUser, remoteData.applications])
+  const displayApplications = useMemo(() => getDisplayApplications(applications), [applications])
+  const applicationsSummary = useMemo(() => summarizeApplications(displayApplications), [displayApplications])
   const completedTasks = useMemo(() => (currentUser ? listCompletedTasksForUser(remoteData.completedTasks, currentUser.id) : []), [currentUser, remoteData.completedTasks])
   const employerVacancies = useMemo(() => (currentUser ? listEmployerVacancies(remoteData.employerVacancies, currentUser.id) : []), [currentUser, remoteData.employerVacancies])
   const employerCompletedTasks = useMemo(() => [...(remoteData.employerCompletedTasks || [])], [remoteData.employerCompletedTasks])
@@ -630,6 +633,7 @@ export default function App() {
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
+        headerSubtitle={section === 'applications' ? applicationsSummary.subtitle : undefined}
         mapFilters={
           section === 'map' ? (
             <MapFiltersToolbar
@@ -674,9 +678,8 @@ export default function App() {
         {section === 'applications' ? (
           <ApplicationsPage
             currentUser={currentUser}
-            applications={applications}
-            onGoToCatalog={() => navigate('/')}
-            onOpenVacancy={(vacancyId) => navigate(`/vacancy/${vacancyId}`)}
+            applications={displayApplications}
+            onOpenApplication={(applicationId) => navigate(`/application/${applicationId}`)}
           />
         ) : null}
         {section === 'chat' ? (
@@ -687,14 +690,12 @@ export default function App() {
           <ProfilePage
             currentUser={currentUser}
             completedTasks={completedTasks}
-            employerCompletedTasks={employerCompletedTasks}
             employerVacancies={employerVacancies}
-            onGoToCatalog={() => navigate('/')}
+            onNavigate={navigate}
             onOpenEmployerVacancy={(vacancyId) => navigate(`/employer/vacancies/${vacancyId}`)}
             onCreateVacancy={() => navigate('/employer/vacancies/new')}
             onLogout={handleLogout}
             onSaveProfile={handleProfileSave}
-            onRateCompletedTask={handleRateCompletedTask}
           />
         ) : null}
       </AppShell>
@@ -703,39 +704,38 @@ export default function App() {
 
   function VacancyPageRoute() {
     if (!preLaunchAccessGranted) return <Navigate to="/" replace />
+    if (!currentUser) return <Navigate to="/" replace />
 
     const { vacancyId } = useParams()
     const rawVacancy = getVacancyById(remoteData.vacancies, vacancyId, searchPoint)
     const canViewNonPublicVacancy = rawVacancy && currentUser?.role === 'employer' && rawVacancy.ownerId === currentUser.id
     const vacancy = rawVacancy && (rawVacancy.status === 'open' || canViewNonPublicVacancy) ? rawVacancy : null
-    const relatedVacancies = vacancies.filter((item) => item.id !== vacancyId && item.status === 'open').slice(0, 3)
+    const application = displayApplications.find((item) => item.vacancyId === vacancyId) || null
+
+    if (application) {
+      return <Navigate to={`/application/${application.id}`} replace />
+    }
 
     return (
       <AppShell
         currentUser={currentUser}
-        currentSection="vacancy"
+        currentSection="map"
         onNavigate={navigate}
         currentLocationName={currentLocationName}
+        hideTopbar
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
       >
-        <VacancyPage
+        <ApplicationDetailPage
           vacancy={vacancy}
-          currentUser={currentUser}
           hasApplied={vacancy ? appliedVacancyIds.includes(vacancy.id) : false}
-          seekerApplication={
-            currentUser?.role === 'seeker'
-              ? remoteData.applications.find((application) => application.vacancyId === vacancyId && application.applicantId === currentUser.id) ||
-                null
-              : null
-          }
-          onApply={handleApplyToVacancy}
-          onBackToCatalog={() => navigate('/')}
-          onOpenVacancy={(nextVacancyId) => navigate(`/vacancy/${nextVacancyId}`)}
+          onBack={() => navigate('/map')}
+          onApply={() => handleApplyToVacancy(vacancyId)}
           onShowOnMap={(nextVacancyId) => navigate(`/map?vacancy=${nextVacancyId}`)}
-          relatedVacancies={relatedVacancies}
+          emptyBackLabel="Назад к карте"
+          emptyMessage="Смена не найдена"
         />
       </AppShell>
     )
@@ -825,6 +825,39 @@ export default function App() {
     )
   }
 
+  function ApplicationDetailRoute() {
+    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
+    if (!currentUser) return <Navigate to="/" replace />
+
+    const { applicationId } = useParams()
+    const application = displayApplications.find((item) => item.id === applicationId) || null
+    const vacancy = application?.vacancyId ? getVacancyById(remoteData.vacancies, application.vacancyId, searchPoint) : null
+
+    return (
+      <AppShell
+        currentUser={currentUser}
+        currentSection="applications"
+        onNavigate={navigate}
+        currentLocationName={currentLocationName}
+        hideTopbar
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
+        cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+      >
+        <ApplicationDetailPage
+          application={application}
+          vacancy={vacancy}
+          onBack={() => navigate('/applications')}
+          onOpenChat={() => navigate('/chat')}
+          onCancel={() => navigate('/applications')}
+          onShowOnMap={(vacancyId) => navigate(`/map?vacancy=${vacancyId}`)}
+          emptyMessage="Отклик не найден"
+        />
+      </AppShell>
+    )
+  }
+
   return (
     <div className="site">
       <main className="site__main" id="start">
@@ -856,6 +889,7 @@ export default function App() {
           />
           <Route path="/map" element={renderAppPage('map')} />
           <Route path="/applications" element={renderAppPage('applications')} />
+          <Route path="/application/:applicationId" element={<ApplicationDetailRoute />} />
           <Route path="/chat" element={renderAppPage('chat')} />
           <Route path="/profile" element={renderAppPage('profile')} />
           <Route path="/vacancy/:vacancyId" element={<VacancyPageRoute />} />

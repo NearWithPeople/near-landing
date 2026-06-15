@@ -1,172 +1,210 @@
 .applicationsPage {
-  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   min-height: 100%;
-  background: #0b0c0e;
+  padding: 4px 0 24px;
+  background: var(--palette-forest);
 }
 
-.applicationsHeader {
+.applicationsPage__toolbar {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
 }
 
-.statsButton, .archiveButton {
+.applicationsPage__statsBtn {
   flex: 1;
-  height: 64px;
-  background: rgba(255, 255, 255, 0.05);
+  min-height: 58px;
+  padding: 0 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 32px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
   color: #fff;
-  font-weight: 700;
   font-size: 16px;
-  display: flex;
+  font-weight: 800;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   cursor: pointer;
 }
 
-.statsIcon, .archiveIcon {
+.applicationsPage__statsIcon {
   width: 20px;
   height: 20px;
-  opacity: 0.7;
+  filter: brightness(0) invert(1);
+  opacity: 0.72;
 }
 
-.applicationsList {
+.applicationsPage__archiveBtn {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.applicationsPage__list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .applicationCard {
-  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 40px;
-  padding: 24px;
-  transition: transform 0.2s ease;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.applicationCard--compact {
+  border-radius: 22px;
+}
+
+.applicationCard__button {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .applicationCard__main {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 14px;
+  padding: 22px 20px;
+}
+
+.applicationCard__compactRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
 }
 
 .applicationCard__content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  gap: 10px;
 }
 
 .applicationCard__title {
-  font-size: 20px;
-  font-weight: 900;
-  color: #fff;
-  line-height: 1.2;
   margin: 0;
+  color: #fff;
+  font-size: clamp(1.05rem, 4.2vw, 1.25rem);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
-.applicationCard__info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
-  font-weight: 600;
+.applicationCard--compact .applicationCard__title {
+  font-size: 15px;
+  font-weight: 800;
 }
 
-.infoIcon {
-  width: 16px;
-  height: 16px;
-  filter: brightness(0) invert(1);
-  opacity: 0.6;
-}
-
+.applicationCard__info,
 .applicationCard__requirement {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 13px;
-  font-weight: 500;
-  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
-.reqIcon {
-  width: 14px;
-  height: 14px;
+.applicationCard__infoIcon {
+  width: 16px;
+  height: 16px;
   margin-top: 2px;
   filter: brightness(0) invert(1);
-  opacity: 0.4;
+  opacity: 0.62;
+  flex-shrink: 0;
 }
 
-/* Status Badges */
-.statusBadge {
-  display: flex;
+.applicationCard__check {
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.applicationCard__requirement {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.applicationCard__badge {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 10px 16px;
   border-radius: 999px;
+  color: #fff;
+  font-size: 14px;
   font-weight: 800;
-  font-size: 15px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.statusDot {
-  width: 12px;
-  height: 12px;
+.applicationCard__badgeDot {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 
-/* Status Specific Styles */
-.statusBadge--active {
-  background: rgba(95, 88, 212, 0.2);
-  color: #fff;
-  box-shadow: 0 0 20px rgba(95, 88, 212, 0.3);
-}
-.statusBadge--active .statusDot {
-  background: #5F58D4;
-  box-shadow: 0 0 10px #5F58D4;
+.applicationCard__badge--active {
+  background: rgba(95, 88, 212, 0.22);
+  box-shadow: 0 0 18px rgba(95, 88, 212, 0.28);
 }
 
-.statusBadge--pending {
-  background: rgba(255, 212, 0, 0.15);
-  color: #fff;
-  box-shadow: 0 0 20px rgba(255, 212, 0, 0.2);
-}
-.statusBadge--pending .statusDot {
-  background: #FFD400;
-  box-shadow: 0 0 10px #FFD400;
+.applicationCard__badge--active .applicationCard__badgeDot {
+  background: #5f58d4;
+  box-shadow: 0 0 10px #5f58d4;
 }
 
-.statusBadge--cancelled {
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.7);
-}
-.statusBadge--cancelled .statusDot {
-  background: rgba(255, 255, 255, 0.2);
+.applicationCard__badge--pending {
+  background: rgba(255, 212, 0, 0.16);
+  box-shadow: 0 0 18px rgba(255, 212, 0, 0.22);
 }
 
-.statusBadge--completed {
+.applicationCard__badge--pending .applicationCard__badgeDot {
+  background: #ffd400;
+  box-shadow: 0 0 10px #ffd400;
+}
+
+.applicationCard__badge--cancelled {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.applicationCard__badge--cancelled .applicationCard__badgeDot {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.applicationCard__badge--completed {
   background: rgba(34, 197, 94, 0.15);
-  color: #fff;
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
 }
-.statusBadge--completed .statusDot {
+
+.applicationCard__badge--completed .applicationCard__badgeDot {
   background: #22c55e;
   box-shadow: 0 0 10px #22c55e;
 }
 
-/* Card specific adjustments */
-.applicationCard--cancelled {
-  opacity: 0.6;
-}
-
-.applicationsCatalogBtn {
-  margin-top: auto;
-  margin-bottom: 20px;
+.applicationCard--compact {
+  opacity: 0.72;
 }

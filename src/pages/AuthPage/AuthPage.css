@@ -125,7 +125,7 @@
   background:
     radial-gradient(ellipse 120% 90% at 40% 20%, rgba(91, 112, 101, 0.35), transparent 52%),
     radial-gradient(ellipse 90% 70% at 85% 75%, rgba(48, 64, 64, 0.45), transparent 50%),
-    linear-gradient(155deg, #021820 0%, #04202c 38%, #304040 72%, #04202c 100%);
+    linear-gradient(155deg, #141f2e 0%, #1B283B 38%, #304040 72%, #1B283B 100%);
   background-size: 180% 180%;
   animation: auth-mesh-shift 11s ease-in-out infinite;
 }
@@ -263,7 +263,7 @@
   background:
     radial-gradient(ellipse 120% 90% at 8% 8%, rgba(91, 112, 101, 0.26), transparent 52%),
     radial-gradient(ellipse 90% 70% at 92% 94%, rgba(48, 64, 64, 0.36), transparent 48%),
-    linear-gradient(180deg, #060e12 0%, #04202c 48%, #061820 100%);
+    linear-gradient(180deg, #141f2e 0%, #1B283B 48%, #121c2a 100%);
 
   background-position:
     8% 18%,

@@ -131,7 +131,7 @@
 
 /* Основное приложение в формате промо-лендинга (как guestLandingPromo); карта без изменений */
 .site:has(.appFrame--promo) {
-  background: var(--palette-forest, #04202c);
+  background: var(--palette-forest, #1B283B);
   color: rgba(var(--palette-mist-rgb), 0.92);
 }
 
@@ -1419,7 +1419,7 @@
   border-radius: 0;
   position: relative;
   overflow: hidden;
-  background: #0b0c0e;
+  background: var(--palette-forest);
 }
 
 .mapboxCanvas,
@@ -1435,7 +1435,7 @@
   padding: 24px;
   text-align: center;
   color: rgba(255, 255, 255, 0.78);
-  background: #0b0c0e;
+  background: var(--palette-forest);
 }
 
 .mapboxCanvas .mapboxgl-ctrl-top-right {

@@ -1,7 +1,22 @@
 import { Icon } from './Icon'
 import { CustomSelect } from './CustomSelect'
 
-export function AppShell({ currentUser, currentSection, onNavigate, currentLocationName, children, cityOptions, selectedCity, onCityChange, onCreateVacancy, mapFilters = null, isVacancySelected = false }) {
+export function AppShell({
+  currentUser,
+  currentSection,
+  onNavigate,
+  currentLocationName,
+  children,
+  cityOptions,
+  selectedCity,
+  onCityChange,
+  onCreateVacancy,
+  mapFilters = null,
+  isVacancySelected = false,
+  headerTitle,
+  headerSubtitle,
+  hideTopbar = false,
+}) {
   const isMapSection = currentSection === 'map'
   const keepBottomNavOnAdaptive = true // Always keep bottom nav as per request
 
@@ -10,54 +25,59 @@ export function AppShell({ currentUser, currentSection, onNavigate, currentLocat
       case 'map':
         return {
           title: currentLocationName || 'пр. Независимости',
-          subtitle: '4 вакансии поблизости ›'
+          subtitle: '4 вакансии поблизости ›',
         }
       case 'applications':
         return {
-          title: 'Задачи',
-          subtitle: '2 активные задачи'
+          title: 'Отклики',
+          subtitle: 'Пока нет активных откликов',
         }
       case 'chat':
         return {
           title: 'Чат',
-          subtitle: '4 вакансии поблизости ›'
+          subtitle: '4 вакансии поблизости ›',
         }
       case 'profile':
         return {
           title: 'Профиль',
-          subtitle: currentUser?.fullName || 'Пользователь'
+          subtitle:
+            currentUser?.role === 'employer'
+              ? currentUser?.companyName || currentUser?.fullName || 'Работодатель'
+              : 'нашего звёздного специалиста',
         }
       case 'vacancy':
         return {
           title: currentLocationName || 'Вакансия',
-          subtitle: 'Детали смены'
+          subtitle: 'Детали смены',
         }
       default:
         return {
           title: 'near',
-          subtitle: 'Вакансии рядом'
+          subtitle: 'Вакансии рядом',
         }
     }
   }
 
   const header = getHeaderContent()
+  const resolvedTitle = headerTitle ?? header.title
+  const resolvedSubtitle = headerSubtitle ?? header.subtitle
 
   return (
     <div className={`appFrame ${isMapSection ? '' : 'appFrame--promo'}`}>
       <div className={`appMain ${isMapSection ? 'appMain--map' : ''}`}>
-        {currentSection !== 'landing' && (
+        {currentSection !== 'landing' && !hideTopbar ? (
           <header className="appTopbar--custom">
             <div className="appTopbar__content">
               <div className="appTopbar__location">
-                <div className="appTopbar__address">{header.title}</div>
-                <div className="appTopbar__nearby">{header.subtitle}</div>
+                <div className="appTopbar__address">{resolvedTitle}</div>
+                <div className="appTopbar__nearby">{resolvedSubtitle}</div>
               </div>
               <div className="appTopbar__balance">
                 9999<span className="balance-dot"></span>
               </div>
             </div>
           </header>
-        )}
+        ) : null}
 
         <div className={`appContent ${isMapSection ? 'appContent--map' : 'appContent--promo'}`}>{children}</div>
 
@@ -85,10 +105,10 @@ export function AppShell({ currentUser, currentSection, onNavigate, currentLocat
               </>
             ) : null}
             <nav className={`bottomNav--custom ${isVacancySelected ? 'is-hidden' : 'is-visible'}`} aria-label="Основная навигация">
-              <div 
-                className="bottomNav__active-indicator" 
-                style={{ 
-                  '--bottom-nav-indicator-index': ['map', 'applications', 'chat', 'profile'].indexOf(currentSection)
+              <div
+                className="bottomNav__active-indicator"
+                style={{
+                  '--bottom-nav-indicator-index': ['map', 'applications', 'chat', 'profile'].indexOf(currentSection),
                 }}
               >
                 <div className="bottomNav__active-outer"></div>
@@ -117,4 +137,3 @@ export function AppShell({ currentUser, currentSection, onNavigate, currentLocat
     </div>
   )
 }
-

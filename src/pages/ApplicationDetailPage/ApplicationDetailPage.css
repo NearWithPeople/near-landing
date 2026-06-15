@@ -1,0 +1,377 @@
+.applicationDetailPage {
+  --application-detail-panel-height: clamp(260px, 38dvh, 320px);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 120px);
+  margin: -20px -20px 0;
+  background: var(--palette-forest);
+}
+
+.applicationDetailPage__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px 14px;
+  background: rgba(var(--palette-forest-rgb), 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.applicationDetailPage__back {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.applicationDetailPage__topTitle {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.applicationDetailPage__statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.applicationDetailPage__statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.applicationDetailPage__statusBadge--active {
+  background: rgba(95, 88, 212, 0.22);
+  box-shadow: 0 0 18px rgba(95, 88, 212, 0.28);
+}
+
+.applicationDetailPage__statusBadge--active .applicationDetailPage__statusDot {
+  background: #5f58d4;
+  box-shadow: 0 0 10px #5f58d4;
+}
+
+.applicationDetailPage__statusBadge--pending {
+  background: rgba(255, 212, 0, 0.16);
+  box-shadow: 0 0 18px rgba(255, 212, 0, 0.22);
+}
+
+.applicationDetailPage__statusBadge--pending .applicationDetailPage__statusDot {
+  background: #ffd400;
+  box-shadow: 0 0 10px #ffd400;
+}
+
+.applicationDetailPage__statusBadge--cancelled,
+.applicationDetailPage__statusBadge--completed {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.applicationDetailPage__statusBadge--cancelled .applicationDetailPage__statusDot {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.applicationDetailPage__statusBadge--completed .applicationDetailPage__statusDot {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+}
+
+.applicationDetailPage__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px calc(var(--application-detail-panel-height) + 24px);
+}
+
+.applicationDetailPage__card {
+  display: grid;
+  gap: 14px;
+  padding: 22px 20px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.applicationDetailPage__cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.applicationDetailPage__title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 4.8vw, 1.7rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.applicationDetailPage__cardActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.applicationDetailPage__iconBtn {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.applicationDetailPage__iconBtn--menu {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+
+.applicationDetailPage__infoRow,
+.applicationDetailPage__requirement {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.applicationDetailPage__infoIcon {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  filter: brightness(0) invert(1);
+  opacity: 0.72;
+  flex-shrink: 0;
+}
+
+.applicationDetailPage__check {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.applicationDetailPage__description {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.applicationDetailPage__mapCard {
+  width: 100%;
+  margin-top: 4px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.applicationDetailPage__map {
+  width: 100%;
+  height: 180px;
+}
+
+.applicationDetailPage__mapWrap {
+  display: grid;
+  gap: 8px;
+}
+
+.applicationDetailPage__walkTime {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.applicationDetailPage__panelHead {
+  display: grid;
+  gap: 4px;
+}
+
+.applicationDetailPage__panelSubtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.applicationDetailPage__progressDetail {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.applicationDetailPage__bottomPanel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--map-bottom-nav-clearance, 92px) + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  display: grid;
+  gap: 12px;
+  padding: 18px 16px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(var(--palette-forest-rgb), 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.applicationDetailPage--vacancy {
+  --application-detail-panel-height: clamp(92px, 14dvh, 110px);
+}
+
+.applicationDetailPage__topSpacer {
+  width: 88px;
+}
+
+.applicationDetailPage__actionBtn--full {
+  width: 100%;
+}
+
+.applicationDetailPage__bottomPanel--vacancy {
+  gap: 0;
+}
+
+.applicationDetailPage__panelTitle {
+  margin: 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.applicationDetailPage__progress {
+  display: grid;
+  gap: 10px;
+}
+
+.applicationDetailPage__progressTrack {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.applicationDetailPage__progressSegment {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.applicationDetailPage__progressSegment--filled {
+  background: #ffd400;
+  box-shadow: 0 0 14px rgba(255, 212, 0, 0.42);
+}
+
+.applicationDetailPage__progressLabels {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.applicationDetailPage__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.applicationDetailPage__actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.applicationDetailPage__actionBtn img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+}
+
+.applicationDetailPage__actionBtn--ghost {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.applicationDetailPage__actionBtn--primary {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.applicationDetailPage__empty {
+  display: grid;
+  gap: 16px;
+  padding: 24px 16px;
+  color: #fff;
+}
+
+.applicationDetailPage__ghostBtn {
+  justify-self: start;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .applicationDetailPage {
+    margin: 0;
+    min-height: auto;
+  }
+
+  .applicationDetailPage__bottomPanel {
+    position: sticky;
+    bottom: 0;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .applicationDetailPage__scroll {
+    padding-bottom: 24px;
+  }
+}
