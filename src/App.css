@@ -1811,14 +1811,241 @@
 }
 
 /* PC Adaptation */
+.desktopRail {
+  display: none;
+}
+
 @media (min-width: 1024px) {
-  .appTopbar--custom {
+  :root {
+    --desktop-rail-width: 92px;
+  }
+
+  .desktopRail {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 220;
+    width: var(--desktop-rail-width);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 24px 12px 20px;
+    background: rgba(12, 18, 28, 0.88);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.18);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .desktopRail.is-hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .desktopRail__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .desktopRail__brandMark {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+  }
+
+  .desktopRail__brandText {
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .desktopRail__nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .desktopRail__item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 72px;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 18px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.58);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .desktopRail__item:hover {
+    color: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .desktopRail__item.is-active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .desktopRail__item.is-active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 4px;
+    height: 28px;
+    border-radius: 0 999px 999px 0;
+    background: #2dd3a7;
+    transform: translateY(-50%);
+    box-shadow: 0 0 16px rgba(45, 211, 167, 0.45);
+  }
+
+  .desktopRail__icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    filter: brightness(0) invert(0.58);
+    transition: filter 0.2s ease;
+  }
+
+  .desktopRail__item.is-active .desktopRail__icon,
+  .desktopRail__item:hover .desktopRail__icon {
+    filter: brightness(0) invert(1);
+  }
+
+  .desktopRail__icon--user {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.72);
+    filter: none;
+  }
+
+  .desktopRail__item.is-active .desktopRail__icon--user {
+    background: #fff;
+  }
+
+  .desktopRail__iconWrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .desktopRail__badge {
+    position: absolute;
+    top: -5px;
+    right: -9px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #ff4949;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #1b283b;
+    box-shadow: 0 2px 8px rgba(255, 73, 73, 0.35);
+  }
+
+  .desktopRail__label {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .bottomNav--mobile,
+  .bottomNav__page-blur {
+    display: none !important;
+  }
+
+  .appFrame:has(.desktopRail) .appMain {
+    margin-left: var(--desktop-rail-width);
+    max-width: none;
+    width: calc(100% - var(--desktop-rail-width));
+  }
+
+  .appFrame:has(.desktopRail) .appMain--map {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .appFrame:has(.desktopRail) .appTopbar--custom {
+    left: var(--desktop-rail-width);
+    right: 0;
+    width: auto;
     padding: 24px 40px;
   }
-  
-  .bottomNav--custom {
-    width: 500px;
-    padding: 14px;
+
+  .appFrame:has(.desktopRail) .appMain:not(.appMain--map) {
+    padding: 24px 40px 40px;
+  }
+
+  .appFrame:has(.desktopRail) .appContent--promo {
+    padding-bottom: 40px;
+  }
+
+  .appMain--map {
+    --map-bottom-nav-clearance: 24px;
+  }
+
+  .bottomNav__controls--left {
+    left: calc(var(--desktop-rail-width) + 16px);
+    bottom: 24px;
+  }
+
+  .bottomNav__controls--right {
+    bottom: 24px;
+    right: 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --desktop-rail-width: 108px;
+  }
+
+  .desktopRail {
+    padding: 28px 16px 24px;
+  }
+
+  .desktopRail__item {
+    min-height: 78px;
+  }
+
+  .desktopRail__label {
+    font-size: 12px;
   }
 }
 

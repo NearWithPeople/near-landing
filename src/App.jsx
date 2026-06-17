@@ -23,7 +23,7 @@ import { UserProfilePage } from './pages/UserProfilePage/UserProfilePage'
 import { getCategoryOptions } from './constants/vacancyCategories'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy, updateApplicationStatus } from './services/applicationService'
 import { getCurrentUser, loginAccount, logoutUser, updateUserProfile } from './services/authService'
-import { loadAppBootstrap } from './services/appService'
+import { loadAppBootstrap, normalizeVacancyFromApi } from './services/appService'
 import { loadSiteContent } from './services/siteService'
 import { listCompletedTasksForUser, listEmployerVacancies, rateCompletedTask } from './services/taskService'
 import { archiveVacancy, createVacancy, getVacancyById, listVacancies } from './services/vacancyService'
@@ -616,7 +616,7 @@ export default function App() {
             ? formatNearbyVacanciesLabel(visibleMapVacancies.length)
             : section === 'applications'
               ? isEmployer
-                ? formatEmployerShiftsSubtitle(employerVacancies)
+                ? formatEmployerShiftsSubtitle(employerVacancies, employerApplications)
                 : applicationsSummary.subtitle
               : undefined
         }
@@ -712,14 +712,39 @@ export default function App() {
   }
 
   async function handleArchiveVacancy(vacancyId, shiftClosure) {
-    if (!currentUser || currentUser.role !== 'employer') return 'Недостаточно прав для архивации вакансии.'
+    if (!currentUser || currentUser.role !== 'employer') {
+      return { error: 'Недостаточно прав для архивации вакансии.', completedTask: null }
+    }
 
     try {
-      await archiveVacancy(vacancyId, shiftClosure)
+      const result = await archiveVacancy(vacancyId, shiftClosure)
+      const normalizedVacancy = normalizeVacancyFromApi(result.vacancy)
+      const selectedApplicationId = shiftClosure?.applicationId ? String(shiftClosure.applicationId) : ''
+
+      setRemoteData((prev) => ({
+        ...prev,
+        employerVacancies: prev.employerVacancies.map((vacancy) =>
+          String(vacancy.id) === String(vacancyId) && normalizedVacancy ? { ...vacancy, ...normalizedVacancy } : vacancy
+        ),
+        applications: prev.applications.map((application) => {
+          if (String(application.vacancyId) !== String(vacancyId)) return application
+          if (['rejected', 'cancelled', 'completed'].includes(application.status)) return application
+          if (selectedApplicationId && String(application.id) === selectedApplicationId) {
+            return { ...application, status: 'completed' }
+          }
+          return { ...application, status: 'cancelled' }
+        }),
+        employerCompletedTasks: result.completedTask
+          ? [
+              ...(prev.employerCompletedTasks || []).filter((task) => String(task.id) !== String(result.completedTask.id)),
+              result.completedTask,
+            ]
+          : prev.employerCompletedTasks,
+      }))
       setDataVersion((prev) => prev + 1)
-      return ''
+      return { error: '', completedTask: result.completedTask || null }
     } catch (error) {
-      return error.message || 'Не удалось закрыть вакансию.'
+      return { error: error.message || 'Не удалось закрыть вакансию.', completedTask: null }
     }
   }
 
@@ -792,17 +817,17 @@ export default function App() {
         chatsCount={displayApplications.length}
         hideTopbar
         isVacancySelected
-        headerTitle={ownedVacancy?.title || 'Смена'}
-        headerSubtitle={ownedVacancy ? getVacancyStatusLabel(ownedVacancy.status) : 'Детали смены'}
       >
         <EmployerVacancyManagePage
           vacancy={ownedVacancy}
           applications={applicationsForVacancy}
+          employerCompletedTasks={remoteData.employerCompletedTasks}
           onBack={() => navigate('/applications')}
           onCreateNew={() => navigate('/employer/vacancies/new')}
           onArchiveVacancy={handleArchiveVacancy}
           onShowOnMap={(nextVacancyId) => navigate(`/map?vacancy=${nextVacancyId}`)}
           onUpdateApplicationStatus={handleUpdateApplicationStatus}
+          onRateCompletedTask={handleRateCompletedTask}
           onOpenChat={(applicationId) => {
             setActiveChatId(applicationId)
             navigate('/chat')
@@ -846,6 +871,7 @@ export default function App() {
           onShowOnMap={(vacancyId) => navigate(`/map?vacancy=${vacancyId}`)}
           onOpenCompanyProfile={vacancy?.ownerId ? () => navigate(`/company/${vacancy.ownerId}`) : undefined}
           completedTasks={allCompletedTasks}
+          onRateCompletedTask={handleRateCompletedTask}
           vacancies={remoteData.vacancies}
           emptyMessage="Отклик не найден"
         />

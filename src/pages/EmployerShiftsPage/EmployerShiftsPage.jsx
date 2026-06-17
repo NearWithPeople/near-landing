@@ -1,18 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
-import { getCategoryEmoji, getCategoryLabel } from '../../constants/vacancyCategories'
-import { formatActiveUntil } from '../../services/vacancyService'
+import { getCategoryEmoji } from '../../constants/vacancyCategories'
+import {
+  formatEmployerShiftsSubtitle,
+  isActiveEmployerShift,
+  isArchivedEmployerShift,
+  normalizeEmployerShift,
+} from '../../utils/employerShiftPresentation'
+import '../ApplicationsPage/ApplicationsPage.css'
 import './EmployerShiftsPage.css'
 
-function getVacancyStatusLabel(status) {
-  if (status === 'pending_review') return 'На модерации'
-  if (status === 'rejected') return 'Отклонена'
-  if (status === 'archived') return 'В архиве'
-  if (status === 'closed') return 'Закрыта'
-  if (status === 'paused') return 'На паузе'
-  if (status === 'draft') return 'Черновик'
-  return 'Открыта'
-}
+export { formatEmployerShiftsSubtitle }
 
 function formatApplicationCount(count) {
   const mod10 = count % 10
@@ -22,40 +20,21 @@ function formatApplicationCount(count) {
   return `${count} откликов`
 }
 
-function isActiveShift(vacancy) {
-  return vacancy.status === 'open' || !vacancy.status
-}
-
-export function formatEmployerShiftsSubtitle(vacancies = []) {
-  const activeCount = vacancies.filter(isActiveShift).length
-
-  if (!activeCount) return 'Нет активных смен'
-
-  const mod10 = activeCount % 10
-  const mod100 = activeCount % 100
-  if (mod10 === 1 && mod100 !== 11) return `${activeCount} активная смена`
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${activeCount} активные смены`
-  return `${activeCount} активных смен`
-}
-
 export function EmployerShiftsPage({ vacancies = [], applications = [], onOpenShift, onCreateShift }) {
-  const applicationCountByVacancy = useMemo(() => {
-    const map = new Map()
-    applications.forEach((application) => {
-      if (!application.vacancyId) return
-      map.set(application.vacancyId, (map.get(application.vacancyId) || 0) + 1)
-    })
-    return map
-  }, [applications])
+  const [showArchive, setShowArchive] = useState(false)
+  const displayShifts = useMemo(
+    () => vacancies.map((vacancy) => normalizeEmployerShift(vacancy, applications)),
+    [applications, vacancies]
+  )
 
-  const activeShifts = vacancies.filter(isActiveShift)
-  const archivedShifts = vacancies.filter((vacancy) => !isActiveShift(vacancy))
+  const activeShifts = displayShifts.filter((shift) => isActiveEmployerShift(shift))
+  const archivedShifts = displayShifts.filter((shift) => isArchivedEmployerShift(shift))
 
-  if (!vacancies.length) {
+  if (!displayShifts.length) {
     return (
-      <section className="employerShiftsPage">
-        <div className="employerShiftsPage__empty">
-          <div className="employerShiftsPage__emptyIcon" aria-hidden="true" />
+      <section className="applicationsPage employerShiftsPage">
+        <div className="applicationsPage__empty">
+          <div className="applicationsPage__emptyVisual">📋</div>
           <h2>Смен пока нет</h2>
           <p>Создайте первую смену — она появится на карте и в этом разделе.</p>
           <button type="button" className="employerShiftsPage__createBtn" onClick={onCreateShift}>
@@ -66,12 +45,83 @@ export function EmployerShiftsPage({ vacancies = [], applications = [], onOpenSh
     )
   }
 
+  function renderShiftCard(shift) {
+    const isCompact = shift.statusVariant === 'cancelled' || shift.statusVariant === 'completed'
+
+    return (
+      <article
+        key={shift.id}
+        className={`applicationCard applicationCard--${shift.statusVariant}${isCompact ? ' applicationCard--compact' : ''}`}
+      >
+        <button type="button" className="applicationCard__button" onClick={() => onOpenShift?.(shift.id)}>
+          {isCompact ? (
+            <div className="applicationCard__compactRow">
+              <h3 className="applicationCard__title">{shift.vacancyTitle}</h3>
+              <div className={`applicationCard__badge applicationCard__badge--${shift.statusVariant}`}>
+                <span className="applicationCard__badgeDot" aria-hidden="true" />
+                <span>{shift.statusLabel}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="applicationCard__main">
+              <div className="applicationCard__content">
+                <h3 className="applicationCard__title">{shift.vacancyTitle}</h3>
+
+                {shift.address ? (
+                  <div className="applicationCard__info">
+                    <img src="/map-icons/map-pin.png" alt="" className="applicationCard__infoIcon" />
+                    <span>{shift.address}</span>
+                  </div>
+                ) : null}
+
+                <div className="applicationCard__info">
+                  <img src="/map-icons/losso.png" alt="" className="applicationCard__infoIcon" />
+                  <span>{shift.salary}</span>
+                </div>
+
+                {shift.time ? (
+                  <div className="applicationCard__info">
+                    <img src="/map-icons/message-circle.png" alt="" className="applicationCard__infoIcon" />
+                    <span>{shift.time}</span>
+                  </div>
+                ) : null}
+
+                <div className="applicationCard__info">
+                  <span className="employerShiftsPage__categoryEmoji" aria-hidden="true">
+                    {getCategoryEmoji(shift.type || shift.category)}
+                  </span>
+                  <span>{formatApplicationCount(shift.applicationCount)}</span>
+                </div>
+              </div>
+
+              <div className={`applicationCard__badge applicationCard__badge--${shift.statusVariant}`}>
+                <span className="applicationCard__badgeDot" aria-hidden="true" />
+                <span>{shift.statusLabel}</span>
+              </div>
+            </div>
+          )}
+        </button>
+      </article>
+    )
+  }
+
   return (
-    <section className="employerShiftsPage">
-      <div className="employerShiftsPage__toolbar">
-        <button type="button" className="employerShiftsPage__createBtn" onClick={onCreateShift}>
+    <section className="applicationsPage employerShiftsPage">
+      <div className="applicationsPage__toolbar">
+        <button type="button" className="employerShiftsPage__createBtn applicationsPage__statsBtn" onClick={onCreateShift}>
           + Создать смену
         </button>
+        {archivedShifts.length ? (
+          <button
+            type="button"
+            className={`applicationsPage__archiveBtn${showArchive ? ' applicationsPage__archiveBtn--active' : ''}`}
+            aria-label="Архив"
+            aria-pressed={showArchive}
+            onClick={() => setShowArchive((prev) => !prev)}
+          >
+            <span aria-hidden="true">↺</span>
+          </button>
+        ) : null}
       </div>
 
       {activeShifts.length ? (
@@ -80,58 +130,21 @@ export function EmployerShiftsPage({ vacancies = [], applications = [], onOpenSh
             <h3>Активные</h3>
             <span>{activeShifts.length}</span>
           </div>
-          <div className="employerShiftsPage__list">
-            {activeShifts.map((vacancy) => {
-              const applicationCount = applicationCountByVacancy.get(vacancy.id) || vacancy.applicationCount || 0
-
-              return (
-                <article key={vacancy.id} className="employerShiftCard">
-                  <button type="button" className="employerShiftCard__button" onClick={() => onOpenShift?.(vacancy.id)}>
-                    <div className="employerShiftCard__emoji">{getCategoryEmoji(vacancy.type || vacancy.category)}</div>
-                    <div className="employerShiftCard__content">
-                      <div className="employerShiftCard__top">
-                        <h4>{vacancy.title}</h4>
-                        <span className="employerShiftCard__status employerShiftCard__status--open">{getVacancyStatusLabel(vacancy.status)}</span>
-                      </div>
-                      <p className="employerShiftCard__category">{getCategoryLabel(vacancy.type || vacancy.category)}</p>
-                      {vacancy.address ? <p className="employerShiftCard__meta">{vacancy.address}</p> : null}
-                      <div className="employerShiftCard__facts">
-                        <span>от {vacancy.payFrom} BYN</span>
-                        <span>{vacancy.shiftDate || 'Дата уточняется'}</span>
-                        <span>до {formatActiveUntil(vacancy.activeUntil, vacancy.activeUntilTime)}</span>
-                      </div>
-                      <p className="employerShiftCard__responses">{formatApplicationCount(applicationCount)}</p>
-                    </div>
-                  </button>
-                </article>
-              )
-            })}
-          </div>
+          <div className="applicationsPage__list">{activeShifts.map(renderShiftCard)}</div>
         </div>
-      ) : null}
+      ) : (
+        <div className="applicationsPage__empty applicationsPage__empty--inline">
+          <p>Нет активных смен. Завершённые — в архиве.</p>
+        </div>
+      )}
 
-      {archivedShifts.length ? (
+      {showArchive && archivedShifts.length ? (
         <div className="employerShiftsPage__section">
           <div className="employerShiftsPage__sectionHead">
             <h3>Архив</h3>
             <span>{archivedShifts.length}</span>
           </div>
-          <div className="employerShiftsPage__list">
-            {archivedShifts.map((vacancy) => (
-              <article key={vacancy.id} className="employerShiftCard employerShiftCard--archived">
-                <button type="button" className="employerShiftCard__button" onClick={() => onOpenShift?.(vacancy.id)}>
-                  <div className="employerShiftCard__emoji">{getCategoryEmoji(vacancy.type || vacancy.category)}</div>
-                  <div className="employerShiftCard__content">
-                    <div className="employerShiftCard__top">
-                      <h4>{vacancy.title}</h4>
-                      <span className="employerShiftCard__status">{getVacancyStatusLabel(vacancy.status)}</span>
-                    </div>
-                    <p className="employerShiftCard__meta">{vacancy.address}</p>
-                  </div>
-                </button>
-              </article>
-            ))}
-          </div>
+          <div className="applicationsPage__list">{archivedShifts.map(renderShiftCard)}</div>
         </div>
       ) : null}
     </section>

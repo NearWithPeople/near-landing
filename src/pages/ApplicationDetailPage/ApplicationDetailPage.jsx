@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { ShiftRatingBlock } from '../../components/ShiftRatingBlock'
 import {
   APPLICATION_PROGRESS_STAGES,
   formatApplicationSalary,
@@ -16,11 +17,29 @@ export function ApplicationDetailPage({
   onCancel,
   onOpenCompanyProfile,
   completedTasks = [],
+  onRateCompletedTask,
   emptyBackLabel = 'Назад к откликам',
   emptyMessage = 'Не найдено',
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [ratingError, setRatingError] = useState('')
+  const [isRating, setIsRating] = useState(false)
+
+  const companyRatingSummary = useMemo(() => {
+    if (!application || !vacancy?.ownerId) return null
+    return getEmployerRatingSummary({
+      completedTasks,
+      vacancies,
+      ownerId: vacancy.ownerId,
+      employerName: vacancy.companyName || application.employerName,
+    })
+  }, [application, completedTasks, vacancies, vacancy])
+
+  const completedTask = useMemo(
+    () => (application ? completedTasks.find((task) => task.vacancyId === application.vacancyId) || null : null),
+    [application, completedTasks]
+  )
 
   if (!application) {
     return (
@@ -45,18 +64,24 @@ export function ApplicationDetailPage({
   const progressFilled = Math.max(0, Math.min(APPLICATION_PROGRESS_STAGES.length, item.progressFilled || 0))
   const showApplicationActions = item.statusVariant === 'pending' || item.statusVariant === 'active'
   const pageTitle = 'Детали заказа'
-  const companyRatingSummary = useMemo(() => {
-    if (!vacancy?.ownerId) return null
-    return getEmployerRatingSummary({
-      completedTasks,
-      vacancies,
-      ownerId: vacancy.ownerId,
-      employerName: vacancy.companyName || item.employerName,
-    })
-  }, [completedTasks, item.employerName, vacancies, vacancy])
   const companyRatingLabel = companyRatingSummary
     ? formatRatingLabel(companyRatingSummary.rating, companyRatingSummary.count)
     : ''
+
+  async function handleRateEmployer(rating) {
+    if (!completedTask?.id || !onRateCompletedTask) return
+
+    setRatingError('')
+    setIsRating(true)
+
+    try {
+      await onRateCompletedTask(completedTask.id, rating)
+    } catch (error) {
+      setRatingError(error.message || 'Не удалось сохранить оценку.')
+    }
+
+    setIsRating(false)
+  }
 
   return (
     <section className="applicationDetailPage">
@@ -168,6 +193,29 @@ export function ApplicationDetailPage({
 
           {item.progressDetailText ? <p className="applicationDetailPage__progressDetail">{item.progressDetailText}</p> : null}
         </div>
+
+        {item.statusVariant === 'completed' && completedTask ? (
+          <div className="applicationDetailPage__statusSection">
+            <div className="applicationDetailPage__panelHead">
+              <p className="applicationDetailPage__panelTitle">Оцените работодателя</p>
+              {completedTask.summary ? (
+                <p className="applicationDetailPage__panelSubtitle">{completedTask.summary}</p>
+              ) : null}
+            </div>
+            <ShiftRatingBlock
+              label={
+                completedTask.workerToEmployerRating != null
+                  ? 'Ваша оценка работодателя'
+                  : 'Поставьте оценку от 1 до 5'
+              }
+              value={completedTask.workerToEmployerRating}
+              interactive={completedTask.workerToEmployerRating == null}
+              disabled={isRating}
+              onSelect={handleRateEmployer}
+            />
+            {ratingError ? <div className="formError">{ratingError}</div> : null}
+          </div>
+        ) : null}
       </div>
 
       {showApplicationActions ? (

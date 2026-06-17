@@ -250,3 +250,56 @@
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.6);
 }
+
+.applicationsPage__empty--inline {
+  flex: 0;
+  padding: 8px 4px 0;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.applicationsPage__empty--inline p {
+  max-width: none;
+  font-size: 14px;
+}
+
+.applicationsPage__archiveBtn--active {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.applicationsPage__archiveSection {
+  display: grid;
+  gap: 10px;
+}
+
+.applicationsPage__archiveHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.applicationsPage__archiveHead h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.applicationsPage__archiveHead span {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.72);
+}

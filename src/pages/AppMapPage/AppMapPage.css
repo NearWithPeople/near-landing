@@ -233,12 +233,34 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9999; /* Set very high to ensure it's on top of everything */
+  z-index: 9999;
   background: transparent;
   padding: 0;
   display: flex;
   flex-direction: column;
+  pointer-events: none;
+}
+
+.mapVacancySheet__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  border: none;
+  background: rgba(0, 0, 0, 0.18);
+  cursor: pointer;
   pointer-events: auto;
+}
+
+.vacancySheet__layout {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.vacancySheet__close {
+  display: none;
 }
 
 .mapVacancySheet--custom::-webkit-scrollbar {
@@ -256,8 +278,8 @@
   justify-content: center;
   align-items: center;
   padding-top: 70px;
-  pointer-events: none;
-  position: relative; /* Ensure children can be absolute relative to this */
+  pointer-events: auto;
+  position: relative;
 }
 
 .vacancySheet__center-group {
@@ -473,9 +495,22 @@
   border-radius: 32px;
   padding: 24px;
   margin-bottom: 32px;
+}
+
+.vacancySheet__description--clickable {
   cursor: pointer;
-  touch-action: none;
-  user-select: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.vacancySheet__description--clickable:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.vacancySheet__readMore {
+  margin-bottom: 16px;
+  color: #2dd3a7;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .vacancySheet__desc-text {
@@ -880,4 +915,144 @@
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.5;
   font-size: 14px;
+}
+
+@media (min-width: 1024px) {
+  .mapVacancySheet__backdrop {
+    display: none;
+  }
+
+  .mapVacancySheet--custom {
+    top: auto;
+    right: auto;
+    bottom: 28px;
+    left: calc(var(--desktop-rail-width, 92px) + 24px);
+    width: auto;
+    height: auto;
+    max-width: min(760px, calc(100vw - var(--desktop-rail-width, 92px) - 48px));
+    z-index: 140;
+    pointer-events: none;
+  }
+
+  .vacancySheet__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.28);
+    color: #fff;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .vacancySheet__layout {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 18px;
+    pointer-events: none;
+  }
+
+  .vacancySheet__top {
+    flex: 0 0 auto;
+    padding-top: 0;
+    justify-content: flex-end;
+    pointer-events: auto;
+  }
+
+  .vacancySheet__center-group {
+    width: 132px;
+    height: 132px;
+  }
+
+  .vacancySheet__icon-circle-large {
+    border-width: 4px;
+  }
+
+  .vacancySheet__emoji {
+    font-size: 68px;
+  }
+
+  .badge-verified {
+    font-size: 12px;
+    padding: 8px 18px;
+    border-width: 3px;
+    top: 4px;
+    left: -72px;
+  }
+
+  .badge-applications-top {
+    font-size: 12px;
+    padding: 8px 18px;
+    border-width: 3px;
+    top: 28px;
+    right: -58px;
+  }
+
+  .vacancySheet__quick-actions {
+    margin-top: 14px;
+    gap: 8px;
+  }
+
+  .quick-action-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .vacancySheet__card {
+    position: relative;
+    flex: 1;
+    width: min(420px, calc(100vw - var(--desktop-rail-width, 92px) - 220px));
+    max-height: min(560px, calc(100dvh - 120px));
+    margin-top: 0;
+    border-radius: 28px;
+    padding: 24px 22px 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+    pointer-events: auto;
+    animation: slideInCardDesktop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideInCardDesktop {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .mapExperience.has-preview .custom-vacancy-marker:not(.is-active) {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .mapVacancySheet--custom {
+    left: calc(var(--desktop-rail-width, 108px) + 32px);
+    max-width: min(820px, calc(100vw - var(--desktop-rail-width, 108px) - 64px));
+  }
+
+  .vacancySheet__center-group {
+    width: 148px;
+    height: 148px;
+  }
+
+  .vacancySheet__emoji {
+    font-size: 76px;
+  }
+
+  .vacancySheet__card {
+    width: min(460px, calc(100vw - var(--desktop-rail-width, 108px) - 240px));
+  }
 }

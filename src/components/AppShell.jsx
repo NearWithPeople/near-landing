@@ -1,5 +1,79 @@
-import { Icon } from './Icon'
-import { CustomSelect } from './CustomSelect'
+function AppNavigation({
+  currentSection,
+  isEmployer,
+  resolvedChatsCount,
+  onNavigate,
+  variant = 'bottom',
+}) {
+  const isRail = variant === 'rail'
+  const itemClassName = isRail ? 'desktopRail__item' : 'bottomNav__item'
+  const iconClassName = isRail ? 'desktopRail__icon' : 'bottomNav__icon'
+  const iconWrapperClassName = isRail ? 'desktopRail__iconWrapper' : 'bottomNav__iconWrapper'
+  const badgeClassName = isRail ? 'desktopRail__badge' : 'bottomNav__badge'
+  const userIconClassName = isRail ? 'desktopRail__icon desktopRail__icon--user' : 'bottomNav__icon bottomNav__icon--user'
+  const labelClassName = isRail ? 'desktopRail__label' : undefined
+
+  function renderItem(section, label, iconSrc, onClick) {
+    const isActive = currentSection === section
+
+    return (
+      <button
+        type="button"
+        className={`${itemClassName}${isActive ? ' is-active' : ''}`}
+        onClick={onClick}
+        aria-current={isActive ? 'page' : undefined}
+      >
+        <img src={iconSrc} alt="" className={iconClassName} />
+        <span className={labelClassName}>{label}</span>
+      </button>
+    )
+  }
+
+  return (
+    <>
+      {!isRail ? (
+        <div
+          className="bottomNav__active-indicator"
+          style={{
+            '--bottom-nav-indicator-index': ['map', 'applications', 'chat', 'profile'].indexOf(currentSection),
+          }}
+        >
+          <div className="bottomNav__active-outer"></div>
+          <div className="bottomNav__active-bg"></div>
+        </div>
+      ) : null}
+
+      {renderItem('map', 'Карта', '/map-icons/map-pin.png', () => onNavigate('/map'))}
+      {renderItem(
+        'applications',
+        isEmployer ? 'Смены' : 'Отклики',
+        '/map-icons/notepad-text.png',
+        () => onNavigate('/applications')
+      )}
+      <button
+        type="button"
+        className={`${itemClassName}${currentSection === 'chat' ? ' is-active' : ''}`}
+        onClick={() => onNavigate('/chat')}
+        aria-current={currentSection === 'chat' ? 'page' : undefined}
+      >
+        <div className={iconWrapperClassName}>
+          <img src="/map-icons/message-circle.png" alt="" className={iconClassName} />
+          {resolvedChatsCount > 0 ? <span className={badgeClassName}>{resolvedChatsCount}</span> : null}
+        </div>
+        <span className={labelClassName}>Чат</span>
+      </button>
+      <button
+        type="button"
+        className={`${itemClassName}${currentSection === 'profile' ? ' is-active' : ''}`}
+        onClick={() => onNavigate('/profile')}
+        aria-current={currentSection === 'profile' ? 'page' : undefined}
+      >
+        <div className={userIconClassName}></div>
+        <span className={labelClassName}>{isEmployer ? 'Компания' : 'Ты'}</span>
+      </button>
+    </>
+  )
+}
 
 export function AppShell({
   currentUser,
@@ -25,7 +99,6 @@ export function AppShell({
   const resolvedChatsCount = Number(chatsCount) || 0
   const isEmployer = currentUser?.role === 'employer'
   const isMapSection = currentSection === 'map'
-  const keepBottomNavOnAdaptive = true // Always keep bottom nav as per request
 
   const getHeaderContent = () => {
     switch (currentSection) {
@@ -75,6 +148,21 @@ export function AppShell({
 
   return (
     <div className={`appFrame ${isMapSection ? '' : 'appFrame--promo'}`}>
+      {currentSection !== 'landing' ? (
+        <aside className={`desktopRail ${isVacancySelected ? 'is-hidden' : ''}`} aria-label="Основная навигация">
+          
+          <nav className="desktopRail__nav">
+            <AppNavigation
+              currentSection={currentSection}
+              isEmployer={isEmployer}
+              resolvedChatsCount={resolvedChatsCount}
+              onNavigate={onNavigate}
+              variant="rail"
+            />
+          </nav>
+        </aside>
+      ) : null}
+
       <div className={`appMain ${isMapSection ? 'appMain--map' : ''}`}>
         {currentSection !== 'landing' && !hideTopbar ? (
           <header className="appTopbar--custom">
@@ -123,37 +211,17 @@ export function AppShell({
                 </div>
               </>
             ) : null}
-            <nav className={`bottomNav--custom ${isVacancySelected ? 'is-hidden' : 'is-visible'}`} aria-label="Основная навигация">
-              <div
-                className="bottomNav__active-indicator"
-                style={{
-                  '--bottom-nav-indicator-index': ['map', 'applications', 'chat', 'profile'].indexOf(currentSection),
-                }}
-              >
-                <div className="bottomNav__active-outer"></div>
-                <div className="bottomNav__active-bg"></div>
-              </div>
-              <button className={`bottomNav__item ${currentSection === 'map' ? 'is-active' : ''}`} onClick={() => onNavigate('/map')}>
-                <img src="/map-icons/map-pin.png" alt="" className="bottomNav__icon" />
-                <span>Карта</span>
-              </button>
-              <button className={`bottomNav__item ${currentSection === 'applications' ? 'is-active' : ''}`} onClick={() => onNavigate('/applications')}>
-                <img src="/map-icons/notepad-text.png" alt="" className="bottomNav__icon" />
-                <span>{isEmployer ? 'Смены' : 'Отклики'}</span>
-              </button>
-              <button className={`bottomNav__item ${currentSection === 'chat' ? 'is-active' : ''}`} onClick={() => onNavigate('/chat')}>
-                <div className="bottomNav__iconWrapper">
-                  <img src="/map-icons/message-circle.png" alt="" className="bottomNav__icon" />
-                  {resolvedChatsCount > 0 && (
-                    <span className="bottomNav__badge">{resolvedChatsCount}</span>
-                  )}
-                </div>
-                <span>Чат</span>
-              </button>
-              <button className={`bottomNav__item ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')}>
-                <div className="bottomNav__icon bottomNav__icon--user"></div>
-                <span>{isEmployer ? 'Компания' : 'Ты'}</span>
-              </button>
+            <nav
+              className={`bottomNav--custom bottomNav--mobile ${isVacancySelected ? 'is-hidden' : 'is-visible'}`}
+              aria-label="Основная навигация"
+            >
+              <AppNavigation
+                currentSection={currentSection}
+                isEmployer={isEmployer}
+                resolvedChatsCount={resolvedChatsCount}
+                onNavigate={onNavigate}
+                variant="bottom"
+              />
             </nav>
           </>
         )}

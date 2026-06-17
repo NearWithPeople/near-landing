@@ -134,6 +134,9 @@ export async function archiveVacancy(vacancyId, shiftClosure) {
     body: shiftClosure ? { shiftClosure } : {},
   })
 
-  return response.vacancy
+  return {
+    vacancy: response.vacancy,
+    completedTask: response.completedTask || null,
+  }
 }
 

@@ -1,142 +1,194 @@
-.shiftManagePage__facts {
+.employerShiftDetailPage .applicationDetailPage__scroll {
+  padding-bottom: 120px;
+}
+
+.employerShiftDetailPage__categoryRow {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.employerShiftDetailPage__categoryEmoji {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.employerShiftDetailPage__closureNote {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.employerShiftDetailPage__closureTitle {
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.employerShiftDetailPage__closureNote p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.employerShiftDetailPage__ratingSection {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.employerShiftDetailPage__ratingHead h3 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.employerShiftDetailPage__ratingHead p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.employerShiftDetailPage__applicantsSection {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.employerShiftDetailPage__applicantsHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.employerShiftDetailPage__applicantsHead h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.employerShiftDetailPage__applicantsHead span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.employerShiftDetailPage__search {
+  margin: 0;
+}
+
+.employerShiftDetailPage__hint {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.4;
 }
 
-.shiftManagePage__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.shiftManagePage__hint {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.58);
-}
-
-.shiftManagePage__text {
-  display: grid;
-  gap: 10px;
-  color: rgba(255, 255, 255, 0.82);
-  line-height: 1.55;
-}
-
-.shiftManagePage__text p {
-  margin: 0;
-}
-
-.shiftManagePage__applicants {
-  display: grid;
-  gap: 10px;
-}
-
-.vacancyApplicantCard {
-  border-radius: 20px;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.employerShiftDetailPage__applicants {
   display: grid;
   gap: 12px;
 }
 
-.vacancyApplicantCard__facts {
+.employerShiftDetailPage__applicantCard {
   display: grid;
-  gap: 16px;
-  min-width: 0;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.vacancyApplicantCard__actions {
+.employerShiftDetailPage__applicantTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.employerShiftDetailPage__applicantTop h4 {
+  margin: 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.employerShiftDetailPage__applicantFacts {
+  display: grid;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.employerShiftDetailPage__applicantReview {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.employerShiftDetailPage__applicantActions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.vacancyClosureNote {
-  margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.employerShiftDetailPage__inlineAction {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
 }
 
-.vacancyClosureNote__title {
+.applicationDetailPage__fixedActions--single {
+  grid-template-columns: 1fr;
+}
+
+.employerShiftDetailPage__completeBtn {
+  width: 100%;
+}
+
+.employerShiftDetailPage__closureModal {
+  max-height: min(88dvh, 720px);
+  overflow: auto;
+}
+
+.employerShiftDetailPage__closureOptions {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.employerShiftDetailPage__closureOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.employerShiftDetailPage__closureField {
+  margin-bottom: 12px;
+}
+
+.employerShiftDetailPage .applicationCard__badge {
   font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.62);
-  margin-bottom: 8px;
-}
-
-.vacancyClosureNote__text {
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.shiftClosureModal {
-  position: fixed;
-  inset: 0;
-  z-index: 120;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-}
-
-.shiftClosureModal__backdrop {
-  position: absolute;
-  inset: 0;
-  border: none;
-  margin: 0;
-  padding: 0;
-  background: rgba(0, 0, 0, 0.55);
-  cursor: pointer;
-}
-
-.shiftClosureModal__panel {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 520px);
-  max-height: min(90dvh, 640px);
-  overflow-y: auto;
-  padding: 22px;
-  border-radius: 22px;
-  background: rgba(14, 15, 18, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: grid;
-  gap: 16px;
-}
-
-.shiftClosureModal__lead {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.shiftClosureModal__options {
-  display: grid;
-  gap: 10px;
-}
-
-.shiftClosureModal__option {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.shiftClosureModal__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
+  padding: 8px 12px;
 }

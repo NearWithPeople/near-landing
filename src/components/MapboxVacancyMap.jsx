@@ -15,7 +15,18 @@ const BUILDINGS_LAYER_ID = 'vacancy-3d-buildings'
 
 function getViewportPadding(hasSelection = false) {
   if (typeof window === 'undefined') {
-    return { top: 150, right: 24, bottom: 220, left: hasSelection ? 360 : 24 }
+    return { top: 150, right: hasSelection ? 460 : 24, bottom: 220, left: hasSelection ? 360 : 24 }
+  }
+
+  const desktopRailWidth = window.innerWidth >= 1280 ? 108 : window.innerWidth >= 1024 ? 92 : 0
+
+  if (window.innerWidth >= 1024) {
+    return {
+      top: 120,
+      right: hasSelection ? 500 : 40,
+      bottom: hasSelection ? 120 : 80,
+      left: desktopRailWidth + (hasSelection ? 220 : 40),
+    }
   }
 
   if (window.innerWidth <= 560) {
