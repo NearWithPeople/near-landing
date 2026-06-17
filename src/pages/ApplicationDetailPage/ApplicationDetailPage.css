@@ -2,8 +2,8 @@
   --application-detail-panel-height: clamp(260px, 38dvh, 320px);
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 120px);
-  margin: -20px -20px 0;
+  min-height: 100dvh;
+  margin: -92px -20px 0;
   background: var(--palette-forest);
 }
 
@@ -103,7 +103,7 @@
 .applicationDetailPage__scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 0 16px calc(var(--application-detail-panel-height) + 24px);
+  padding: 0 16px calc(90px + env(safe-area-inset-bottom, 0px));
 }
 
 .applicationDetailPage__card {
@@ -240,19 +240,30 @@
   line-height: 1.45;
 }
 
-.applicationDetailPage__bottomPanel {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--map-bottom-nav-clearance, 92px) + env(safe-area-inset-bottom, 0px));
-  z-index: 5;
+.applicationDetailPage__statusSection {
   display: grid;
   gap: 12px;
-  padding: 18px 16px 16px;
+  padding: 24px 0 12px;
+  margin-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(var(--palette-forest-rgb), 0.96);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+}
+
+.applicationDetailPage__fixedActions {
+  position: fixed;
+  bottom: 13px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(320px, calc(100vw - 22px));
+  z-index: 120;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  background: #00000003;
+  -webkit-backdrop-filter: blur(34px);
+  backdrop-filter: blur(34px);
+  border-radius: 999px;
+  box-shadow: 0px 4px 8px 0px #0000001A, 0px 30px 60px 0px #00000033;
 }
 
 
@@ -308,11 +319,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   gap: 8px;
-  min-height: 54px;
-  padding: 0 14px;
+  min-height: 48px;
+  padding: 0 12px;
   border-radius: 999px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -416,13 +428,98 @@
     min-height: auto;
   }
 
-  .applicationDetailPage__bottomPanel {
-    position: sticky;
-    bottom: 0;
-    border-radius: 24px 24px 0 0;
-  }
-
   .applicationDetailPage__scroll {
     padding-bottom: 24px;
+  }
+}
+
+.applicationDetailPage__modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: modalOverlayFade 0.25s ease-out;
+}
+
+.applicationDetailPage__modal {
+  width: 100%;
+  max-width: 320px;
+  padding: 24px 20px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(22, 28, 44, 0.95);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.applicationDetailPage__modalTitle {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.applicationDetailPage__modalText {
+  margin: 0 0 20px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.applicationDetailPage__modalActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.applicationDetailPage__modalBtn {
+  min-height: 46px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.applicationDetailPage__modalBtn--ghost {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.applicationDetailPage__modalBtn--danger {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+@keyframes modalOverlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleUp {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

@@ -1580,6 +1580,12 @@
   padding: 0;
 }
 
+.bottomNav__controlButton.is-active {
+  background: rgba(45, 211, 167, 0.25);
+  border-color: #2DD3A7;
+  box-shadow: 0 0 12px rgba(45, 211, 167, 0.5);
+}
+
 .bottomNav__controlButton img {
   width: 18px;
   height: 18px;
@@ -3409,6 +3415,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .appTopbar__address {
+    font-size: 18px;
+  }
+
+  .appTopbar__nearby {
+    font-size: 11px;
+    margin-top: 2px;
   }
 
   .bottomNav__item {

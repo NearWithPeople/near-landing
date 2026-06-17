@@ -17,6 +17,8 @@ export function AppShell({
   headerSubtitle,
   hideTopbar = false,
   chatsCount = 0,
+  lassoActive = false,
+  onLassoToggle,
 }) {
   const resolvedChatsCount = Number(chatsCount) || 0
   const isMapSection = currentSection === 'map'
@@ -95,8 +97,8 @@ export function AppShell({
                   <button type="button" className="bottomNav__controlButton">
                     <img src="/map-icons/list.png" alt="" />
                   </button>
-                  <button type="button" className="bottomNav__controlButton">
-                    <img src="/map-icons/losso.png" alt="" />
+                  <button type="button" className={`bottomNav__controlButton ${lassoActive ? 'is-active' : ''}`} onClick={onLassoToggle}>
+                    <img src="/map-icons/losso.png" alt="Выделение лассо" />
                   </button>
                 </div>
                 <div className="bottomNav__controls bottomNav__controls--right" aria-hidden="true">

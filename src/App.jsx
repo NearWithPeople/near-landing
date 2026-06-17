@@ -841,11 +841,12 @@ export default function App() {
         onNavigate={navigate}
         currentLocationName={currentLocationName}
         hideTopbar
+        isVacancySelected={true}
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
-        chatsCount={applications.length}
+        chatsCount={displayApplications.length}
       >
         <ApplicationDetailPage
           application={application}

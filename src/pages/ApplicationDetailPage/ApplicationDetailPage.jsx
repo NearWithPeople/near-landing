@@ -15,6 +15,7 @@ export function ApplicationDetailPage({
   emptyMessage = 'Не найдено',
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   if (!application) {
     return (
@@ -38,7 +39,7 @@ export function ApplicationDetailPage({
   const description = item.description || 'Подробности смены появятся, когда работодатель заполнит описание вакансии.'
   const progressFilled = Math.max(0, Math.min(APPLICATION_PROGRESS_STAGES.length, item.progressFilled || 0))
   const showApplicationActions = item.statusVariant === 'pending' || item.statusVariant === 'active'
-  const pageTitle = 'Детали отклика'
+  const pageTitle = 'Детали заказа'
 
   return (
     <section className="applicationDetailPage">
@@ -74,7 +75,7 @@ export function ApplicationDetailPage({
                   <button type="button" onClick={() => { setMenuOpen(false); alert('Служба поддержки: support@near.by'); }}>
                     <span className="dropdown-icon">ℹ️</span> Нужна помощь
                   </button>
-                  <button type="button" onClick={() => { setMenuOpen(false); onCancel?.(); }}>
+                  <button type="button" onClick={() => { setMenuOpen(false); setShowCancelConfirm(true); }}>
                     <span className="dropdown-icon">❌</span> Отказаться
                   </button>
                   <button type="button" onClick={() => { setMenuOpen(false); onOpenChat?.(); }}>
@@ -113,47 +114,77 @@ export function ApplicationDetailPage({
 
           <div className="applicationDetailPage__description">{description}</div>
         </article>
+
+        <div className="applicationDetailPage__statusSection">
+          <div className="applicationDetailPage__panelHead">
+            <p className="applicationDetailPage__panelTitle">{item.panelTitle}</p>
+            {item.panelSubtitle ? <p className="applicationDetailPage__panelSubtitle">{item.panelSubtitle}</p> : null}
+          </div>
+
+          <div className="applicationDetailPage__progress">
+            <div className="applicationDetailPage__progressTrack" aria-hidden="true">
+              {APPLICATION_PROGRESS_STAGES.map((stage, index) => (
+                <span
+                  key={stage.id}
+                  className={`applicationDetailPage__progressSegment${
+                    index < progressFilled ? ' applicationDetailPage__progressSegment--filled' : ''
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="applicationDetailPage__progressLabels">
+              {APPLICATION_PROGRESS_STAGES.map((stage) => (
+                <span key={stage.id}>{stage.label}</span>
+              ))}
+            </div>
+          </div>
+
+          {item.progressDetailText ? <p className="applicationDetailPage__progressDetail">{item.progressDetailText}</p> : null}
+        </div>
       </div>
 
-      <div className="applicationDetailPage__bottomPanel">
-        <div className="applicationDetailPage__panelHead">
-          <p className="applicationDetailPage__panelTitle">{item.panelTitle}</p>
-          {item.panelSubtitle ? <p className="applicationDetailPage__panelSubtitle">{item.panelSubtitle}</p> : null}
+      {showApplicationActions ? (
+        <div className="applicationDetailPage__fixedActions">
+          <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--ghost" onClick={() => setShowCancelConfirm(true)}>
+            <span aria-hidden="true">×</span>
+            Отказаться
+          </button>
+          <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--primary" onClick={onOpenChat}>
+            <img src="/map-icons/message-circle.png" alt="" />
+            Перейти в чат
+          </button>
         </div>
+      ) : null}
 
-        <div className="applicationDetailPage__progress">
-          <div className="applicationDetailPage__progressTrack" aria-hidden="true">
-            {APPLICATION_PROGRESS_STAGES.map((stage, index) => (
-              <span
-                key={stage.id}
-                className={`applicationDetailPage__progressSegment${
-                  index < progressFilled ? ' applicationDetailPage__progressSegment--filled' : ''
-                }`}
-              />
-            ))}
-          </div>
-          <div className="applicationDetailPage__progressLabels">
-            {APPLICATION_PROGRESS_STAGES.map((stage) => (
-              <span key={stage.id}>{stage.label}</span>
-            ))}
+      {showCancelConfirm ? (
+        <div className="applicationDetailPage__modalOverlay" onClick={() => setShowCancelConfirm(false)}>
+          <div className="applicationDetailPage__modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="applicationDetailPage__modalTitle">Отказаться от смены?</h3>
+            <p className="applicationDetailPage__modalText">
+              Вы уверены, что хотите отказаться от этой смены? Это действие нельзя отменить, и работодатель получит уведомление.
+            </p>
+            <div className="applicationDetailPage__modalActions">
+              <button
+                type="button"
+                className="applicationDetailPage__modalBtn applicationDetailPage__modalBtn--ghost"
+                onClick={() => setShowCancelConfirm(false)}
+              >
+                Назад
+              </button>
+              <button
+                type="button"
+                className="applicationDetailPage__modalBtn applicationDetailPage__modalBtn--danger"
+                onClick={() => {
+                  setShowCancelConfirm(false)
+                  onCancel?.()
+                }}
+              >
+                Отказаться
+              </button>
+            </div>
           </div>
         </div>
-
-        {item.progressDetailText ? <p className="applicationDetailPage__progressDetail">{item.progressDetailText}</p> : null}
-
-        {showApplicationActions ? (
-          <div className="applicationDetailPage__actions">
-            <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--ghost" onClick={onCancel}>
-              <span aria-hidden="true">×</span>
-              Отказаться
-            </button>
-            <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--primary" onClick={onOpenChat}>
-              <img src="/map-icons/message-circle.png" alt="" />
-              Перейти в чат
-            </button>
-          </div>
-        ) : null}
-      </div>
+      ) : null}
     </section>
   )
 }
