@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { getCategoryEmoji, getCategoryLabel } from '../../constants/vacancyCategories'
+import { formatRatingLabel, getEmployerRatingSummary } from '../../utils/ratings'
 import { MapboxVacancyMap } from '../../components/MapboxVacancyMap'
 import './AppMapPage.css'
 
@@ -50,16 +52,42 @@ export function AppMapPage({
   onLocationChange,
   onOpenVacancy,
   autoOpenVacancyId = '',
-  selectedCityLabel,
   selectedCityPoint,
+  visibleVacancies = [],
+  onVisibleVacanciesChange,
+  isNearbyListOpen = false,
+  onNearbyListOpenChange,
+  currentUser,
+  completedTasks = [],
+  onOpenCompanyProfile,
+  onOpenEmployerVacancy,
 }) {
   const [previewVacancyId, setPreviewVacancyId] = useState(autoOpenVacancyId)
   const previewVacancy = useMemo(() => vacancies.find((vacancy) => vacancy.id === previewVacancyId) || null, [previewVacancyId, vacancies])
+  const companyRatingLabel = useMemo(() => {
+    if (!previewVacancy?.ownerId) return 'Профиль компании'
+    const summary = getEmployerRatingSummary({
+      completedTasks,
+      vacancies,
+      ownerId: previewVacancy.ownerId,
+      employerName: previewVacancy.companyName,
+    })
+    return formatRatingLabel(summary.rating, summary.count, 'Профиль компании')
+  }, [completedTasks, previewVacancy, vacancies])
+  const isOwnVacancy = currentUser?.role === 'employer' && previewVacancy?.ownerId === currentUser?.id
 
   const handleSelect = useCallback((vacancyId) => {
     onSelect(vacancyId)
     setPreviewVacancyId(vacancyId)
-  }, [onSelect])
+    if (vacancyId) {
+      onNearbyListOpenChange?.(false)
+    }
+  }, [onNearbyListOpenChange, onSelect])
+
+  const handleOpenNearbyVacancy = useCallback((vacancyId) => {
+    handleSelect(vacancyId)
+    onNearbyListOpenChange?.(false)
+  }, [handleSelect, onNearbyListOpenChange])
 
   useEffect(() => {
     if (!autoOpenVacancyId) return
@@ -83,15 +111,44 @@ export function AppMapPage({
           selectedVacancyId={selectedVacancyId}
           onSelect={handleSelect}
           onLocationChange={onLocationChange}
+          onVisibleVacanciesChange={onVisibleVacanciesChange}
           centerPoint={selectedCityPoint}
           className="mapPlaceholder"
         />
 
-        {vacancies.length === 0 ? (
-          <div className="spotlightCard spotlightCard--floating">
-            <div className="spotlightCard__title">Пока нет вакансий</div>
-            <div className="spotlightCard__meta">По городу {selectedCityLabel} открытые смены еще не добавлены. Попробуй другой город или сбрось фильтры.</div>
-          </div>
+        {isNearbyListOpen ? (
+          <aside className="mapNearbyList" aria-label="Вакансии на экране" onClick={() => onNearbyListOpenChange?.(false)}>
+            <div className="mapNearbyList__panel" onClick={(event) => event.stopPropagation()}>
+              <div className="mapNearbyList__header">
+                <h2 className="mapNearbyList__title">Вакансии на экране</h2>
+                <span className="mapNearbyList__count">{visibleVacancies.length}</span>
+              </div>
+
+              <div className="mapNearbyList__items">
+                {visibleVacancies.length ? (
+                  visibleVacancies.map((vacancy) => (
+                    <button
+                      key={vacancy.id}
+                      type="button"
+                      className={`mapNearbyList__item${selectedVacancyId === vacancy.id ? ' is-active' : ''}`}
+                      onClick={() => handleOpenNearbyVacancy(vacancy.id)}
+                    >
+                      <div className="mapNearbyList__itemEmoji">{getCategoryEmoji(vacancy.type || vacancy.category)}</div>
+                      <div className="mapNearbyList__itemMain">
+                        <div className="mapNearbyList__itemTitle">{vacancy.title}</div>
+                        <div className="mapNearbyList__itemSalary">от {vacancy.payFrom} Br за смену</div>
+                        <div className="mapNearbyList__itemMeta">{vacancy.companyName}</div>
+                        {vacancy.address ? <div className="mapNearbyList__itemAddress">{vacancy.address}</div> : null}
+                      </div>
+                      <span className="mapNearbyList__itemArrow" aria-hidden="true">›</span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="mapNearbyList__empty">В видимой области карты пока нет вакансий. Подвиньте карту или измените масштаб.</div>
+                )}
+              </div>
+            </div>
+          </aside>
         ) : null}
 
         {previewVacancy ? (
@@ -106,13 +163,7 @@ export function AppMapPage({
                 <div className="badge-applications-top">{previewVacancy.applicationCount} отклика</div>
                 
                 <div className="vacancySheet__icon-circle-large">
-                  <span className="vacancySheet__emoji">
-                    {(() => {
-                      const emojis = ['💻', '🚚', '🛒', '📦', '🍽️', '🎨', '🚗', '📚', '🛠️', '📄', '🐶']
-                      const emojiIndex = previewVacancy.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % emojis.length
-                      return emojis[emojiIndex]
-                    })()}
-                  </span>
+                  <span className="vacancySheet__emoji">{getCategoryEmoji(previewVacancy.type || previewVacancy.category)}</span>
                 </div>
               </div>
 
@@ -135,7 +186,7 @@ export function AppMapPage({
               
               <div className="vacancySheet__sub-info">
                 <span className="vacancySheet__salary">от {previewVacancy.payFrom} Br за смену, на руки</span>
-                <span className="vacancySheet__count-tag">уже {previewVacancy.applicationCount} отклика</span>
+                <span className="vacancySheet__count-tag">{getCategoryLabel(previewVacancy.type || previewVacancy.category)}</span>
               </div>
 
               <VacancyDescriptionPreview
@@ -145,19 +196,29 @@ export function AppMapPage({
               />
 
               <div className="vacancySheet__footer">
-                <div className="company-info">
+                <button
+                  type="button"
+                  className="company-info"
+                  onClick={() => previewVacancy.ownerId && onOpenCompanyProfile?.(previewVacancy.ownerId)}
+                >
                   <div className="company-logo-circle">
-                    <img src="/map-icons/losso.png" alt="" style={{filter: 'invert(85%) sepia(44%) saturate(542%) hue-rotate(36deg) brightness(96%) contrast(91%)'}} />
+                    <span className="company-logo-emoji">{getCategoryEmoji(previewVacancy.type || previewVacancy.category)}</span>
                   </div>
                   <div className="company-details">
                     <div className="company-name">{previewVacancy.companyName}</div>
-                    <div className="company-rating">Ресторан общ. пит. ★ 4.0 и 233 оценки</div>
+                    <div className="company-rating">{companyRatingLabel}</div>
                   </div>
-                </div>
-                
-                <button className="apply-btn-main" onClick={() => onOpenVacancy(previewVacancy.id)}>
-                  <img src="/map-icons/ОТКЛИК НУТЬСЯ.png" alt="Откликнуться" className="apply-btn-img-only" />
                 </button>
+                
+                {isOwnVacancy ? (
+                  <button className="apply-btn-main" onClick={() => onOpenEmployerVacancy?.(previewVacancy.id)}>
+                    Управлять
+                  </button>
+                ) : currentUser?.role !== 'employer' ? (
+                  <button className="apply-btn-main" onClick={() => onOpenVacancy(previewVacancy.id)}>
+                    <img src="/map-icons/ОТКЛИК НУТЬСЯ.png" alt="Откликнуться" className="apply-btn-img-only" />
+                  </button>
+                ) : null}
               </div>
             </div>
           </aside>

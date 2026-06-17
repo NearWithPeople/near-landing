@@ -8,6 +8,18 @@ import './ApplicationsPage.css'
 export function ApplicationsPage({ currentUser, applications = [], onOpenApplication }) {
   const displayApplications = getDisplayApplications(applications).map(normalizeApplication)
 
+  if (!displayApplications.length) {
+    return (
+      <section className="applicationsPage">
+        <div className="applicationsPage__empty">
+          <div className="applicationsPage__emptyVisual">📋</div>
+          <h2>Пока нет откликов</h2>
+          <p>Откликнитесь на смену на карте — здесь появятся ваши заявки и их статусы.</p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="applicationsPage">
       <div className="applicationsPage__toolbar">

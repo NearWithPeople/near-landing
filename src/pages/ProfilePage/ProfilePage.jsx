@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { buildFullName, isBelarusPhone, normalizePhone, splitFullName } from '../../utils/common'
+import { formatRatingLabel, getEmployerRatingSummary, getSeekerRatingSummary } from '../../utils/ratings'
 import './ProfilePage.css'
 
 function getProfileForm(currentUser) {
@@ -75,6 +76,7 @@ function ProfileMenuIcon({ type }) {
 export function ProfilePage({
   currentUser,
   completedTasks,
+  employerCompletedTasks = [],
   employerVacancies,
   onNavigate,
   onOpenEmployerVacancy,
@@ -104,17 +106,30 @@ export function ProfilePage({
   )
 
   const ratingLabel = useMemo(() => {
-    const employerCount = new Set(completedTasks.map((task) => task.employerName).filter(Boolean)).size
-    const count = employerCount || 12
-    return `4.9 от ${count} работодателей`
-  }, [completedTasks])
+    if (isEmployer) {
+      const mergedTasks = [...completedTasks, ...employerCompletedTasks]
+      const summary = getEmployerRatingSummary({
+        completedTasks: mergedTasks,
+        vacancies: employerVacancies,
+        ownerId: currentUser.id,
+        employerName: currentUser.companyName,
+      })
+      return formatRatingLabel(summary.rating, summary.count, currentUser.companyName || 'Работодатель')
+    }
+
+    const summary = getSeekerRatingSummary({
+      completedTasks,
+      userId: currentUser.id,
+    })
+    return formatRatingLabel(summary.rating, summary.count, 'Пока нет оценок')
+  }, [completedTasks, currentUser.companyName, currentUser.id, employerCompletedTasks, employerVacancies, isEmployer])
 
   const menuItems = isEmployer
     ? [
-        { id: 'tasks', label: 'Мои задачи', icon: 'stats' },
+        { id: 'shifts', label: 'Мои смены', icon: 'stats' },
         { id: 'stats', label: 'Статистика', icon: 'stats' },
         { id: 'notifications', label: 'Уведомления', icon: 'notifications' },
-        { id: 'data', label: 'Мои данные', icon: 'data' },
+        { id: 'data', label: 'Данные компании', icon: 'data' },
       ]
     : [
         { id: 'history', label: 'История откликов', icon: 'history' },
@@ -168,7 +183,7 @@ export function ProfilePage({
   }
 
   function handleMenuSelect(itemId) {
-    if (itemId === 'history') {
+    if (itemId === 'history' || itemId === 'shifts') {
       onNavigate?.('/applications')
       return
     }
@@ -286,12 +301,12 @@ export function ProfilePage({
 
   function renderEmployerTasks() {
     return (
-      <section className="profilePage">
+      <section className="profilePage profilePage--employer">
         <div className="profilePage__subHeader">
           <button type="button" className="profilePage__back" onClick={() => setActiveView('hub')} aria-label="Назад">
             ←
           </button>
-          <h2 className="profilePage__subTitle">Мои задачи</h2>
+          <h2 className="profilePage__subTitle">Мои смены</h2>
           <button type="button" className="profilePage__subAction" onClick={onCreateVacancy}>
             Создать
           </button>
@@ -324,9 +339,9 @@ export function ProfilePage({
             ))
           ) : (
             <article className="profilePage__panel">
-              <p className="profilePage__panelText">Пока нет опубликованных задач.</p>
+              <p className="profilePage__panelText">Пока нет опубликованных смен.</p>
               <button type="button" className="primaryButton" onClick={onCreateVacancy}>
-                Создать первую задачу
+                Создать смену
               </button>
             </article>
           )}
@@ -336,7 +351,7 @@ export function ProfilePage({
   }
 
   if (activeView === 'data') return renderProfileData()
-  if (activeView === 'tasks') return renderEmployerTasks()
+  if (activeView === 'tasks' || activeView === 'shifts') return renderEmployerTasks()
   if (activeView === 'stats') {
     return renderPlaceholderView('Статистика', 'Здесь скоро появится статистика по откликам и выполненным сменам.')
   }
@@ -344,20 +359,30 @@ export function ProfilePage({
     return renderPlaceholderView('Уведомления', 'Здесь будут уведомления о статусах откликов и новых сменах.')
   }
 
-  const displayName = currentUser.fullName || buildFullName({ lastName: nameParts.lastName, firstName: nameParts.firstName, middleName: nameParts.middleName })
+  const displayName = isEmployer
+    ? currentUser.companyName || currentUser.fullName || 'Компания'
+    : currentUser.fullName || buildFullName({ lastName: nameParts.lastName, firstName: nameParts.firstName, middleName: nameParts.middleName })
 
   return (
-    <section className="profilePage">
+    <section className={`profilePage${isEmployer ? ' profilePage--employer' : ''}`}>
       <article className="profilePage__userCard">
-        <div className="profilePage__avatar" aria-hidden="true" />
+        <button
+          type="button"
+          className="profilePage__userCardButton"
+          onClick={() => onNavigate?.(isEmployer ? `/company/${currentUser.id}` : `/user/${currentUser.id}`)}
+        >
+          <div className={`profilePage__avatar${isEmployer ? ' profilePage__avatar--company' : ''}`} aria-hidden="true">
+            {isEmployer ? <span className="profilePage__avatarMark">⌂</span> : null}
+          </div>
 
-        <div className="profilePage__userInfo">
-          <h2 className="profilePage__name">
-            {displayName}
-          </h2>
-          {!isEmployer ? <p className="profilePage__rating">★ 4.95 Отрекомендованный</p> : null}
-          {isEmployer ? <p className="profilePage__rating">{currentUser.companyName || 'Работодатель'}</p> : null}
-        </div>
+          <div className="profilePage__userInfo">
+            <h2 className="profilePage__name">
+              {displayName}
+            </h2>
+            <p className="profilePage__rating">{ratingLabel}</p>
+            {isEmployer ? <p className="profilePage__roleLabel">Работодатель</p> : null}
+          </div>
+        </button>
 
         <div className="profilePage__cardMenu">
           <button type="button" className="profilePage__menuBtn" aria-label="Меню профиля" onClick={() => setMenuOpen((prev) => !prev)}>

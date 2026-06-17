@@ -19,8 +19,11 @@ export function AppShell({
   chatsCount = 0,
   lassoActive = false,
   onLassoToggle,
+  onMapNearbyClick,
+  onMapListClick,
 }) {
   const resolvedChatsCount = Number(chatsCount) || 0
+  const isEmployer = currentUser?.role === 'employer'
   const isMapSection = currentSection === 'map'
   const keepBottomNavOnAdaptive = true // Always keep bottom nav as per request
 
@@ -29,13 +32,18 @@ export function AppShell({
       case 'map':
         return {
           title: currentLocationName || 'пр. Независимости',
-          subtitle: '4 вакансии поблизости ›',
+          subtitle: 'нет вакансий поблизости',
         }
       case 'applications':
-        return {
-          title: 'Отклики',
-          subtitle: 'Пока нет активных откликов',
-        }
+        return isEmployer
+          ? {
+              title: 'Смены',
+              subtitle: 'Нет активных смен',
+            }
+          : {
+              title: 'Отклики',
+              subtitle: 'Пока нет активных откликов',
+            }
       case 'chat':
         return {
           title: 'Чат',
@@ -43,11 +51,10 @@ export function AppShell({
         }
       case 'profile':
         return {
-          title: 'Профиль',
-          subtitle:
-            currentUser?.role === 'employer'
-              ? currentUser?.companyName || currentUser?.fullName || 'Работодатель'
-              : 'нашего звёздного специалиста',
+          title: isEmployer ? 'Компания' : 'Профиль',
+          subtitle: isEmployer
+            ? currentUser?.companyName || currentUser?.fullName || 'Работодатель'
+            : 'нашего звёздного специалиста',
         }
       case 'vacancy':
         return {
@@ -74,11 +81,19 @@ export function AppShell({
             <div className="appTopbar__content">
               <div className="appTopbar__location">
                 <div className="appTopbar__address">{resolvedTitle}</div>
-                <div className="appTopbar__nearby">{resolvedSubtitle}</div>
+                {isMapSection && onMapNearbyClick ? (
+                  <button type="button" className="appTopbar__nearby" onClick={onMapNearbyClick}>
+                    {resolvedSubtitle}
+                  </button>
+                ) : (
+                  <div className="appTopbar__nearby">{resolvedSubtitle}</div>
+                )}
               </div>
-              <div className="appTopbar__balance">
-                9999<span className="balance-dot"></span>
-              </div>
+              {!isEmployer ? (
+                <div className="appTopbar__balance">
+                  9999<span className="balance-dot"></span>
+                </div>
+              ) : null}
             </div>
           </header>
         ) : null}
@@ -90,19 +105,19 @@ export function AppShell({
             <div className="bottomNav__page-blur" aria-hidden="true"></div>
             {isMapSection ? (
               <>
-                <div className="bottomNav__controls bottomNav__controls--left" aria-hidden="true">
-                  <button type="button" className="bottomNav__controlButton">
+                <div className="bottomNav__controls bottomNav__controls--left">
+                  <button type="button" className="bottomNav__controlButton" aria-label="Фильтры">
                     <img src="/map-icons/funnel.png" alt="" />
                   </button>
-                  <button type="button" className="bottomNav__controlButton">
+                  <button type="button" className="bottomNav__controlButton" aria-label="Список вакансий на экране" onClick={onMapListClick}>
                     <img src="/map-icons/list.png" alt="" />
                   </button>
-                  <button type="button" className={`bottomNav__controlButton ${lassoActive ? 'is-active' : ''}`} onClick={onLassoToggle}>
-                    <img src="/map-icons/losso.png" alt="Выделение лассо" />
+                  <button type="button" className={`bottomNav__controlButton ${lassoActive ? 'is-active' : ''}`} aria-label="Выделение лассо" onClick={onLassoToggle}>
+                    <img src="/map-icons/losso.png" alt="" />
                   </button>
                 </div>
-                <div className="bottomNav__controls bottomNav__controls--right" aria-hidden="true">
-                  <button type="button" className="bottomNav__controlButton">
+                <div className="bottomNav__controls bottomNav__controls--right">
+                  <button type="button" className="bottomNav__controlButton" aria-label="Моё местоположение">
                     <img src="/map-icons/locate-fixed.png" alt="" />
                   </button>
                 </div>
@@ -124,7 +139,7 @@ export function AppShell({
               </button>
               <button className={`bottomNav__item ${currentSection === 'applications' ? 'is-active' : ''}`} onClick={() => onNavigate('/applications')}>
                 <img src="/map-icons/notepad-text.png" alt="" className="bottomNav__icon" />
-                <span>Отклики</span>
+                <span>{isEmployer ? 'Смены' : 'Отклики'}</span>
               </button>
               <button className={`bottomNav__item ${currentSection === 'chat' ? 'is-active' : ''}`} onClick={() => onNavigate('/chat')}>
                 <div className="bottomNav__iconWrapper">
@@ -137,7 +152,7 @@ export function AppShell({
               </button>
               <button className={`bottomNav__item ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')}>
                 <div className="bottomNav__icon bottomNav__icon--user"></div>
-                <span>Ты</span>
+                <span>{isEmployer ? 'Компания' : 'Ты'}</span>
               </button>
             </nav>
           </>

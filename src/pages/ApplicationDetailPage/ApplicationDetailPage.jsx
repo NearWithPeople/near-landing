@@ -1,16 +1,21 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   APPLICATION_PROGRESS_STAGES,
   formatApplicationSalary,
   normalizeApplication,
 } from '../../utils/applicationPresentation'
+import { formatRatingLabel, getEmployerRatingSummary } from '../../utils/ratings'
 import './ApplicationDetailPage.css'
 
 export function ApplicationDetailPage({
   application,
+  vacancy,
+  vacancies = [],
   onBack,
   onOpenChat,
   onCancel,
+  onOpenCompanyProfile,
+  completedTasks = [],
   emptyBackLabel = 'Назад к откликам',
   emptyMessage = 'Не найдено',
 }) {
@@ -40,6 +45,18 @@ export function ApplicationDetailPage({
   const progressFilled = Math.max(0, Math.min(APPLICATION_PROGRESS_STAGES.length, item.progressFilled || 0))
   const showApplicationActions = item.statusVariant === 'pending' || item.statusVariant === 'active'
   const pageTitle = 'Детали заказа'
+  const companyRatingSummary = useMemo(() => {
+    if (!vacancy?.ownerId) return null
+    return getEmployerRatingSummary({
+      completedTasks,
+      vacancies,
+      ownerId: vacancy.ownerId,
+      employerName: vacancy.companyName || item.employerName,
+    })
+  }, [completedTasks, item.employerName, vacancies, vacancy])
+  const companyRatingLabel = companyRatingSummary
+    ? formatRatingLabel(companyRatingSummary.rating, companyRatingSummary.count)
+    : ''
 
   return (
     <section className="applicationDetailPage">
@@ -111,6 +128,16 @@ export function ApplicationDetailPage({
               <span>{requirement}</span>
             </div>
           ))}
+
+          {vacancy?.companyName ? (
+            <button type="button" className="applicationDetailPage__companyCard" onClick={onOpenCompanyProfile}>
+              <div className="applicationDetailPage__companyAvatar">{(vacancy.companyName || 'К')[0]}</div>
+              <div>
+                <div className="applicationDetailPage__companyName">{vacancy.companyName}</div>
+                <div className="applicationDetailPage__companyRating">{companyRatingLabel || 'Профиль компании'}</div>
+              </div>
+            </button>
+          ) : null}
 
           <div className="applicationDetailPage__description">{description}</div>
         </article>

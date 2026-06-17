@@ -364,6 +364,43 @@
   cursor: pointer;
 }
 
+.applicationDetailPage__companyCard {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.applicationDetailPage__companyAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #5f58d4;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.applicationDetailPage__companyName {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.applicationDetailPage__companyRating {
+  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.58);
+}
+
 .applicationDetailPage__dropdown {
   position: absolute;
   top: calc(100% + 8px);

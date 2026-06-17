@@ -21,6 +21,20 @@ export function formatMoneyBYN(amount) {
   return new Intl.NumberFormat('ru-RU').format(Math.round(v)) + ' BYN'
 }
 
+export function formatNearbyVacanciesLabel(count) {
+  const value = Number(count) || 0
+  if (!value) return 'нет вакансий поблизости'
+
+  const mod10 = value % 10
+  const mod100 = value % 100
+  let word = 'вакансий'
+
+  if (mod10 === 1 && mod100 !== 11) word = 'вакансия'
+  else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) word = 'вакансии'
+
+  return `${value} ${word} поблизости ›`
+}
+
 export function normalizePhone(input) {
   const digits = String(input || '').replace(/\D+/g, '')
   if (!digits) return ''

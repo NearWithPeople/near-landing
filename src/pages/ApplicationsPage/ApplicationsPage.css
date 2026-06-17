@@ -220,3 +220,33 @@
 .applicationCard--compact {
   opacity: 0.72;
 }
+
+.applicationsPage__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.applicationsPage__emptyVisual {
+  font-size: 48px;
+}
+
+.applicationsPage__empty h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.applicationsPage__empty p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}

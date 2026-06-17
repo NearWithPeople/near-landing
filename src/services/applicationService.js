@@ -30,3 +30,11 @@ export async function createApplication({ vacancyId }) {
   return response.application
 }
 
+export async function updateApplicationStatus(applicationId, status) {
+  const response = await apiRequest(`/app/applications/${applicationId}/status`, {
+    method: 'PUT',
+    body: { status },
+  })
+
+  return response.application
+}

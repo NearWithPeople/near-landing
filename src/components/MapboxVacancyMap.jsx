@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { getCategoryEmoji } from '../constants/vacancyCategories'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
 const SOURCE_ID = 'vacancies'
@@ -118,6 +119,19 @@ function updateSourceData(map, vacancies) {
   source.setData(getFeatureCollection(vacancies))
 }
 
+function getVisibleVacancies(map, vacancies) {
+  if (!map) return []
+
+  const bounds = map.getBounds()
+
+  return (vacancies || []).filter((vacancy) => {
+    const lat = Number(vacancy.lat)
+    const lng = Number(vacancy.lng)
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false
+    return bounds.contains([lng, lat])
+  })
+}
+
 import { reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
 
 function updateBubblePositions(map, markersRef) {
@@ -181,12 +195,13 @@ function updateBubblePositions(map, markersRef) {
   })
 }
 
-export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLocationChange, centerPoint, className = '' }) {
+export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLocationChange, onVisibleVacanciesChange, centerPoint, className = '' }) {
   const mapNodeRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef(new Map())
   const onSelectRef = useRef(onSelect)
   const onLocationChangeRef = useRef(onLocationChange)
+  const onVisibleVacanciesChangeRef = useRef(onVisibleVacanciesChange)
   const vacanciesRef = useRef(vacancies)
   const selectedVacancyIdRef = useRef(selectedVacancyId)
 
@@ -197,6 +212,10 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
   useEffect(() => {
     onLocationChangeRef.current = onLocationChange
   }, [onLocationChange])
+
+  useEffect(() => {
+    onVisibleVacanciesChangeRef.current = onVisibleVacanciesChange
+  }, [onVisibleVacanciesChange])
 
   useEffect(() => {
     vacanciesRef.current = vacancies
@@ -224,7 +243,14 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
 
     mapRef.current = map
 
+    const notifyVisibleVacancies = () => {
+      if (!onVisibleVacanciesChangeRef.current) return
+      onVisibleVacanciesChangeRef.current(getVisibleVacancies(map, vacanciesRef.current))
+    }
+
     const handleMoveEnd = async () => {
+      notifyVisibleVacancies()
+
       const currentZoom = map.getZoom()
       const center = map.getCenter()
 
@@ -278,6 +304,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
 
     map.on('moveend', handleMoveEnd)
     map.on('move', () => {
+      notifyVisibleVacancies()
       updateMarkers()
       updateBubblePositions(map, markersRef)
     })
@@ -307,6 +334,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
       ensureSourceAndLayers(map)
       ensureBuildingsLayer(map)
       updateSourceData(map, vacanciesRef.current)
+      notifyVisibleVacancies()
 
       map.on('click', handleMapClick)
       
@@ -389,10 +417,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
           const bubble = document.createElement('div')
           bubble.className = 'marker-bubble'
           
-          const emojis = ['💻', '🚚', '🛒', '📦', '🍽️', '🎨', '🚗', '📚', '🛠️', '📄', '🐶']
-          // Use vacancy ID to pick a stable emoji for this vacancy
-          const emojiIndex = vacancyId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % emojis.length
-          const stableEmoji = emojis[emojiIndex]
+          const stableEmoji = getCategoryEmoji(vacancy.type || vacancy.category)
 
           const icon = document.createElement('div')
           icon.className = 'marker-icon'
@@ -480,6 +505,9 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
         pitch: 60,
         bearing: -20,
       })
+      if (onVisibleVacanciesChangeRef.current) {
+        onVisibleVacanciesChangeRef.current(getVisibleVacancies(map, vacancies))
+      }
       return
     }
 
@@ -492,6 +520,9 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
         essential: true,
         duration: 0,
       })
+      if (onVisibleVacanciesChangeRef.current) {
+        onVisibleVacanciesChangeRef.current([])
+      }
     }
   }, [vacancies, centerPoint])
 

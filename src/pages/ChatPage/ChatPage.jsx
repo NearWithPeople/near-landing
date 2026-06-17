@@ -1,66 +1,102 @@
 import { useState, useEffect, useRef } from 'react'
-import { getMessagesForApplication, saveChatMessage } from '../../services/chatService'
+import { fetchChatMessages, sendChatMessage } from '../../services/chatService'
 import './ChatPage.css'
 
-export function ChatPage({ currentUser, applications = [], onNavigate, activeChatId, onActiveChatChange }) {
+export function ChatPage({ currentUser, applications = [], onNavigate, activeChatId, onActiveChatChange, onChatActivity }) {
   const activeAppId = activeChatId
   const setActiveAppId = onActiveChatChange
   const [messages, setMessages] = useState([])
   const [inputText, setInputText] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSending, setIsSending] = useState(false)
+  const [chatError, setChatError] = useState('')
   const messagesEndRef = useRef(null)
 
-  // Find the currently active application/chat thread
   const activeApp = applications.find((app) => app.id === activeAppId) || null
 
-  // Auto-scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  // Load messages when the active chat thread changes
   useEffect(() => {
-    if (activeAppId) {
-      const loaded = getMessagesForApplication(activeAppId, activeApp)
-      setMessages(loaded)
-    } else {
+    if (!activeAppId) {
       setMessages([])
+      setChatError('')
+      return
     }
-  }, [activeAppId, activeApp])
+
+    let cancelled = false
+
+    async function loadMessages() {
+      setIsLoading(true)
+      setChatError('')
+
+      try {
+        const loaded = await fetchChatMessages(activeAppId)
+        if (!cancelled) {
+          setMessages(loaded)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setChatError(error.message || 'Не удалось загрузить сообщения.')
+          setMessages([])
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadMessages()
+
+    return () => {
+      cancelled = true
+    }
+  }, [activeAppId])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
-  // If there's an active app, periodically check for new messages in localStorage
   useEffect(() => {
     if (!activeAppId) return
 
-    const interval = setInterval(() => {
-      const current = getMessagesForApplication(activeAppId, activeApp)
-      if (current.length !== messages.length) {
-        setMessages(current)
+    const interval = setInterval(async () => {
+      try {
+        const current = await fetchChatMessages(activeAppId)
+        setMessages((prev) => {
+          if (prev.length === current.length && prev.at(-1)?.id === current.at(-1)?.id) {
+            return prev
+          }
+          return current
+        })
+      } catch {
+        // Keep polling silent; explicit load already shows errors.
       }
-    }, 1500)
+    }, 4000)
 
     return () => clearInterval(interval)
-  }, [activeAppId, messages.length, activeApp])
+  }, [activeAppId])
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (!inputText.trim() || !activeAppId) return
+    if (!inputText.trim() || !activeAppId || isSending) return
 
-    const isSeeker = currentUser.role === 'seeker'
-    const newMessage = {
-      applicationId: activeAppId,
-      senderId: currentUser.id,
-      senderName: isSeeker ? (currentUser.fullName || 'Соискатель') : (currentUser.companyName || 'Работодатель'),
-      text: inputText.trim(),
-    }
+    setIsSending(true)
+    setChatError('')
 
-    const saved = saveChatMessage(newMessage)
-    if (saved) {
-      setMessages((prev) => [...prev, saved])
-      setInputText('')
+    try {
+      const saved = await sendChatMessage(activeAppId, inputText.trim())
+      if (saved) {
+        setMessages((prev) => [...prev, saved])
+        setInputText('')
+        onChatActivity?.()
+      }
+    } catch (error) {
+      setChatError(error.message || 'Не удалось отправить сообщение.')
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -86,7 +122,7 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
       <div className="chatPage__emptyState">
         <div className="chatPage__emptyVisual">💬</div>
         <h2>У вас пока нет активных чатов</h2>
-        <p>Откликнитесь на вакансии на карте или в каталоге, чтобы начать общение с работодателями.</p>
+        <p>Откликнитесь на вакансии на карте, чтобы начать общение с работодателями.</p>
         <button className="primaryButton" onClick={() => onNavigate('/map')}>
           Найти подработку
         </button>
@@ -96,7 +132,6 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
 
   return (
     <div className={`chatPage ${activeAppId ? 'chatPage--hasActiveChat' : ''}`}>
-      {/* Sidebar - Threads list */}
       <aside className="chatPage__sidebar">
         <div className="chatPage__sidebarHeader">
           <h3>Сообщения</h3>
@@ -106,8 +141,6 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
           {applications.map((app) => {
             const partnerName = getPartnerName(app)
             const initials = getPartnerAvatarInitials(app)
-            const threadMessages = getMessagesForApplication(app.id, app)
-            const lastMsg = threadMessages[threadMessages.length - 1]
 
             return (
               <button
@@ -119,16 +152,8 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
                 <div className="chatPage__threadInfo">
                   <div className="chatPage__threadTop">
                     <span className="chatPage__threadName">{partnerName}</span>
-                    {lastMsg && (
-                      <span className="chatPage__threadTime">
-                        {formatMessageTime(lastMsg.timestamp)}
-                      </span>
-                    )}
                   </div>
                   <span className="chatPage__threadVacancy">{app.vacancyTitle}</span>
-                  <p className="chatPage__threadPreview">
-                    {lastMsg ? lastMsg.text : 'Нет сообщений'}
-                  </p>
                 </div>
               </button>
             )
@@ -136,11 +161,9 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
         </div>
       </aside>
 
-      {/* Main chat window */}
       <main className="chatPage__window">
         {activeApp ? (
           <>
-            {/* Window Topbar */}
             <div className="chatPage__windowHeader">
               <button
                 className="chatPage__backBtn"
@@ -158,10 +181,11 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
               </div>
             </div>
 
-            {/* Window Messages */}
             <div className="chatPage__messages">
+              {isLoading ? <div className="chatPage__systemMessage"><span>Загрузка сообщений...</span></div> : null}
+              {chatError ? <div className="chatPage__systemMessage"><span>{chatError}</span></div> : null}
               {messages.map((msg) => {
-                const isSystem = msg.senderId === 'system' || msg.senderId === 'employer-system'
+                const isSystem = msg.senderId === 'system' || msg.senderRole === 'system'
                 const isMine = msg.senderId === currentUser.id
 
                 if (isSystem) {
@@ -191,7 +215,6 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Window Input Form */}
             <form className="chatPage__inputForm" onSubmit={handleSendMessage}>
               <input
                 type="text"
@@ -199,11 +222,12 @@ export function ChatPage({ currentUser, applications = [], onNavigate, activeCha
                 placeholder="Сообщение..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                disabled={isSending}
               />
               <button
                 type="submit"
                 className="chatPage__sendBtn"
-                disabled={!inputText.trim()}
+                disabled={!inputText.trim() || isSending}
                 aria-label="Отправить"
               >
                 ➔

@@ -10,24 +10,28 @@ import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from './constants/legalPages'
 import { AuthPage } from './pages/AuthPage/AuthPage'
 import { ApplicationsPage } from './pages/ApplicationsPage/ApplicationsPage'
 import { ApplicationDetailPage } from './pages/ApplicationDetailPage/ApplicationDetailPage'
-import { CatalogPage } from './pages/CatalogPage/CatalogPage'
+import { ChatPage } from './pages/ChatPage/ChatPage'
 import { EmployerVacancyFormPage } from './pages/EmployerVacancyFormPage/EmployerVacancyFormPage'
 import { EmployerVacancyManagePage } from './pages/EmployerVacancyManagePage/EmployerVacancyManagePage'
+import { EmployerShiftsPage, formatEmployerShiftsSubtitle } from './pages/EmployerShiftsPage/EmployerShiftsPage'
 import { LaunchLandingPage } from './pages/LaunchLandingPage/LaunchLandingPage'
 import { ProfilePage } from './pages/ProfilePage/ProfilePage'
 import { AppMapPage } from './pages/AppMapPage/AppMapPage'
 import { StaticInfoPage } from './pages/StaticInfoPage/StaticInfoPage'
-import { ChatPage } from './pages/ChatPage/ChatPage'
-import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
+import { CompanyProfilePage } from './pages/CompanyProfilePage/CompanyProfilePage'
+import { UserProfilePage } from './pages/UserProfilePage/UserProfilePage'
+import { getCategoryOptions } from './constants/vacancyCategories'
+import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy, updateApplicationStatus } from './services/applicationService'
 import { getCurrentUser, loginAccount, logoutUser, updateUserProfile } from './services/authService'
 import { loadAppBootstrap } from './services/appService'
 import { loadSiteContent } from './services/siteService'
 import { listCompletedTasksForUser, listEmployerVacancies, rateCompletedTask } from './services/taskService'
 import { archiveVacancy, createVacancy, getVacancyById, listVacancies } from './services/vacancyService'
-import { buildFullName, isBelarusPhone, normalizePhone } from './utils/common'
+import { buildFullName, formatNearbyVacanciesLabel, isBelarusPhone, normalizePhone } from './utils/common'
 import {
   consumePreLaunchAccessFromSearch,
-  readPreLaunchAccess,
+  getDefaultAppPath,
+  readPreLaunchAccessRole,
   stripPreLaunchAccessFromSearch,
 } from './utils/preLaunchAccess'
 import { getDisplayApplications, summarizeApplications } from './utils/applicationPresentation'
@@ -44,6 +48,17 @@ const LEGACY_APP_ROUTES = {
 }
 
 const CITY_STORAGE_KEY = 'near_selected_city_v1'
+
+function getVacancyStatusLabel(status) {
+  if (status === 'pending_review') return 'На модерации'
+  if (status === 'rejected') return 'Отклонена'
+  if (status === 'archived') return 'В архиве'
+  if (status === 'closed') return 'Закрыта'
+  if (status === 'paused') return 'На паузе'
+  if (status === 'draft') return 'Черновик'
+  return 'Открыта'
+}
+
 const DEFAULT_SITE_CONTENT = {
   landingPage: {
     guestBadge: 'Гостевой экран',
@@ -63,14 +78,7 @@ const DEFAULT_SITE_CONTENT = {
 }
 
 const FALLBACK_CITY_OPTIONS = BELARUS_CITY_OPTIONS.filter((city) => city.value !== 'all')
-const FALLBACK_CATEGORY_OPTIONS = [
-  { value: 'all', label: 'Все категории' },
-  { value: 'Курьер', label: 'Курьер' },
-  { value: 'Склад', label: 'Склад' },
-  { value: 'Промо', label: 'Промо' },
-  { value: 'HoReCa', label: 'HoReCa' },
-  { value: 'Подсобные', label: 'Подсобные' },
-]
+const FALLBACK_CATEGORY_OPTIONS = [{ value: 'all', label: 'Все категории' }, ...getCategoryOptions()]
 const FALLBACK_PAY_OPTIONS = [
   { value: '0', label: 'Любая ставка' },
   { value: '40', label: 'От 40 BYN' },
@@ -143,99 +151,6 @@ function normalizeAppFilters(filters) {
   }
 }
 
-const MOCK_VACANCIES = [
-  {
-    id: 'mock-center',
-    title: 'Администратор (тестовая)',
-    companyName: 'NEAR Team',
-    payFrom: 100,
-    address: 'пр. Независимости 1',
-    city: 'minsk',
-    lat: 53.9023,
-    lng: 27.5619,
-    type: 'HoReCa',
-    category: 'HoReCa',
-    shiftDate: 'Сегодня',
-    schedule: 'Гибкий график',
-    status: 'open',
-    applicationCount: 5,
-    description: 'Тестовая вакансия в самом центре Минска для проверки интерфейса.',
-    requirements: ['Пунктуальность', 'Вежливость']
-  },
-  {
-    id: 'mock-1',
-    title: 'Сотрудник бригады ресторана (разнорабочий)',
-    companyName: 'УП «МАК.БАЙ»',
-    payFrom: 70,
-    address: 'пр. Независимости 43к7',
-    city: 'minsk',
-    lat: 53.9188,
-    lng: 27.5235,
-    type: 'HoReCa',
-    category: 'HoReCa',
-    shiftDate: 'Завтра',
-    schedule: 'Дневная смена',
-    status: 'open',
-    applicationCount: 3,
-    description: 'Ночная или дневная смена (8 часов) в качестве сотрудника бригады ресторана быстрого обслуживания Mak.by Вокзальная. Приятная подработка в ведущей сети ресторанов быстрого обслуживания в Беларуси на стабильных условиях, гибким графиком и удобной локацией.',
-    requirements: ['Для работы необходима медсправка*', 'Доступно с 14 лет с согласием законного представителя*']
-  },
-  {
-    id: 'mock-2',
-    title: 'Курьер на личном авто',
-    companyName: 'Доставка Плюс',
-    payFrom: 120,
-    address: 'ул. Сурганова 50',
-    city: 'minsk',
-    lat: 53.9244,
-    lng: 27.552,
-    type: 'Курьер',
-    category: 'Курьер',
-    shiftDate: 'Сегодня',
-    schedule: 'Свободный график',
-    status: 'open',
-    applicationCount: 12,
-    description: 'Доставка заказов по городу. Оплата ежедневно.',
-    requirements: ['Наличие авто', 'Стаж вождения от 1 года']
-  },
-  {
-    id: 'mock-3',
-    title: 'Промоутер',
-    companyName: 'Рекламное Агентство',
-    payFrom: 45,
-    address: 'пр. Победителей 9',
-    city: 'minsk',
-    lat: 53.9084,
-    lng: 27.5638,
-    type: 'Промо',
-    category: 'Промо',
-    shiftDate: 'Сб, 30 мая',
-    schedule: '4 часа',
-    status: 'open',
-    applicationCount: 5,
-    description: 'Раздача листовок возле ТЦ.',
-    requirements: ['Активность', 'Коммуникабельность']
-  },
-  {
-    id: 'mock-4',
-    title: 'Сотрудник склада',
-    companyName: 'Логистик Центр',
-    payFrom: 85,
-    address: 'ул. Притыцкого 29',
-    city: 'minsk',
-    lat: 53.9065,
-    lng: 27.4844,
-    type: 'Склад',
-    category: 'Склад',
-    shiftDate: 'Пн, 1 июня',
-    schedule: 'Ночная смена',
-    status: 'open',
-    applicationCount: 8,
-    description: 'Сортировка и упаковка товаров на теплом складе.',
-    requirements: ['Ответственность', 'Готовность к физическому труду']
-  }
-]
-
 export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -244,7 +159,7 @@ export default function App() {
   const [authError, setAuthError] = useState('')
   const [isAuthSubmitting, setIsAuthSubmitting] = useState(false)
   const [remoteData, setRemoteData] = useState({
-    vacancies: MOCK_VACANCIES,
+    vacancies: [],
     applications: [],
     completedTasks: [],
     employerCompletedTasks: [],
@@ -252,9 +167,9 @@ export default function App() {
   })
   const [siteContent, setSiteContent] = useState(DEFAULT_SITE_CONTENT)
   const [appFilters, setAppFilters] = useState(() => normalizeAppFilters())
-  const [authForm, setAuthForm] = useState({
+  const [authForm, setAuthForm] = useState(() => ({
     mode: 'login',
-    role: 'seeker',
+    role: readPreLaunchAccessRole() === 'employer' ? 'employer' : 'seeker',
     lastName: '',
     firstName: '',
     middleName: '',
@@ -265,7 +180,7 @@ export default function App() {
     telegramUsername: '',
     password: '',
     acceptedLegal: false,
-  })
+  }))
   const [selectedCity, setSelectedCity] = useState(() => {
     if (typeof window === 'undefined') return DEFAULT_CITY_VALUE
     return localStorage.getItem(CITY_STORAGE_KEY) || DEFAULT_CITY_VALUE
@@ -273,6 +188,8 @@ export default function App() {
   const [dataVersion, setDataVersion] = useState(0)
   const [activeVacancyId, setActiveVacancyId] = useState('')
   const [activeChatId, setActiveChatId] = useState('')
+  const [visibleMapVacancies, setVisibleMapVacancies] = useState([])
+  const [isNearbyListOpen, setIsNearbyListOpen] = useState(false)
   const [currentLocationName, setCurrentLocationName] = useState('Минск')
   const [catalogFilters, setCatalogFilters] = useState({
     query: '',
@@ -282,7 +199,7 @@ export default function App() {
     sortBy: 'relevant',
   })
   const [userPoint, setUserPoint] = useState({ lat: 53.9023, lng: 27.5619 }) // Minsk center fallback
-  const [preLaunchAccessGranted, setPreLaunchAccessGranted] = useState(() => readPreLaunchAccess())
+  const [preLaunchAccessRole, setPreLaunchAccessRole] = useState(() => readPreLaunchAccessRole())
   const currentUserId = currentUser?.id || ''
 
   const selectedCityOption = useMemo(() => getCityOption(selectedCity, appFilters.cityOptions), [appFilters.cityOptions, selectedCity])
@@ -315,7 +232,22 @@ export default function App() {
   }, [currentUser, remoteData.applications])
   const displayApplications = useMemo(() => getDisplayApplications(applications), [applications])
   const applicationsSummary = useMemo(() => summarizeApplications(displayApplications), [displayApplications])
+  const isEmployer = currentUser?.role === 'employer'
+  const employerApplications = useMemo(
+    () => (currentUser && isEmployer ? listApplicationsForEmployer(remoteData.applications, currentUser.id) : []),
+    [currentUser, isEmployer, remoteData.applications]
+  )
   const completedTasks = useMemo(() => (currentUser ? listCompletedTasksForUser(remoteData.completedTasks, currentUser.id) : []), [currentUser, remoteData.completedTasks])
+  const allCompletedTasks = useMemo(() => {
+    const merged = [...(remoteData.completedTasks || []), ...(remoteData.employerCompletedTasks || [])]
+    const seen = new Set()
+    return merged.filter((task) => {
+      const key = String(task.id)
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }, [remoteData.completedTasks, remoteData.employerCompletedTasks])
   const employerVacancies = useMemo(() => (currentUser ? listEmployerVacancies(remoteData.employerVacancies, currentUser.id) : []), [currentUser, remoteData.employerVacancies])
   const employerCompletedTasks = useMemo(() => [...(remoteData.employerCompletedTasks || [])], [remoteData.employerCompletedTasks])
   const appliedVacancyIds = useMemo(() => userApplications.map((application) => application.vacancyId), [userApplications])
@@ -345,6 +277,17 @@ export default function App() {
             ...(payload.stats || {}),
           },
         })
+
+        if (payload.settings) {
+          setAppFilters((prev) =>
+            normalizeAppFilters({
+              defaultCity: payload.settings.defaultCity || prev.defaultCity,
+              cityOptions: payload.settings.cityOptions || prev.cityOptions,
+              categoryOptions: payload.settings.categoryOptions || prev.categoryOptions,
+              payOptions: payload.settings.payOptions || prev.payOptions,
+            })
+          )
+        }
       } catch {
         if (cancelled) return
       }
@@ -358,22 +301,24 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (!consumePreLaunchAccessFromSearch(location.search)) return
+    const grantedRole = consumePreLaunchAccessFromSearch(location.search)
+    if (!grantedRole) return
 
-    setPreLaunchAccessGranted(true)
+    setPreLaunchAccessRole(grantedRole)
+
+    if (grantedRole === 'employer') {
+      setAuthForm((prev) => ({ ...prev, role: 'employer' }))
+    }
 
     const cleanedSearch = stripPreLaunchAccessFromSearch(location.search)
-    if (cleanedSearch === location.search) return
+    const nextPath = getDefaultAppPath({
+      user: currentUser,
+      accessRole: grantedRole,
+    })
 
-    navigate({ pathname: location.pathname, search: cleanedSearch }, { replace: true })
-  }, [location.pathname, location.search, navigate])
+    navigate({ pathname: nextPath, search: cleanedSearch }, { replace: true })
+  }, [currentUser, location.pathname, location.search, navigate])
 
-  useEffect(() => {
-    if (preLaunchAccessGranted) return
-    if (location.pathname === '/') return
-
-    navigate('/', { replace: true })
-  }, [location.pathname, navigate, preLaunchAccessGranted])
 // сдеоай так чтобы он щапрагивал первый ращ когда нажимаешь чтобы  на карте найти себя а не при взоде на сайт
   // useEffect(() => {
   //   if (!('geolocation' in navigator)) return
@@ -391,7 +336,7 @@ export default function App() {
       if (!currentUserId) {
         if (!cancelled) {
           setRemoteData({
-            vacancies: MOCK_VACANCIES,
+            vacancies: [],
             applications: [],
             completedTasks: [],
             employerCompletedTasks: [],
@@ -403,13 +348,13 @@ export default function App() {
 
       try {
         const payload = await loadAppBootstrap()
-        if (cancelled) return
+        if (cancelled || !payload) return
 
-        if (!payload?.currentUser) {
+        if (!payload.currentUser) {
           logoutUser()
           setCurrentUser(null)
           setRemoteData({
-            vacancies: MOCK_VACANCIES,
+            vacancies: [],
             applications: [],
             completedTasks: [],
             employerCompletedTasks: [],
@@ -419,22 +364,18 @@ export default function App() {
         }
 
         setCurrentUser(payload.currentUser)
-        setAppFilters(normalizeAppFilters(payload.filters))
-        setRemoteData({
-          vacancies: payload.vacancies?.length ? payload.vacancies : MOCK_VACANCIES,
-          applications: payload.applications || [],
-          completedTasks: payload.completedTasks || [],
-          employerCompletedTasks: payload.employerCompletedTasks || [],
-          employerVacancies: payload.employerVacancies || [],
-        })
-      } catch {
-        // On error, keep using mock data
-        if (!cancelled) {
-          setRemoteData(prev => ({
-            ...prev,
-            vacancies: prev.vacancies.length ? prev.vacancies : MOCK_VACANCIES
-          }))
+        if (payload.filters) {
+          setAppFilters(normalizeAppFilters(payload.filters))
         }
+        setRemoteData({
+          vacancies: payload.vacancies,
+          applications: payload.applications,
+          completedTasks: payload.completedTasks,
+          employerCompletedTasks: payload.employerCompletedTasks,
+          employerVacancies: payload.employerVacancies,
+        })
+      } catch (error) {
+        console.error('Failed to load app bootstrap from API', error)
       }
     }
 
@@ -523,7 +464,7 @@ export default function App() {
         setCurrentUser(user)
         setAuthError('')
         setDataVersion((prev) => prev + 1)
-        navigate('/map')
+        navigate(getDefaultAppPath({ user, accessRole: preLaunchAccessRole }))
         return
       }
 
@@ -625,6 +566,12 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (location.pathname !== '/map') {
+      setIsNearbyListOpen(false)
+    }
+  }, [location.pathname])
+
+  useEffect(() => {
     if (!currentUser) return
 
     const isLegacyAppRoute = Object.hasOwn(LEGACY_APP_ROUTES, location.pathname)
@@ -649,8 +596,7 @@ export default function App() {
   }, [location.pathname, location.search, vacancies])
 
   function renderAppPage(section) {
-    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
-    if (!currentUser) return <Navigate to="/" replace />
+    if (!currentUser) return <Navigate to="/auth" replace />
 
     return (
       <AppShell
@@ -665,7 +611,17 @@ export default function App() {
         onCityChange={setSelectedCity}
         chatsCount={displayApplications.length}
         hideTopbar={section === 'chat' && Boolean(activeChatId)}
-        headerSubtitle={section === 'applications' ? applicationsSummary.subtitle : undefined}
+        headerSubtitle={
+          section === 'map'
+            ? formatNearbyVacanciesLabel(visibleMapVacancies.length)
+            : section === 'applications'
+              ? isEmployer
+                ? formatEmployerShiftsSubtitle(employerVacancies)
+                : applicationsSummary.subtitle
+              : undefined
+        }
+        onMapNearbyClick={section === 'map' ? () => setIsNearbyListOpen(true) : undefined}
+        onMapListClick={section === 'map' ? () => setIsNearbyListOpen(true) : undefined}
         mapFilters={
           section === 'map' ? (
             <MapFiltersToolbar
@@ -685,34 +641,32 @@ export default function App() {
             onLocationChange={setCurrentLocationName}
             onOpenVacancy={handleOpenVacancy}
             autoOpenVacancyId={mapFocusedVacancyId}
-            selectedCityLabel={selectedCityOption.label}
             selectedCityPoint={selectedCityPoint}
-          />
-        ) : null}
-        {section === 'catalog' ? (
-          <CatalogPage
-            filters={catalogFilters}
-            onFilterChange={(field, value) => setCatalogFilters((prev) => ({ ...prev, [field]: value }))}
-            vacancies={vacancies}
-            onShowMap={() => navigate('/map')}
-            selectedCity={selectedCity}
-            cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
-            onCityChange={setSelectedCity}
-            selectedCityLabel={selectedCityOption.label}
-            categoryOptions={appFilters.categoryOptions}
-            payOptions={appFilters.payOptions}
+            visibleVacancies={visibleMapVacancies}
+            onVisibleVacanciesChange={setVisibleMapVacancies}
+            isNearbyListOpen={isNearbyListOpen}
+            onNearbyListOpenChange={setIsNearbyListOpen}
             currentUser={currentUser}
-            appliedVacancyIds={appliedVacancyIds}
-            onApplyToVacancy={handleApplyToVacancy}
-            onOpenVacancy={handleOpenVacancy}
+            completedTasks={allCompletedTasks}
+            onOpenCompanyProfile={(ownerId) => navigate(`/company/${ownerId}`)}
+            onOpenEmployerVacancy={(vacancyId) => navigate(`/employer/vacancies/${vacancyId}`)}
           />
         ) : null}
         {section === 'applications' ? (
-          <ApplicationsPage
-            currentUser={currentUser}
-            applications={displayApplications}
-            onOpenApplication={(applicationId) => navigate(`/application/${applicationId}`)}
-          />
+          isEmployer ? (
+            <EmployerShiftsPage
+              vacancies={employerVacancies}
+              applications={employerApplications}
+              onOpenShift={(vacancyId) => navigate(`/employer/vacancies/${vacancyId}`)}
+              onCreateShift={() => navigate('/employer/vacancies/new')}
+            />
+          ) : (
+            <ApplicationsPage
+              currentUser={currentUser}
+              applications={displayApplications}
+              onOpenApplication={(applicationId) => navigate(`/application/${applicationId}`)}
+            />
+          )
         ) : null}
         {section === 'chat' ? (
           <ChatPage
@@ -721,12 +675,14 @@ export default function App() {
             onNavigate={navigate}
             activeChatId={activeChatId}
             onActiveChatChange={setActiveChatId}
+            onChatActivity={() => setDataVersion((prev) => prev + 1)}
           />
         ) : null}
         {section === 'profile' ? (
           <ProfilePage
             currentUser={currentUser}
             completedTasks={completedTasks}
+            employerCompletedTasks={remoteData.employerCompletedTasks}
             employerVacancies={employerVacancies}
             onNavigate={navigate}
             onOpenEmployerVacancy={(vacancyId) => navigate(`/employer/vacancies/${vacancyId}`)}
@@ -767,40 +723,29 @@ export default function App() {
     }
   }
 
-  function EmployerVacancyFormRoute() {
-    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
-    if (!currentUser || currentUser.role !== 'employer') {
-      return <Navigate to="/" replace />
-    }
+  async function handleUpdateApplicationStatus(applicationId, status) {
+    if (!currentUser) return 'Требуется авторизация.'
 
-    return (
-      <AppShell
-        currentUser={currentUser}
-        currentSection="profile"
-        onNavigate={navigate}
-        currentLocationName={currentLocationName}
-        onCreateVacancy={() => navigate('/employer/vacancies/new')}
-        cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
-        selectedCity={selectedCity}
-        onCityChange={setSelectedCity}
-        chatsCount={applications.length}
-      >
-        <EmployerVacancyFormPage currentUser={currentUser} selectedCity={selectedCity} onCreateVacancy={handleCreateVacancy} onCancel={() => navigate('/profile')} />
-      </AppShell>
-    )
+    try {
+      await updateApplicationStatus(applicationId, status)
+      setDataVersion((prev) => prev + 1)
+      return ''
+    } catch (error) {
+      return error.message || 'Не удалось обновить статус отклика.'
+    }
   }
 
-  function EmployerVacancyManageRoute() {
-    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
-
-    const { vacancyId } = useParams()
-
-    if (!currentUser || currentUser.role !== 'employer') {
-      return <Navigate to="/" replace />
+  async function handleCancelApplication(applicationId) {
+    const error = await handleUpdateApplicationStatus(applicationId, 'cancelled')
+    if (!error) {
+      navigate('/applications')
     }
+  }
 
-    const vacancy = getVacancyById(remoteData.employerVacancies, vacancyId, searchPoint, { includeExpired: true })
-    const applicationsForVacancy = listApplicationsForVacancy(remoteData.applications, currentUser.id, vacancyId)
+  function EmployerVacancyFormRoute() {
+    if (!currentUser || currentUser.role !== 'employer') {
+      return <Navigate to="/auth" replace />
+    }
 
     return (
       <AppShell
@@ -812,23 +757,64 @@ export default function App() {
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
-        chatsCount={applications.length}
+        chatsCount={displayApplications.length}
+        isVacancySelected
+        hideTopbar
+        headerTitle="Новая смена"
+        headerSubtitle="Заполните данные и опубликуйте"
+      >
+        <EmployerVacancyFormPage currentUser={currentUser} selectedCity={selectedCity} onCreateVacancy={handleCreateVacancy} onCancel={() => navigate('/applications')} />
+      </AppShell>
+    )
+  }
+
+  function EmployerVacancyManageRoute() {
+    const { vacancyId } = useParams()
+
+    if (!currentUser || currentUser.role !== 'employer') {
+      return <Navigate to="/auth" replace />
+    }
+
+    const vacancy = getVacancyById(remoteData.employerVacancies, vacancyId, searchPoint, { includeExpired: true })
+    const applicationsForVacancy = listApplicationsForVacancy(remoteData.applications, currentUser.id, vacancyId)
+    const ownedVacancy = vacancy?.ownerId === currentUser.id ? vacancy : null
+
+    return (
+      <AppShell
+        currentUser={currentUser}
+        currentSection="applications"
+        onNavigate={navigate}
+        currentLocationName={currentLocationName}
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
+        cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+        chatsCount={displayApplications.length}
+        hideTopbar
+        isVacancySelected
+        headerTitle={ownedVacancy?.title || 'Смена'}
+        headerSubtitle={ownedVacancy ? getVacancyStatusLabel(ownedVacancy.status) : 'Детали смены'}
       >
         <EmployerVacancyManagePage
-          vacancy={vacancy?.ownerId === currentUser.id ? vacancy : null}
+          vacancy={ownedVacancy}
           applications={applicationsForVacancy}
-          onBack={() => navigate('/profile')}
+          onBack={() => navigate('/applications')}
           onCreateNew={() => navigate('/employer/vacancies/new')}
           onArchiveVacancy={handleArchiveVacancy}
           onShowOnMap={(nextVacancyId) => navigate(`/map?vacancy=${nextVacancyId}`)}
+          onUpdateApplicationStatus={handleUpdateApplicationStatus}
+          onOpenChat={(applicationId) => {
+            setActiveChatId(applicationId)
+            navigate('/chat')
+          }}
+          onOpenUserProfile={(userId) => navigate(`/user/${userId}`)}
         />
       </AppShell>
     )
   }
 
   function ApplicationDetailRoute() {
-    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
-    if (!currentUser) return <Navigate to="/" replace />
+    if (!currentUser) return <Navigate to="/auth" replace />
 
     const { applicationId } = useParams()
     const application = displayApplications.find((item) => item.id === applicationId) || null
@@ -852,11 +838,78 @@ export default function App() {
           application={application}
           vacancy={vacancy}
           onBack={() => navigate('/applications')}
-          onOpenChat={() => navigate('/chat')}
-          onCancel={() => navigate('/applications')}
+          onOpenChat={() => {
+            setActiveChatId(applicationId)
+            navigate('/chat')
+          }}
+          onCancel={() => handleCancelApplication(applicationId)}
           onShowOnMap={(vacancyId) => navigate(`/map?vacancy=${vacancyId}`)}
+          onOpenCompanyProfile={vacancy?.ownerId ? () => navigate(`/company/${vacancy.ownerId}`) : undefined}
+          completedTasks={allCompletedTasks}
+          vacancies={remoteData.vacancies}
           emptyMessage="Отклик не найден"
         />
+      </AppShell>
+    )
+  }
+
+  function CompanyProfileRoute() {
+    if (!currentUser) return <Navigate to="/auth" replace />
+
+    const { ownerId } = useParams()
+
+    return (
+      <AppShell
+        currentUser={currentUser}
+        currentSection="profile"
+        onNavigate={navigate}
+        currentLocationName={currentLocationName}
+        hideTopbar
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
+        cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+        chatsCount={displayApplications.length}
+      >
+        <CompanyProfilePage
+          ownerId={ownerId}
+          vacancies={remoteData.vacancies}
+          completedTasks={allCompletedTasks}
+          onBack={() => navigate(-1)}
+          onOpenMapVacancy={(vacancyId) => navigate(`/map?vacancy=${vacancyId}`)}
+        />
+      </AppShell>
+    )
+  }
+
+  function UserProfileRoute() {
+    if (!currentUser) return <Navigate to="/auth" replace />
+
+    const { userId } = useParams()
+    const isOwnProfile = String(currentUser.id) === String(userId)
+    const profileUser = isOwnProfile
+      ? currentUser
+      : {
+          id: userId,
+          fullName: displayApplications.find((item) => String(item.applicantId) === String(userId))?.applicantName || 'Исполнитель',
+          age: displayApplications.find((item) => String(item.applicantId) === String(userId))?.applicantAge ?? null,
+          review: displayApplications.find((item) => String(item.applicantId) === String(userId))?.applicantReview || '',
+        }
+
+    return (
+      <AppShell
+        currentUser={currentUser}
+        currentSection="profile"
+        onNavigate={navigate}
+        currentLocationName={currentLocationName}
+        hideTopbar
+        onCreateVacancy={() => navigate('/employer/vacancies/new')}
+        cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+        chatsCount={displayApplications.length}
+      >
+        <UserProfilePage user={profileUser} completedTasks={allCompletedTasks} onBack={() => navigate(-1)} />
       </AppShell>
     )
   }
@@ -868,16 +921,18 @@ export default function App() {
           <Route
             path="/"
             element={
-              currentUser && preLaunchAccessGranted ? <Navigate to="/map" replace /> : <LaunchLandingPage />
+              currentUser ? (
+                <Navigate to={getDefaultAppPath({ user: currentUser, accessRole: preLaunchAccessRole })} replace />
+              ) : (
+                <LaunchLandingPage />
+              )
             }
           />
           <Route
             path="/auth"
             element={
-              !preLaunchAccessGranted ? (
-                <Navigate to="/" replace />
-              ) : currentUser ? (
-                <Navigate to="/map" replace />
+              currentUser ? (
+                <Navigate to={getDefaultAppPath({ user: currentUser, accessRole: preLaunchAccessRole })} replace />
               ) : (
                 <AuthPage
                   form={authForm}
@@ -895,6 +950,10 @@ export default function App() {
           <Route path="/application/:applicationId" element={<ApplicationDetailRoute />} />
           <Route path="/chat" element={renderAppPage('chat')} />
           <Route path="/profile" element={renderAppPage('profile')} />
+          <Route path="/employer/vacancies/new" element={<EmployerVacancyFormRoute />} />
+          <Route path="/employer/vacancies/:vacancyId" element={<EmployerVacancyManageRoute />} />
+          <Route path="/company/:ownerId" element={<CompanyProfileRoute />} />
+          <Route path="/user/:userId" element={<UserProfileRoute />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

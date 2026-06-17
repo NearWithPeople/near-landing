@@ -18,11 +18,10 @@ const STATUS_META = {
   pending: {
     variant: 'pending',
     label: 'Ожидает',
-    progress: 3,
-    panelTitle: 'Отклик ожидает подтверждения',
+    progress: 1,
+    panelTitle: 'Отклик отправлен',
     panelSubtitle: 'Обычно заказчик одобряет отклик в течении 4 часов',
-    progressDetailText:
-      'Создатель заявки просмотрел ваш отклик. Теперь в течении 3 часов ждите одобрение отклика на смену.',
+    progressDetailText: 'Ваш отклик отправлен работодателю и ожидает просмотра.',
   },
   cancelled: {
     variant: 'cancelled',
@@ -75,51 +74,6 @@ const STATUS_META = {
   },
 }
 
-export const MOCK_APPLICATIONS = [
-  {
-    id: 'app-1',
-    vacancyId: 'mock-center',
-    vacancyTitle: 'Грузчик для переезда бренд-офиса',
-    address: 'г. Минск, ул. Громова 30',
-    salary: 'Оплата 45 Br за смену',
-    time: 'с 08:00 по 12:00 2 июня 2026',
-    status: 'active',
-  },
-  {
-    id: 'app-2',
-    vacancyId: 'mock-1',
-    vacancyTitle: 'Сотрудник бригады ресторана: смена',
-    address: 'г. Минск, ул. Ленина 15 (ТЦ "Galileo")',
-    salary: 'Оплата от 70 Br за смену + питание',
-    time: 'с 08:00 16 июня 2026 по 21:00 17 июня 2026',
-    status: 'pending',
-    requirements: [
-      'Для работы необходима медсправка*',
-      'Доступно с 14 лет с согласием законного представителя*',
-    ],
-    description:
-      'Ночная или дневная смена (8 часов) в качестве сотрудника бригады ресторана быстрого обслуживания Mak.by Вокзальная. Приятная подработка в ведущей сети ресторанов быстрого обслуживания в Беларуси на стабильных условиях, гибким графиком и удобной локацией.',
-  },
-  {
-    id: 'app-3',
-    vacancyId: 'mock-3',
-    vacancyTitle: 'Волонтер на фестивале еды в ларьке',
-    status: 'cancelled',
-  },
-  {
-    id: 'app-4',
-    vacancyId: 'mock-3',
-    vacancyTitle: 'Волонтер на марафоне',
-    status: 'cancelled',
-  },
-  {
-    id: 'app-5',
-    vacancyId: 'mock-4',
-    vacancyTitle: 'Работник зеленого строительства',
-    status: 'completed',
-  },
-]
-
 export function getApplicationStatusMeta(status) {
   return STATUS_META[status] || STATUS_META.pending
 }
@@ -139,7 +93,7 @@ export function normalizeApplication(application) {
 }
 
 export function getDisplayApplications(applications) {
-  return applications?.length ? applications : MOCK_APPLICATIONS
+  return applications || []
 }
 
 export function summarizeApplications(applications) {

@@ -1,0 +1,181 @@
+.dateTimePicker {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+.dateTimePicker__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(110px, 0.8fr);
+  gap: 10px;
+}
+
+.dateTimePicker__dateField,
+.dateTimePicker__timeField {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dateTimePicker__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.dateTimePicker__trigger,
+.dateTimePicker__timeInput {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font: inherit;
+}
+
+.dateTimePicker__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dateTimePicker__value {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.dateTimePicker__value.is-placeholder {
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 600;
+}
+
+.dateTimePicker__timeInput {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dateTimePicker__timeInput.is-mask {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.dateTimePicker__timeInput:not(.is-mask) {
+  color: #fff;
+}
+
+.dateTimePicker__hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.dateTimePicker__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background:
+    linear-gradient(#fff, #fff) center 3px / 12px 2px no-repeat,
+    linear-gradient(#fff, #fff) 3px 7px / 12px 8px / 2px 2px 2px 2px no-repeat;
+  opacity: 0.72;
+}
+
+.dateTimePicker__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(var(--palette-forest-rgb), 0.98);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.dateTimePicker__calendarHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.dateTimePicker__month {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.dateTimePicker__navBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dateTimePicker__weekdays,
+.dateTimePicker__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dateTimePicker__weekdays {
+  margin-bottom: 6px;
+}
+
+.dateTimePicker__weekdays span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.dateTimePicker__day {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dateTimePicker__day--empty {
+  pointer-events: none;
+}
+
+.dateTimePicker__day:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.dateTimePicker__day.is-today {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.dateTimePicker__day.is-selected {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+@media (max-width: 520px) {
+  .dateTimePicker__row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,56 +1,140 @@
-.vacancyFormPage {
-  display: grid;
-  gap: 20px;
+.shiftCreatePage {
+  min-height: 100%;
+  padding-bottom: 24px;
 }
 
-.vacancyFormLayout {
+.shiftCreatePage__form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-  min-width: 0;
-}
-
-@media (min-width: 1040px) {
-  .vacancyFormLayout {
-    grid-template-columns: minmax(0, 1.45fr) minmax(260px, 340px);
-  }
-}
-
-.vacancyFormMain,
-.vacancyFormSidebar {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
-}
-
-.vacancyFormCard {
-  border-radius: 24px;
-  padding: 20px;
-  background: rgba(var(--palette-forest-rgb), 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: grid;
-  gap: 16px;
-}
-
-.vacancyFormGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
+.shiftCreatePage__section {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 14px;
+}
+
+.shiftCreatePage__sectionHead h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.shiftCreatePage__sectionHead p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.shiftCreatePage__categoryRail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.shiftCreatePage__categoryRail::-webkit-scrollbar {
+  display: none;
+}
+
+.shiftCreatePage__categoryChip {
+  flex: 0 0 auto;
+  min-width: 132px;
+  max-width: 180px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shiftCreatePage__categoryChip.is-active {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.shiftCreatePage__categoryEmoji {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.shiftCreatePage__categoryLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.shiftCreatePage__categoryPreview {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shiftCreatePage__categoryPreviewEmoji {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.shiftCreatePage__categoryPreviewTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.shiftCreatePage__categoryPreviewDesc {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.shiftCreatePage__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
 @media (min-width: 640px) {
-  .vacancyFormGrid {
+  .shiftCreatePage__fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.vacancyFormGrid__full {
+.shiftCreatePage__field--full {
   grid-column: 1 / -1;
 }
 
-.vacancyFormSelect {
-  justify-content: flex-start;
+.shiftCreatePage__map {
+  min-height: 260px;
+  height: 260px;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .vacancyAddressSearch {
@@ -63,7 +147,7 @@
   left: 0;
   right: 0;
   z-index: 12;
-  border-radius: 18px;
+  border-radius: 14px;
   background: rgba(var(--palette-forest-rgb), 0.98);
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
@@ -88,9 +172,26 @@
   color: rgba(255, 255, 255, 0.72);
 }
 
-.vacancyFormMap {
-  min-height: 320px;
-  height: 320px;
-  border-radius: 20px;
-  overflow: hidden;
+.vacancyFormSelect {
+  justify-content: flex-start;
+}
+
+.shiftCreatePage__actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 10px;
+  position: sticky;
+  bottom: 84px;
+  z-index: 5;
+  padding-top: 4px;
+}
+
+.shiftCreatePage__error {
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .shiftCreatePage__actions {
+    bottom: 96px;
+  }
 }

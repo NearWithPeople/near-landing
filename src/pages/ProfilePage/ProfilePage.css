@@ -8,15 +8,27 @@
 
 .profilePage__userCard {
   position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 16px;
+  display: flex;
   align-items: center;
+  gap: 16px;
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.05);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.profilePage__userCardButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .profilePage__avatar {
@@ -25,6 +37,42 @@
   border-radius: 24px;
   border: 1.5px solid rgba(255, 255, 255, 0.15);
   background-color: #ffffff;
+}
+
+.profilePage--employer .profilePage__userCard {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.profilePage--employer .profilePage__avatar {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  display: grid;
+  place-items: center;
+}
+
+.profilePage__avatarMark {
+  font-size: 34px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.profilePage__roleLabel {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.profilePage--employer .profilePage__menuItem {
+  border-radius: 14px;
+}
+
+.profilePage--employer .profilePage__panel {
+  border-radius: 16px;
 }
 
 .profilePage__userInfo {

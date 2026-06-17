@@ -17,16 +17,37 @@ function normalizeActiveUntil(activeUntil) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : ''
 }
 
-export function formatActiveUntil(activeUntil) {
+function normalizeActiveUntilTime(activeUntilTime) {
+  const match = String(activeUntilTime || '').trim().match(/^(\d{1,2}):(\d{2})$/)
+  if (!match) return ''
+
+  const hours = Math.min(23, Math.max(0, Number(match[1])))
+  const minutes = Math.min(59, Math.max(0, Number(match[2])))
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+export function formatActiveUntil(activeUntil, activeUntilTime) {
   const normalized = normalizeActiveUntil(activeUntil)
   if (!normalized) return 'Без срока'
 
-  return new Date(`${normalized}T00:00:00`).toLocaleDateString('ru-RU')
+  const dateLabel = new Date(`${normalized}T00:00:00`).toLocaleDateString('ru-RU')
+  const timeLabel = normalizeActiveUntilTime(activeUntilTime)
+  return timeLabel ? `${dateLabel}, ${timeLabel}` : dateLabel
 }
 
-export function isVacancyActive(vacancy, today = getTodayDateValue()) {
+export function isVacancyActive(vacancy, now = new Date()) {
   const activeUntil = normalizeActiveUntil(vacancy?.activeUntil)
-  return !activeUntil || activeUntil >= today
+  if (!activeUntil) return true
+
+  const today = getTodayDateValue()
+  if (activeUntil > today) return true
+  if (activeUntil < today) return false
+
+  const activeUntilTime = normalizeActiveUntilTime(vacancy?.activeUntilTime) || '23:59'
+  const [hours, minutes] = activeUntilTime.split(':').map(Number)
+  const endDate = new Date(now)
+  endDate.setHours(hours, minutes, 59, 999)
+  return now <= endDate
 }
 
 function normalizeShiftDate(shiftDate) {
