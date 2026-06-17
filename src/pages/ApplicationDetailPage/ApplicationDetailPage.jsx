@@ -1,27 +1,22 @@
-import { MapboxVacancyMap } from '../../components/MapboxVacancyMap'
+import { useState } from 'react'
 import {
   APPLICATION_PROGRESS_STAGES,
   formatApplicationSalary,
-  formatApplicationSchedule,
   normalizeApplication,
 } from '../../utils/applicationPresentation'
 import './ApplicationDetailPage.css'
 
 export function ApplicationDetailPage({
   application,
-  vacancy,
   onBack,
   onOpenChat,
   onCancel,
-  onShowOnMap,
-  onApply,
-  hasApplied = false,
   emptyBackLabel = 'Назад к откликам',
   emptyMessage = 'Не найдено',
 }) {
-  const isApplicationMode = Boolean(application)
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  if (!application && !vacancy) {
+  if (!application) {
     return (
       <section className="applicationDetailPage">
         <div className="applicationDetailPage__empty">
@@ -34,48 +29,59 @@ export function ApplicationDetailPage({
     )
   }
 
-  const item = application ? normalizeApplication(application) : null
-  const title = vacancy?.title || item?.vacancyTitle
-  const address = vacancy?.address || item?.address
-  const salary = formatApplicationSalary(vacancy, item)
-  const time = item?.time || formatApplicationSchedule(vacancy)
-  const requirements = item?.requirements?.length ? item.requirements : vacancy?.requirements || []
-  const description =
-    item?.description ||
-    vacancy?.description ||
-    'Подробности смены появятся, когда работодатель заполнит описание вакансии.'
-  const progressFilled = Math.max(0, Math.min(APPLICATION_PROGRESS_STAGES.length, item?.progressFilled || 0))
-  const showApplicationActions = item && (item.statusVariant === 'pending' || item.statusVariant === 'active')
-  const pageTitle = isApplicationMode ? 'Детали отклика' : 'Детали смены'
+  const item = normalizeApplication(application)
+  const title = item.vacancyTitle
+  const address = item.address
+  const salary = item.salary || formatApplicationSalary(null, item)
+  const time = item.time
+  const requirements = item.requirements || []
+  const description = item.description || 'Подробности смены появятся, когда работодатель заполнит описание вакансии.'
+  const progressFilled = Math.max(0, Math.min(APPLICATION_PROGRESS_STAGES.length, item.progressFilled || 0))
+  const showApplicationActions = item.statusVariant === 'pending' || item.statusVariant === 'active'
+  const pageTitle = 'Детали отклика'
 
   return (
-    <section className={`applicationDetailPage${isApplicationMode ? '' : ' applicationDetailPage--vacancy'}`}>
+    <section className="applicationDetailPage">
       <div className="applicationDetailPage__topbar">
         <button type="button" className="applicationDetailPage__back" onClick={onBack} aria-label="Назад">
           ←
         </button>
         <h1 className="applicationDetailPage__topTitle">{pageTitle}</h1>
-        {item ? (
-          <div className={`applicationDetailPage__statusBadge applicationDetailPage__statusBadge--${item.statusVariant}`}>
-            <span className="applicationDetailPage__statusDot" aria-hidden="true" />
-            <span>{item.statusLabel}</span>
-          </div>
-        ) : (
-          <span className="applicationDetailPage__topSpacer" aria-hidden="true" />
-        )}
+        <div className={`applicationDetailPage__statusBadge applicationDetailPage__statusBadge--${item.statusVariant}`}>
+          <span className="applicationDetailPage__statusDot" aria-hidden="true" />
+          <span>{item.statusLabel}</span>
+        </div>
       </div>
 
       <div className="applicationDetailPage__scroll">
         <article className="applicationDetailPage__card">
           <div className="applicationDetailPage__cardHead">
             <h2 className="applicationDetailPage__title">{title}</h2>
-            <div className="applicationDetailPage__cardActions">
+            <div className="applicationDetailPage__cardActions" style={{ position: 'relative' }}>
               <button type="button" className="applicationDetailPage__iconBtn" aria-label="SOS">
                 SOS
               </button>
-              <button type="button" className="applicationDetailPage__iconBtn applicationDetailPage__iconBtn--menu" aria-label="Меню">
+              <button
+                type="button"
+                className="applicationDetailPage__iconBtn applicationDetailPage__iconBtn--menu"
+                aria-label="Меню"
+                onClick={() => setMenuOpen((prev) => !prev)}
+              >
                 •••
               </button>
+              {menuOpen ? (
+                <div className="applicationDetailPage__dropdown">
+                  <button type="button" onClick={() => { setMenuOpen(false); alert('Служба поддержки: support@near.by'); }}>
+                    <span className="dropdown-icon">ℹ️</span> Нужна помощь
+                  </button>
+                  <button type="button" onClick={() => { setMenuOpen(false); onCancel?.(); }}>
+                    <span className="dropdown-icon">❌</span> Отказаться
+                  </button>
+                  <button type="button" onClick={() => { setMenuOpen(false); onOpenChat?.(); }}>
+                    <span className="dropdown-icon">💬</span> Связаться
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -98,26 +104,6 @@ export function ApplicationDetailPage({
             </div>
           ) : null}
 
-          {vacancy ? (
-            <div className="applicationDetailPage__mapWrap">
-              <p className="applicationDetailPage__walkTime">~15 минут пешком</p>
-              <button
-                type="button"
-                className="applicationDetailPage__mapCard"
-                onClick={() => onShowOnMap?.(vacancy.id)}
-                aria-label={`Открыть ${title} на карте`}
-              >
-                <MapboxVacancyMap
-                  vacancies={[vacancy]}
-                  selectedVacancyId={vacancy.id}
-                  onSelect={() => {}}
-                  centerPoint={{ lat: vacancy.lat, lng: vacancy.lng, zoom: 13 }}
-                  className="applicationDetailPage__map"
-                />
-              </button>
-            </div>
-          ) : null}
-
           {requirements.map((requirement) => (
             <div key={requirement} className="applicationDetailPage__requirement">
               <span className="applicationDetailPage__check" aria-hidden="true" />
@@ -129,58 +115,45 @@ export function ApplicationDetailPage({
         </article>
       </div>
 
-      {isApplicationMode ? (
-        <div className="applicationDetailPage__bottomPanel">
-          <div className="applicationDetailPage__panelHead">
-            <p className="applicationDetailPage__panelTitle">{item.panelTitle}</p>
-            {item.panelSubtitle ? <p className="applicationDetailPage__panelSubtitle">{item.panelSubtitle}</p> : null}
-          </div>
-
-          <div className="applicationDetailPage__progress">
-            <div className="applicationDetailPage__progressTrack" aria-hidden="true">
-              {APPLICATION_PROGRESS_STAGES.map((stage, index) => (
-                <span
-                  key={stage.id}
-                  className={`applicationDetailPage__progressSegment${
-                    index < progressFilled ? ' applicationDetailPage__progressSegment--filled' : ''
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="applicationDetailPage__progressLabels">
-              {APPLICATION_PROGRESS_STAGES.map((stage) => (
-                <span key={stage.id}>{stage.label}</span>
-              ))}
-            </div>
-          </div>
-
-          {item.progressDetailText ? <p className="applicationDetailPage__progressDetail">{item.progressDetailText}</p> : null}
-
-          {showApplicationActions ? (
-            <div className="applicationDetailPage__actions">
-              <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--ghost" onClick={onCancel}>
-                <span aria-hidden="true">×</span>
-                Отказаться
-              </button>
-              <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--primary" onClick={onOpenChat}>
-                <img src="/map-icons/message-circle.png" alt="" />
-                Перейти в чат
-              </button>
-            </div>
-          ) : null}
+      <div className="applicationDetailPage__bottomPanel">
+        <div className="applicationDetailPage__panelHead">
+          <p className="applicationDetailPage__panelTitle">{item.panelTitle}</p>
+          {item.panelSubtitle ? <p className="applicationDetailPage__panelSubtitle">{item.panelSubtitle}</p> : null}
         </div>
-      ) : (
-        <div className="applicationDetailPage__bottomPanel applicationDetailPage__bottomPanel--vacancy">
-          <button
-            type="button"
-            className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--primary applicationDetailPage__actionBtn--full"
-            onClick={onApply}
-            disabled={hasApplied}
-          >
-            {hasApplied ? 'Отклик отправлен' : 'Откликнуться'}
-          </button>
+
+        <div className="applicationDetailPage__progress">
+          <div className="applicationDetailPage__progressTrack" aria-hidden="true">
+            {APPLICATION_PROGRESS_STAGES.map((stage, index) => (
+              <span
+                key={stage.id}
+                className={`applicationDetailPage__progressSegment${
+                  index < progressFilled ? ' applicationDetailPage__progressSegment--filled' : ''
+                }`}
+              />
+            ))}
+          </div>
+          <div className="applicationDetailPage__progressLabels">
+            {APPLICATION_PROGRESS_STAGES.map((stage) => (
+              <span key={stage.id}>{stage.label}</span>
+            ))}
+          </div>
         </div>
-      )}
+
+        {item.progressDetailText ? <p className="applicationDetailPage__progressDetail">{item.progressDetailText}</p> : null}
+
+        {showApplicationActions ? (
+          <div className="applicationDetailPage__actions">
+            <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--ghost" onClick={onCancel}>
+              <span aria-hidden="true">×</span>
+              Отказаться
+            </button>
+            <button type="button" className="applicationDetailPage__actionBtn applicationDetailPage__actionBtn--primary" onClick={onOpenChat}>
+              <img src="/map-icons/message-circle.png" alt="" />
+              Перейти в чат
+            </button>
+          </div>
+        ) : null}
+      </div>
     </section>
   )
 }

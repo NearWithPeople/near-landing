@@ -17,6 +17,7 @@ import { LaunchLandingPage } from './pages/LaunchLandingPage/LaunchLandingPage'
 import { ProfilePage } from './pages/ProfilePage/ProfilePage'
 import { AppMapPage } from './pages/AppMapPage/AppMapPage'
 import { StaticInfoPage } from './pages/StaticInfoPage/StaticInfoPage'
+import { ChatPage } from './pages/ChatPage/ChatPage'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy } from './services/applicationService'
 import { getCurrentUser, loginAccount, logoutUser, updateUserProfile } from './services/authService'
 import { loadAppBootstrap } from './services/appService'
@@ -271,6 +272,7 @@ export default function App() {
   })
   const [dataVersion, setDataVersion] = useState(0)
   const [activeVacancyId, setActiveVacancyId] = useState('')
+  const [activeChatId, setActiveChatId] = useState('')
   const [currentLocationName, setCurrentLocationName] = useState('Минск')
   const [catalogFilters, setCatalogFilters] = useState({
     query: '',
@@ -450,6 +452,12 @@ export default function App() {
   }, [appFilters.cityOptions, appFilters.defaultCity, selectedCity])
 
   useEffect(() => {
+    if (location.pathname !== '/chat') {
+      setActiveChatId('')
+    }
+  }, [location.pathname])
+
+  useEffect(() => {
     localStorage.setItem(CITY_STORAGE_KEY, selectedCity)
   }, [selectedCity])
 
@@ -568,6 +576,28 @@ export default function App() {
     }
   }
 
+  async function handleOpenVacancy(vacancyId) {
+    if (!currentUser || currentUser.role !== 'seeker') return
+
+    const existingApp = userApplications.find((app) => app.vacancyId === vacancyId)
+    if (existingApp) {
+      navigate(`/application/${existingApp.id}`)
+      return
+    }
+
+    try {
+      const newApp = await createApplication({ vacancyId })
+      setDataVersion((prev) => prev + 1)
+      if (newApp?.id) {
+        navigate(`/application/${newApp.id}`)
+      } else {
+        navigate('/applications')
+      }
+    } catch (error) {
+      console.error('Failed to automatically apply to vacancy:', error)
+    }
+  }
+
   async function handleProfileSave(profileForm) {
     if (!currentUser) return
     try {
@@ -628,11 +658,13 @@ export default function App() {
         currentSection={section}
         onNavigate={navigate}
         currentLocationName={currentLocationName}
-        isVacancySelected={section === 'map' && Boolean(selectedVacancyId)}
+        isVacancySelected={(section === 'map' && Boolean(selectedVacancyId)) || (section === 'chat' && Boolean(activeChatId))}
         onCreateVacancy={() => navigate('/employer/vacancies/new')}
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
+        chatsCount={displayApplications.length}
+        hideTopbar={section === 'chat' && Boolean(activeChatId)}
         headerSubtitle={section === 'applications' ? applicationsSummary.subtitle : undefined}
         mapFilters={
           section === 'map' ? (
@@ -651,7 +683,7 @@ export default function App() {
             selectedVacancyId={selectedVacancyId}
             onSelect={setActiveVacancyId}
             onLocationChange={setCurrentLocationName}
-            onOpenVacancy={(vacancyId) => navigate(`/vacancy/${vacancyId}`)}
+            onOpenVacancy={handleOpenVacancy}
             autoOpenVacancyId={mapFocusedVacancyId}
             selectedCityLabel={selectedCityOption.label}
             selectedCityPoint={selectedCityPoint}
@@ -672,7 +704,7 @@ export default function App() {
             currentUser={currentUser}
             appliedVacancyIds={appliedVacancyIds}
             onApplyToVacancy={handleApplyToVacancy}
-            onOpenVacancy={(vacancyId) => navigate(`/vacancy/${vacancyId}`)}
+            onOpenVacancy={handleOpenVacancy}
           />
         ) : null}
         {section === 'applications' ? (
@@ -683,8 +715,13 @@ export default function App() {
           />
         ) : null}
         {section === 'chat' ? (
-          <div className="placeholder-page">
-          </div>
+          <ChatPage
+            currentUser={currentUser}
+            applications={displayApplications}
+            onNavigate={navigate}
+            activeChatId={activeChatId}
+            onActiveChatChange={setActiveChatId}
+          />
         ) : null}
         {section === 'profile' ? (
           <ProfilePage
@@ -702,44 +739,6 @@ export default function App() {
     )
   }
 
-  function VacancyPageRoute() {
-    if (!preLaunchAccessGranted) return <Navigate to="/" replace />
-    if (!currentUser) return <Navigate to="/" replace />
-
-    const { vacancyId } = useParams()
-    const rawVacancy = getVacancyById(remoteData.vacancies, vacancyId, searchPoint)
-    const canViewNonPublicVacancy = rawVacancy && currentUser?.role === 'employer' && rawVacancy.ownerId === currentUser.id
-    const vacancy = rawVacancy && (rawVacancy.status === 'open' || canViewNonPublicVacancy) ? rawVacancy : null
-    const application = displayApplications.find((item) => item.vacancyId === vacancyId) || null
-
-    if (application) {
-      return <Navigate to={`/application/${application.id}`} replace />
-    }
-
-    return (
-      <AppShell
-        currentUser={currentUser}
-        currentSection="map"
-        onNavigate={navigate}
-        currentLocationName={currentLocationName}
-        hideTopbar
-        onCreateVacancy={() => navigate('/employer/vacancies/new')}
-        cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
-        selectedCity={selectedCity}
-        onCityChange={setSelectedCity}
-      >
-        <ApplicationDetailPage
-          vacancy={vacancy}
-          hasApplied={vacancy ? appliedVacancyIds.includes(vacancy.id) : false}
-          onBack={() => navigate('/map')}
-          onApply={() => handleApplyToVacancy(vacancyId)}
-          onShowOnMap={(nextVacancyId) => navigate(`/map?vacancy=${nextVacancyId}`)}
-          emptyBackLabel="Назад к карте"
-          emptyMessage="Смена не найдена"
-        />
-      </AppShell>
-    )
-  }
 
   async function handleCreateVacancy(payload) {
     if (!currentUser || currentUser.role !== 'employer') return
@@ -784,6 +783,7 @@ export default function App() {
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
+        chatsCount={applications.length}
       >
         <EmployerVacancyFormPage currentUser={currentUser} selectedCity={selectedCity} onCreateVacancy={handleCreateVacancy} onCancel={() => navigate('/profile')} />
       </AppShell>
@@ -812,6 +812,7 @@ export default function App() {
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
+        chatsCount={applications.length}
       >
         <EmployerVacancyManagePage
           vacancy={vacancy?.ownerId === currentUser.id ? vacancy : null}
@@ -844,6 +845,7 @@ export default function App() {
         cityOptions={appFilters.cityOptions.map(({ value, label }) => ({ value, label }))}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
+        chatsCount={applications.length}
       >
         <ApplicationDetailPage
           application={application}
@@ -892,7 +894,6 @@ export default function App() {
           <Route path="/application/:applicationId" element={<ApplicationDetailRoute />} />
           <Route path="/chat" element={renderAppPage('chat')} />
           <Route path="/profile" element={renderAppPage('profile')} />
-          <Route path="/vacancy/:vacancyId" element={<VacancyPageRoute />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

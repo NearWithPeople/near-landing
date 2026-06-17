@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { isBelarusPhone, normalizePhone, splitFullName } from '../../utils/common'
+import { buildFullName, isBelarusPhone, normalizePhone, splitFullName } from '../../utils/common'
 import './ProfilePage.css'
 
 function getProfileForm(currentUser) {
@@ -344,8 +344,7 @@ export function ProfilePage({
     return renderPlaceholderView('Уведомления', 'Здесь будут уведомления о статусах откликов и новых сменах.')
   }
 
-  const primaryName = nameParts.firstName || currentUser.fullName
-  const secondaryName = nameParts.middleName || nameParts.lastName || currentUser.companyName || ''
+  const displayName = currentUser.fullName || buildFullName({ lastName: nameParts.lastName, firstName: nameParts.firstName, middleName: nameParts.middleName })
 
   return (
     <section className="profilePage">
@@ -354,10 +353,9 @@ export function ProfilePage({
 
         <div className="profilePage__userInfo">
           <h2 className="profilePage__name">
-            <span>{primaryName}</span>
-            {secondaryName ? <span>{secondaryName}</span> : null}
+            {displayName}
           </h2>
-          {!isEmployer ? <p className="profilePage__rating">★ {ratingLabel}</p> : null}
+          {!isEmployer ? <p className="profilePage__rating">★ 4.95 Отрекомендованный</p> : null}
           {isEmployer ? <p className="profilePage__rating">{currentUser.companyName || 'Работодатель'}</p> : null}
         </div>
 

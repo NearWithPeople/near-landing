@@ -46,7 +46,7 @@ export function CustomSelect({
     <div ref={rootRef} className={`customSelect ${isOpen ? 'is-open' : ''} ${isClearable && isActive ? 'has-clear' : ''} ${className}`.trim()}>
       <button
         type="button"
-        className={`customSelect__trigger ${triggerClassName}`.trim()}
+        className={`customSelect__trigger ${triggerClassName} ${isActive ? 'is-active' : ''}`.trim()}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={listboxId}

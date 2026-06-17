@@ -60,37 +60,44 @@
 }
 
 .applicationDetailPage__statusBadge--active {
-  background: rgba(95, 88, 212, 0.22);
-  box-shadow: 0 0 18px rgba(95, 88, 212, 0.28);
+  background: #2DD3A7;
+  color: #121620;
+  box-shadow: 0 4px 12px rgba(45, 211, 167, 0.3);
 }
 
 .applicationDetailPage__statusBadge--active .applicationDetailPage__statusDot {
-  background: #5f58d4;
-  box-shadow: 0 0 10px #5f58d4;
+  display: none;
 }
 
 .applicationDetailPage__statusBadge--pending {
-  background: rgba(255, 212, 0, 0.16);
-  box-shadow: 0 0 18px rgba(255, 212, 0, 0.22);
+  background: #FFE054;
+  color: #121620;
+  box-shadow: 0 4px 12px rgba(255, 224, 84, 0.3);
 }
 
 .applicationDetailPage__statusBadge--pending .applicationDetailPage__statusDot {
-  background: #ffd400;
-  box-shadow: 0 0 10px #ffd400;
+  display: none;
 }
 
-.applicationDetailPage__statusBadge--cancelled,
-.applicationDetailPage__statusBadge--completed {
-  background: rgba(255, 255, 255, 0.08);
+.applicationDetailPage__statusBadge--cancelled {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 14px;
 }
 
 .applicationDetailPage__statusBadge--cancelled .applicationDetailPage__statusDot {
-  background: rgba(255, 255, 255, 0.28);
+  display: none;
+}
+
+.applicationDetailPage__statusBadge--completed {
+  background: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 .applicationDetailPage__statusBadge--completed .applicationDetailPage__statusDot {
-  background: #22c55e;
-  box-shadow: 0 0 10px #22c55e;
+  display: none;
 }
 
 .applicationDetailPage__scroll {
@@ -248,21 +255,7 @@
   -webkit-backdrop-filter: blur(18px);
 }
 
-.applicationDetailPage--vacancy {
-  --application-detail-panel-height: clamp(92px, 14dvh, 110px);
-}
 
-.applicationDetailPage__topSpacer {
-  width: 88px;
-}
-
-.applicationDetailPage__actionBtn--full {
-  width: 100%;
-}
-
-.applicationDetailPage__bottomPanel--vacancy {
-  gap: 0;
-}
 
 .applicationDetailPage__panelTitle {
   margin: 0;
@@ -290,8 +283,8 @@
 }
 
 .applicationDetailPage__progressSegment--filled {
-  background: #ffd400;
-  box-shadow: 0 0 14px rgba(255, 212, 0, 0.42);
+  background: #FFE054;
+  box-shadow: 0 0 12px rgba(255, 224, 84, 0.5);
 }
 
 .applicationDetailPage__progressLabels {
@@ -357,6 +350,64 @@
   background: transparent;
   color: #fff;
   cursor: pointer;
+}
+
+.applicationDetailPage__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  display: grid;
+  gap: 4px;
+  min-width: 170px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(22, 28, 44, 0.98);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.applicationDetailPage__dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+
+.applicationDetailPage__dropdown button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.applicationDetailPage__dropdown .dropdown-icon {
+  font-size: 14px;
+  display: inline-flex;
+  width: 16px;
+  justify-content: center;
 }
 
 @media (min-width: 768px) {

@@ -5,7 +5,6 @@ import './AppMapPage.css'
 
 function VacancyDescriptionPreview({ description, requirements, onOpenVacancy }) {
   const openedRef = useRef(false)
-  const touchStartY = useRef(0)
 
   const openVacancyPage = useCallback(() => {
     if (openedRef.current) return
@@ -26,21 +25,6 @@ function VacancyDescriptionPreview({ description, requirements, onOpenVacancy })
       onClick={openVacancyPage}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault()
-          openVacancyPage()
-        }
-      }}
-      onTouchStart={(event) => {
-        touchStartY.current = event.touches[0]?.clientY ?? 0
-      }}
-      onTouchMove={(event) => {
-        const currentY = event.touches[0]?.clientY ?? touchStartY.current
-        if (Math.abs(currentY - touchStartY.current) > 8) {
-          openVacancyPage()
-        }
-      }}
-      onWheel={(event) => {
-        if (Math.abs(event.deltaY) > 0) {
           event.preventDefault()
           openVacancyPage()
         }
@@ -117,17 +101,19 @@ export function AppMapPage({
             onClick={() => handleSelect('')}
           >
             <div className="vacancySheet__top">
-              <div className="badge-verified" onClick={(e) => e.stopPropagation()}>Проверенный заказчик</div>
-              <div className="badge-applications-top" onClick={(e) => e.stopPropagation()}>{previewVacancy.applicationCount} отклика</div>
-              
-              <div className="vacancySheet__icon-circle-large" onClick={(e) => e.stopPropagation()}>
-                <span className="vacancySheet__emoji">
-                  {(() => {
-                    const emojis = ['💻', '🚚', '🛒', '📦', '🍽️', '🎨', '🚗', '📚', '🛠️', '📄', '🐶']
-                    const emojiIndex = previewVacancy.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % emojis.length
-                    return emojis[emojiIndex]
-                  })()}
-                </span>
+              <div className="vacancySheet__center-group" onClick={(e) => e.stopPropagation()}>
+                <div className="badge-verified">Проверенный<br />заказчик</div>
+                <div className="badge-applications-top">{previewVacancy.applicationCount} отклика</div>
+                
+                <div className="vacancySheet__icon-circle-large">
+                  <span className="vacancySheet__emoji">
+                    {(() => {
+                      const emojis = ['💻', '🚚', '🛒', '📦', '🍽️', '🎨', '🚗', '📚', '🛠️', '📄', '🐶']
+                      const emojiIndex = previewVacancy.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % emojis.length
+                      return emojis[emojiIndex]
+                    })()}
+                  </span>
+                </div>
               </div>
 
               <div className="vacancySheet__quick-actions" onClick={(e) => e.stopPropagation()}>
@@ -170,7 +156,7 @@ export function AppMapPage({
                 </div>
                 
                 <button className="apply-btn-main" onClick={() => onOpenVacancy(previewVacancy.id)}>
-                  <img src="/map-icons/ОТКЛИК НУТЬСЯ.png" alt="ОТКЛИКНУТЬСЯ" />
+                  <img src="/map-icons/ОТКЛИК НУТЬСЯ.png" alt="Откликнуться" className="apply-btn-img-only" />
                 </button>
               </div>
             </div>

@@ -16,7 +16,9 @@ export function AppShell({
   headerTitle,
   headerSubtitle,
   hideTopbar = false,
+  chatsCount = 0,
 }) {
+  const resolvedChatsCount = Number(chatsCount) || 0
   const isMapSection = currentSection === 'map'
   const keepBottomNavOnAdaptive = true // Always keep bottom nav as per request
 
@@ -35,7 +37,7 @@ export function AppShell({
       case 'chat':
         return {
           title: 'Чат',
-          subtitle: '4 вакансии поблизости ›',
+          subtitle: `${resolvedChatsCount} ${resolvedChatsCount === 1 ? 'активный чат' : 'активных чатов'}`,
         }
       case 'profile':
         return {
@@ -123,7 +125,12 @@ export function AppShell({
                 <span>Отклики</span>
               </button>
               <button className={`bottomNav__item ${currentSection === 'chat' ? 'is-active' : ''}`} onClick={() => onNavigate('/chat')}>
-                <img src="/map-icons/message-circle.png" alt="" className="bottomNav__icon" />
+                <div className="bottomNav__iconWrapper">
+                  <img src="/map-icons/message-circle.png" alt="" className="bottomNav__icon" />
+                  {resolvedChatsCount > 0 && (
+                    <span className="bottomNav__badge">{resolvedChatsCount}</span>
+                  )}
+                </div>
                 <span>Чат</span>
               </button>
               <button className={`bottomNav__item ${currentSection === 'profile' ? 'is-active' : ''}`} onClick={() => onNavigate('/profile')}>

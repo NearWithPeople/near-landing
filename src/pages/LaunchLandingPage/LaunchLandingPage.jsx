@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import './LaunchLandingPage.css'
 
-const LAUNCH_TARGET = new Date('2026-06-17T00:00:00')
+const LAUNCH_TARGET = new Date('2026-06-20T00:00:00')
 const LAUNCH_TELEGRAM_URL = 'https://t.me/nearappby'
 
 const LANDING_CARDS = [

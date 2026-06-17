@@ -260,9 +260,21 @@
   position: relative; /* Ensure children can be absolute relative to this */
 }
 
-.vacancySheet__icon-circle-large {
+.vacancySheet__center-group {
+  position: relative;
   width: 240px;
   height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  animation: floatUpCircle 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto;
+}
+
+.vacancySheet__icon-circle-large {
+  width: 100%;
+  height: 100%;
   background: #FFFFFF;
   border: 6px solid rgba(0, 0, 0, 0.25);
   border-radius: 512px;
@@ -276,8 +288,6 @@
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
-  animation: floatUpCircle 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  pointer-events: auto; /* Re-enable for the circle itself */
 }
 
 @keyframes floatUpCircle {
@@ -317,10 +327,10 @@
 
 .badge-verified {
   position: absolute;
-  top: 80px;
-  left: 5%;
+  top: 10px;
+  left: -90px;
   background: #2DD3A7;
-  color: #00FFBB;
+  color: #121620;
   padding: 12px 40px;
   border-radius: 220px;
   border: 5px solid rgba(0, 0, 0, 0.25);
@@ -339,8 +349,8 @@
 
 .badge-applications-top {
   position: absolute;
-  top: 120px;
-  right: 5%;
+  top: 60px;
+  right: -70px;
   background: #5F58D4;
   color: #00FFBB;
   padding: 14px 28px;
@@ -405,14 +415,22 @@
 .vacancySheet__card {
   background: var(--palette-forest);
   border-radius: 48px 48px 0 0;
-  padding: 32px 24px calc(40px + env(safe-area-inset-bottom, 0px));
-  height: 35vh;
+  padding: 32px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+  height: auto;
+  max-height: 65vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
   margin-top: auto; /* Push to the very bottom of the fixed container */
   margin-bottom: 0;
-  overflow: hidden;
   box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
   animation: slideUpCard 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vacancySheet__card::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes slideUpCard {
@@ -548,20 +566,36 @@
 }
 
 .apply-btn-main {
-  height: 80px;
-  padding: 0 32px;
-  background: #5F58D4;
-  border: none;
-  border-radius: 32px;
+  height: 60px;
+  padding: 0 28px;
+  background: linear-gradient(135deg, #7C3AED 0%, #5F58D4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  color: #ffffff;
+  font-family: 'Geologica', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 15px 30px rgba(95, 88, 212, 0.4);
+  box-shadow: 0 8px 24px rgba(95, 88, 212, 0.45);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
 }
 
-.apply-btn-main img {
-  height: 32px;
+.apply-btn-main:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 28px rgba(95, 88, 212, 0.6);
+}
+
+.apply-btn-main:active {
+  transform: scale(0.98);
+}
+
+.apply-btn-img-only {
+  max-height: 75%;
+  max-width: 75%;
   object-fit: contain;
 }
 
@@ -571,4 +605,151 @@
   width: min(420px, calc(100vw - 32px));
   bottom: 20px;
   border-radius: 24px;
+}
+
+@media (max-width: 768px) {
+  .vacancySheet__icon-circle-large {
+    width: 130px;
+    height: 130px;
+    border-width: 4px;
+  }
+
+  .vacancySheet__emoji {
+    font-size: 64px;
+  }
+
+  .vacancySheet__center-group {
+    width: 130px;
+    height: 130px;
+  }
+
+  .vacancySheet__icon-circle-large {
+    width: 100%;
+    height: 100%;
+    border-width: 4px;
+  }
+
+  .vacancySheet__emoji {
+    font-size: 64px;
+  }
+
+  .badge-verified {
+    font-size: 11px;
+    padding: 6px 14px;
+    border-width: 2.5px;
+    top: -25px;
+    left: -45px;
+  }
+
+  .badge-applications-top {
+    font-size: 11px;
+    padding: 6px 14px;
+    border-width: 2.5px;
+    top: -10px;
+    right: -40px;
+  }
+
+  .vacancySheet__quick-actions {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .quick-action-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .quick-action-btn img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .quick-action-btn--km {
+    width: auto;
+    padding: 0 18px;
+    font-size: 12px;
+    border-radius: 999px;
+    gap: 6px;
+  }
+
+  .vacancySheet__card {
+    padding: 20px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+    border-radius: 28px 28px 0 0;
+    max-height: 58vh;
+  }
+
+  .vacancySheet__title {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .vacancySheet__sub-info {
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+
+  .vacancySheet__salary {
+    font-size: 13px;
+  }
+
+  .vacancySheet__count-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .vacancySheet__description {
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 18px;
+  }
+
+  .vacancySheet__desc-text {
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 10px;
+    max-height: calc(1.45em * 3);
+  }
+
+  .requirement-item {
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .requirement-icon {
+    width: 14px;
+    height: 14px;
+    margin-top: 1px;
+  }
+
+  .company-info {
+    padding: 8px 12px;
+    border-radius: 16px;
+    gap: 8px;
+  }
+
+  .company-logo-circle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .company-logo-circle img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .company-name {
+    font-size: 13px;
+  }
+
+  .company-rating {
+    font-size: 10px;
+    margin-top: 1px;
+  }
+
+  .apply-btn-main {
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 16px;
+  }
 }
