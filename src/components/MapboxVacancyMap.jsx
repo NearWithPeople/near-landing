@@ -1,8 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { getCategoryEmoji } from '../constants/vacancyCategories'
+import { reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
+import { isPointInPolygon, simplifyPolygonPoints } from '../utils/pointInPolygon'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
 const SOURCE_ID = 'vacancies'
@@ -12,6 +14,9 @@ const POINTS_LAYER_ID = 'vacancy-points'
 const SELECTED_GLOW_LAYER_ID = 'vacancy-selected-glow'
 const SELECTED_LAYER_ID = 'vacancy-selected'
 const BUILDINGS_LAYER_ID = 'vacancy-3d-buildings'
+const LASSO_SOURCE_ID = 'lasso-selection'
+const LASSO_FILL_LAYER_ID = 'lasso-selection-fill'
+const LASSO_LINE_LAYER_ID = 'lasso-selection-line'
 
 function getViewportPadding(hasSelection = false) {
   if (typeof window === 'undefined') {
@@ -143,7 +148,79 @@ function getVisibleVacancies(map, vacancies) {
   })
 }
 
-import { reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
+function getVacanciesInPolygon(vacancies, polygon) {
+  return (vacancies || []).filter((vacancy) => {
+    const lat = Number(vacancy.lat)
+    const lng = Number(vacancy.lng)
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false
+    return isPointInPolygon({ lat, lng }, polygon)
+  })
+}
+
+function getPolygonFeature(polygon) {
+  if (!polygon?.length) {
+    return { type: 'FeatureCollection', features: [] }
+  }
+
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[...polygon.map((point) => [point.lng, point.lat]), [polygon[0].lng, polygon[0].lat]]],
+        },
+      },
+    ],
+  }
+}
+
+function ensureLassoLayers(map) {
+  if (!map.getSource(LASSO_SOURCE_ID)) {
+    map.addSource(LASSO_SOURCE_ID, {
+      type: 'geojson',
+      data: getPolygonFeature([]),
+    })
+  }
+
+  if (!map.getLayer(LASSO_FILL_LAYER_ID)) {
+    map.addLayer({
+      id: LASSO_FILL_LAYER_ID,
+      type: 'fill',
+      source: LASSO_SOURCE_ID,
+      paint: {
+        'fill-color': '#2dd3a7',
+        'fill-opacity': 0.18,
+      },
+    })
+  }
+
+  if (!map.getLayer(LASSO_LINE_LAYER_ID)) {
+    map.addLayer({
+      id: LASSO_LINE_LAYER_ID,
+      type: 'line',
+      source: LASSO_SOURCE_ID,
+      paint: {
+        'line-color': '#2dd3a7',
+        'line-width': 2.5,
+        'line-opacity': 0.9,
+      },
+    })
+  }
+}
+
+function updateLassoPolygon(map, polygon) {
+  if (!map?.getSource(LASSO_SOURCE_ID)) return
+  map.getSource(LASSO_SOURCE_ID).setData(getPolygonFeature(polygon))
+}
+
+function screenPathFromPoints(points, close = false) {
+  if (!points.length) return ''
+  const commands = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+  if (close) commands.push('Z')
+  return commands.join(' ')
+}
 
 function updateBubblePositions(map, markersRef) {
   if (!map || !map.getCanvas()) return
@@ -206,19 +283,179 @@ function updateBubblePositions(map, markersRef) {
   })
 }
 
-export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLocationChange, onVisibleVacanciesChange, centerPoint, className = '' }) {
+export function MapboxVacancyMap({
+  vacancies,
+  selectedVacancyId,
+  onSelect,
+  onLocationChange,
+  onVisibleVacanciesChange,
+  centerPoint,
+  className = '',
+  lassoActive = false,
+  hasLassoSelection = false,
+  onLassoSelectionChange,
+  lassoSourceVacancies = vacancies,
+}) {
   const mapNodeRef = useRef(null)
+  const mapWrapperRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef(new Map())
   const onSelectRef = useRef(onSelect)
   const onLocationChangeRef = useRef(onLocationChange)
   const onVisibleVacanciesChangeRef = useRef(onVisibleVacanciesChange)
+  const onLassoSelectionChangeRef = useRef(onLassoSelectionChange)
   const vacanciesRef = useRef(vacancies)
+  const lassoSourceVacanciesRef = useRef(lassoSourceVacancies)
   const selectedVacancyIdRef = useRef(selectedVacancyId)
+  const savedViewRef = useRef(null)
+  const lassoPolygonRef = useRef([])
+  const lassoActiveRef = useRef(lassoActive)
+  const hasLassoSelectionRef = useRef(hasLassoSelection)
+  const lassoDrawPointsRef = useRef([])
+  const [lassoScreenPoints, setLassoScreenPoints] = useState([])
+  const [isLassoDrawing, setIsLassoDrawing] = useState(false)
+
+  lassoActiveRef.current = lassoActive
+  hasLassoSelectionRef.current = hasLassoSelection
 
   useEffect(() => {
     onSelectRef.current = onSelect
   }, [onSelect])
+
+  function restoreMapView(map, { animate = true } = {}) {
+    if (map.getLayer(BUILDINGS_LAYER_ID)) {
+      map.setLayoutProperty(BUILDINGS_LAYER_ID, 'visibility', 'visible')
+    }
+
+    map.easeTo({
+      pitch: savedViewRef.current?.pitch ?? 60,
+      bearing: savedViewRef.current?.bearing ?? -20,
+      duration: animate ? 600 : 0,
+      essential: true,
+    })
+  }
+
+  function getOverlayPoint(event) {
+    const bounds = mapWrapperRef.current?.getBoundingClientRect()
+    if (!bounds) return null
+    return {
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    }
+  }
+
+  function finishLassoDrawing(points) {
+    const map = mapRef.current
+    if (!map) return
+
+    const simplified = simplifyPolygonPoints(points)
+    if (simplified.length < 3) {
+      setLassoScreenPoints([])
+      return
+    }
+
+    const polygon = simplified.map((point) => {
+      const lngLat = map.unproject([point.x, point.y])
+      return {
+        lat: Number(lngLat.lat.toFixed(6)),
+        lng: Number(lngLat.lng.toFixed(6)),
+      }
+    })
+
+    lassoPolygonRef.current = polygon
+    updateLassoPolygon(map, polygon)
+    setLassoScreenPoints([])
+
+    const selectedVacancies = getVacanciesInPolygon(lassoSourceVacanciesRef.current, polygon)
+    onLassoSelectionChangeRef.current?.(selectedVacancies.map((vacancy) => vacancy.id))
+
+    if (onVisibleVacanciesChangeRef.current) {
+      onVisibleVacanciesChangeRef.current(selectedVacancies)
+    }
+
+    restoreMapView(map)
+  }
+
+  function handleLassoPointerDown(event) {
+    if (!lassoActiveRef.current) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+
+    const point = getOverlayPoint(event)
+    if (!point) return
+
+    setIsLassoDrawing(true)
+    lassoDrawPointsRef.current = [point]
+    setLassoScreenPoints([point])
+    mapRef.current?.dragPan.disable()
+  }
+
+  function handleLassoPointerMove(event) {
+    if (!isLassoDrawing || !lassoActiveRef.current) return
+
+    const point = getOverlayPoint(event)
+    if (!point) return
+
+    lassoDrawPointsRef.current = [...lassoDrawPointsRef.current, point]
+    setLassoScreenPoints(lassoDrawPointsRef.current)
+  }
+
+  function handleLassoPointerUp(event) {
+    if (!isLassoDrawing) return
+
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    setIsLassoDrawing(false)
+    mapRef.current?.dragPan.enable()
+    finishLassoDrawing(lassoDrawPointsRef.current)
+    lassoDrawPointsRef.current = []
+  }
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.isStyleLoaded()) return
+
+    if (lassoActive) {
+      if (map.getPitch() > 1) {
+        savedViewRef.current = {
+          pitch: map.getPitch(),
+          bearing: map.getBearing(),
+          zoom: map.getZoom(),
+        }
+      }
+
+      map.easeTo({
+        pitch: 0,
+        bearing: 0,
+        duration: 600,
+        essential: true,
+      })
+
+      if (map.getLayer(BUILDINGS_LAYER_ID)) {
+        map.setLayoutProperty(BUILDINGS_LAYER_ID, 'visibility', 'none')
+      }
+
+      return
+    }
+
+    setIsLassoDrawing(false)
+    setLassoScreenPoints([])
+
+    if (!hasLassoSelection) {
+      lassoPolygonRef.current = []
+      updateLassoPolygon(map, [])
+      restoreMapView(map)
+    }
+  }, [lassoActive, hasLassoSelection])
+
+  useEffect(() => {
+    if (hasLassoSelection) return
+
+    const map = mapRef.current
+    if (!map || !map.isStyleLoaded()) return
+
+    lassoPolygonRef.current = []
+    updateLassoPolygon(map, [])
+  }, [hasLassoSelection])
 
   useEffect(() => {
     onLocationChangeRef.current = onLocationChange
@@ -229,8 +466,16 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
   }, [onVisibleVacanciesChange])
 
   useEffect(() => {
+    onLassoSelectionChangeRef.current = onLassoSelectionChange
+  }, [onLassoSelectionChange])
+
+  useEffect(() => {
     vacanciesRef.current = vacancies
   }, [vacancies])
+
+  useEffect(() => {
+    lassoSourceVacanciesRef.current = lassoSourceVacancies
+  }, [lassoSourceVacancies])
 
   useEffect(() => {
     selectedVacancyIdRef.current = selectedVacancyId
@@ -266,7 +511,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
       const center = map.getCenter()
 
       // 1. Auto-select vacancy on high zoom if one is visible and none selected
-      if (currentZoom >= 16.5 && !selectedVacancyIdRef.current) {
+      if (currentZoom >= 16.5 && !selectedVacancyIdRef.current && !lassoActiveRef.current) {
         const features = map.queryRenderedFeatures({ layers: [POINTS_LAYER_ID] })
         if (features.length > 0) {
           // Find the one closest to center
@@ -326,6 +571,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
     })
 
     const handleMapClick = (event) => {
+      if (lassoActiveRef.current) return
       const interactiveFeatures = map.queryRenderedFeatures(event.point, {
         layers: [CLUSTERS_LAYER_ID],
       })
@@ -344,6 +590,7 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
     map.once('load', () => {
       ensureSourceAndLayers(map)
       ensureBuildingsLayer(map)
+      ensureLassoLayers(map)
       updateSourceData(map, vacanciesRef.current)
       notifyVisibleVacancies()
 
@@ -503,6 +750,23 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
 
     updateSourceData(map, vacancies)
 
+    if (lassoActive) {
+      if (map.getPitch() > 0.5) {
+        map.easeTo({ pitch: 0, bearing: 0, duration: 0, essential: true })
+      }
+      if (onVisibleVacanciesChangeRef.current) {
+        onVisibleVacanciesChangeRef.current(getVisibleVacancies(map, vacancies))
+      }
+      return
+    }
+
+    if (hasLassoSelection) {
+      if (onVisibleVacanciesChangeRef.current) {
+        onVisibleVacanciesChangeRef.current(vacancies)
+      }
+      return
+    }
+
     const bounds = new mapboxgl.LngLatBounds()
     vacancies.forEach((vacancy) => {
       bounds.extend([vacancy.lng, vacancy.lat])
@@ -535,23 +799,23 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
         onVisibleVacanciesChangeRef.current([])
       }
     }
-  }, [vacancies, centerPoint])
+  }, [vacancies, centerPoint, lassoActive, hasLassoSelection])
 
   useEffect(() => {
     const map = mapRef.current
     const active = vacancies.find((vacancy) => vacancy.id === selectedVacancyId)
-    if (!map || !active) return
+    if (!map || !active || lassoActive) return
 
     map.flyTo({
       center: [active.lng, active.lat],
-      zoom: Math.max(map.getZoom(), 16), // Zoom in more for 3D effect
+      zoom: Math.max(map.getZoom(), 16),
       padding: getViewportPadding(true),
       pitch: 60,
       bearing: -20,
       essential: true,
-      duration: 800, // Smooth transition
+      duration: 800,
     })
-  }, [selectedVacancyId, vacancies])
+  }, [selectedVacancyId, vacancies, lassoActive])
 
   if (!MAPBOX_TOKEN) {
     return (
@@ -561,6 +825,32 @@ export function MapboxVacancyMap({ vacancies, selectedVacancyId, onSelect, onLoc
     )
   }
 
-  return <div ref={mapNodeRef} className={`mapboxCanvas ${className}`.trim()} />
+  return (
+    <div
+      ref={mapWrapperRef}
+      className={`mapboxVacancyMap ${lassoActive ? 'mapboxVacancyMap--lasso' : ''} ${className}`.trim()}
+    >
+      <div ref={mapNodeRef} className="mapboxCanvas mapboxVacancyMap__canvas" />
+
+      {lassoActive ? (
+        <>
+          <div
+            className="mapLassoOverlay"
+            onPointerDown={handleLassoPointerDown}
+            onPointerMove={handleLassoPointerMove}
+            onPointerUp={handleLassoPointerUp}
+            onPointerCancel={handleLassoPointerUp}
+          >
+            {lassoScreenPoints.length ? (
+              <svg className="mapLassoOverlay__svg" aria-hidden="true">
+                <path d={screenPathFromPoints(lassoScreenPoints, !isLassoDrawing && lassoScreenPoints.length > 2)} className="mapLassoOverlay__path" />
+              </svg>
+            ) : null}
+          </div>
+          <div className="mapLassoHint">Обведите область пальцем или курсором</div>
+        </>
+      ) : null}
+    </div>
+  )
 }
 

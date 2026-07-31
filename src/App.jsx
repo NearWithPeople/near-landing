@@ -190,6 +190,9 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState('')
   const [visibleMapVacancies, setVisibleMapVacancies] = useState([])
   const [isNearbyListOpen, setIsNearbyListOpen] = useState(false)
+  const [isMapFiltersOpen, setIsMapFiltersOpen] = useState(false)
+  const [lassoActive, setLassoActive] = useState(false)
+  const [lassoVacancyIds, setLassoVacancyIds] = useState(null)
   const [currentLocationName, setCurrentLocationName] = useState('Минск')
   const [catalogFilters, setCatalogFilters] = useState({
     query: '',
@@ -220,6 +223,12 @@ export default function App() {
       sortBy: catalogFilters.sortBy,
     })
   }, [appFilters.cityOptions, catalogFilters.category, catalogFilters.payMin, catalogFilters.query, catalogFilters.shiftDate, catalogFilters.sortBy, remoteData.vacancies, searchPoint, selectedCity])
+
+  const mapVacancies = useMemo(() => {
+    if (lassoVacancyIds === null) return vacancies
+    if (!lassoVacancyIds.length) return []
+    return vacancies.filter((vacancy) => lassoVacancyIds.includes(vacancy.id))
+  }, [lassoVacancyIds, vacancies])
 
   const userApplications = useMemo(() => {
     if (!currentUser || currentUser.role !== 'seeker') return []
@@ -568,6 +577,9 @@ export default function App() {
   useEffect(() => {
     if (location.pathname !== '/map') {
       setIsNearbyListOpen(false)
+      setIsMapFiltersOpen(false)
+      setLassoActive(false)
+      setLassoVacancyIds(null)
     }
   }, [location.pathname])
 
@@ -622,6 +634,30 @@ export default function App() {
         }
         onMapNearbyClick={section === 'map' ? () => setIsNearbyListOpen(true) : undefined}
         onMapListClick={section === 'map' ? () => setIsNearbyListOpen(true) : undefined}
+        isMapFiltersOpen={isMapFiltersOpen}
+        onMapFiltersOpenChange={section === 'map' ? setIsMapFiltersOpen : undefined}
+        lassoActive={section === 'map' ? lassoActive : false}
+        onLassoToggle={
+          section === 'map'
+            ? () => {
+                setLassoActive((prev) => {
+                  const next = !prev
+                  if (!next) setLassoVacancyIds(null)
+                  return next
+                })
+              }
+            : undefined
+        }
+        lassoSelectionCount={section === 'map' && lassoVacancyIds !== null ? lassoVacancyIds.length : 0}
+        hasLassoZoneActive={section === 'map' && lassoVacancyIds !== null}
+        onClearLassoSelection={
+          section === 'map'
+            ? () => {
+                setLassoVacancyIds(null)
+                setLassoActive(false)
+              }
+            : undefined
+        }
         mapFilters={
           section === 'map' ? (
             <MapFiltersToolbar
@@ -629,13 +665,16 @@ export default function App() {
               onFilterChange={(field, value) => setCatalogFilters((prev) => ({ ...prev, [field]: value }))}
               categoryOptions={appFilters.categoryOptions}
               payOptions={appFilters.payOptions}
+              isOpen={isMapFiltersOpen}
+              onOpenChange={setIsMapFiltersOpen}
             />
           ) : null
         }
       >
         {section === 'map' ? (
           <AppMapPage
-            vacancies={vacancies}
+            vacancies={mapVacancies}
+            lassoSourceVacancies={vacancies}
             selectedVacancyId={selectedVacancyId}
             onSelect={setActiveVacancyId}
             onLocationChange={setCurrentLocationName}
@@ -650,6 +689,12 @@ export default function App() {
             completedTasks={allCompletedTasks}
             onOpenCompanyProfile={(ownerId) => navigate(`/company/${ownerId}`)}
             onOpenEmployerVacancy={(vacancyId) => navigate(`/employer/vacancies/${vacancyId}`)}
+            lassoActive={lassoActive}
+            hasLassoSelection={lassoVacancyIds !== null}
+            onLassoSelectionChange={(ids) => {
+              setLassoVacancyIds(Array.isArray(ids) ? ids : [])
+              setLassoActive(false)
+            }}
           />
         ) : null}
         {section === 'applications' ? (

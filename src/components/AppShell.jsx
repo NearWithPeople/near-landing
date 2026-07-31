@@ -86,6 +86,11 @@ export function AppShell({
   onCityChange,
   onCreateVacancy,
   mapFilters = null,
+  isMapFiltersOpen = false,
+  onMapFiltersOpenChange,
+  lassoSelectionCount = 0,
+  hasLassoZoneActive = false,
+  onClearLassoSelection,
   isVacancySelected = false,
   headerTitle,
   headerSubtitle,
@@ -145,6 +150,16 @@ export function AppShell({
   const header = getHeaderContent()
   const resolvedTitle = headerTitle ?? header.title
   const resolvedSubtitle = headerSubtitle ?? header.subtitle
+  const hasLassoZone = lassoActive || hasLassoZoneActive
+
+  function handleLassoControlClick() {
+    if (hasLassoZone) {
+      onClearLassoSelection?.()
+      return
+    }
+
+    onLassoToggle?.()
+  }
 
   return (
     <div className={`appFrame ${isMapSection ? '' : 'appFrame--promo'}`}>
@@ -186,7 +201,18 @@ export function AppShell({
           </header>
         ) : null}
 
+        {isMapSection && lassoSelectionCount > 0 ? (
+          <div className="mapLassoBadge">
+            <span>{lassoSelectionCount} в области</span>
+            <button type="button" onClick={onClearLassoSelection}>
+              Сбросить
+            </button>
+          </div>
+        ) : null}
+
         <div className={`appContent ${isMapSection ? 'appContent--map' : 'appContent--promo'}`}>{children}</div>
+
+        {isMapSection && mapFilters ? mapFilters : null}
 
         {currentSection !== 'landing' && (
           <>
@@ -194,14 +220,30 @@ export function AppShell({
             {isMapSection ? (
               <>
                 <div className="bottomNav__controls bottomNav__controls--left">
-                  <button type="button" className="bottomNav__controlButton" aria-label="Фильтры">
+                  <button
+                    type="button"
+                    className={`bottomNav__controlButton bottomNav__controlButton--filters${isMapFiltersOpen ? ' is-active' : ''}`}
+                    aria-label="Фильтры"
+                    onClick={() => onMapFiltersOpenChange?.(true)}
+                  >
                     <img src="/map-icons/funnel.png" alt="" />
                   </button>
                   <button type="button" className="bottomNav__controlButton" aria-label="Список вакансий на экране" onClick={onMapListClick}>
                     <img src="/map-icons/list.png" alt="" />
                   </button>
-                  <button type="button" className={`bottomNav__controlButton ${lassoActive ? 'is-active' : ''}`} aria-label="Выделение лассо" onClick={onLassoToggle}>
-                    <img src="/map-icons/losso.png" alt="" />
+                  <button
+                    type="button"
+                    className={`bottomNav__controlButton bottomNav__controlButton--lasso${hasLassoZone ? ' is-active' : ''}${hasLassoZone ? ' is-clear' : ''}`}
+                    aria-label={hasLassoZone ? 'Сбросить выделение' : 'Выделение лассо'}
+                    onClick={handleLassoControlClick}
+                  >
+                    {hasLassoZone ? (
+                      <span className="bottomNav__controlClose" aria-hidden="true">
+                        ×
+                      </span>
+                    ) : (
+                      <img src="/map-icons/losso.png" alt="" />
+                    )}
                   </button>
                 </div>
                 <div className="bottomNav__controls bottomNav__controls--right">

@@ -64,6 +64,7 @@ function VacancyDescriptionPreview({ description, requirements, onOpenVacancy })
 
 export function AppMapPage({
   vacancies,
+  lassoSourceVacancies = vacancies,
   selectedVacancyId,
   onSelect,
   onLocationChange,
@@ -78,6 +79,9 @@ export function AppMapPage({
   completedTasks = [],
   onOpenCompanyProfile,
   onOpenEmployerVacancy,
+  lassoActive = false,
+  hasLassoSelection = false,
+  onLassoSelectionChange,
 }) {
   const [previewVacancyId, setPreviewVacancyId] = useState(autoOpenVacancyId)
   const previewVacancy = useMemo(() => vacancies.find((vacancy) => vacancy.id === previewVacancyId) || null, [previewVacancyId, vacancies])
@@ -136,12 +140,16 @@ export function AppMapPage({
       <div className="mapPanel mapPanel--full">
         <MapboxVacancyMap
           vacancies={vacancies}
+          lassoSourceVacancies={lassoSourceVacancies}
           selectedVacancyId={selectedVacancyId}
           onSelect={handleSelect}
           onLocationChange={onLocationChange}
           onVisibleVacanciesChange={onVisibleVacanciesChange}
           centerPoint={selectedCityPoint}
           className="mapPlaceholder"
+          lassoActive={lassoActive}
+          hasLassoSelection={hasLassoSelection}
+          onLassoSelectionChange={onLassoSelectionChange}
         />
 
         {isNearbyListOpen ? (

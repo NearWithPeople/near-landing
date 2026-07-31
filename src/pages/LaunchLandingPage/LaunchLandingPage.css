@@ -311,6 +311,19 @@
   letter-spacing: -0.05em;
 }
 
+.launchLanding__timerLine--soon {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  line-height: 0.72;
+  max-width: 100%;
+}
+
+.launchLanding__soonWord {
+  display: block;
+  white-space: nowrap;
+}
+
 .launchLanding__timerLine--minutes {
   font-size: clamp(
     calc(2.5rem / var(--launch-timer-step) * var(--launch-timer-size-factor)),
@@ -565,6 +578,58 @@
   border: 0;
 }
 
+@media (max-width: 480px) {
+  .launchLanding {
+    --launch-timer-size-factor: 0.78;
+    --launch-logo-size: 76px;
+  }
+
+  .launchLanding__hero {
+    gap: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .launchLanding__caption,
+  .launchLanding__heroLead {
+    max-width: 100%;
+    font-size: clamp(0.95rem, 6.2vw, 1.15rem);
+  }
+
+  .launchLanding__heroLead {
+    align-self: flex-start;
+    text-align: left;
+  }
+
+  .launchLanding__cardVisual {
+    aspect-ratio: 4 / 5;
+  }
+
+  .launchLanding__cardOverlay {
+    padding-top: 56px;
+  }
+
+  .launchLanding__timerLine--soon {
+    font-size: clamp(
+      calc(2rem * var(--launch-timer-size-factor)),
+      calc(14vw * var(--launch-timer-size-factor)),
+      calc(var(--launch-timer-hours-size) * 0.72)
+    );
+  }
+}
+
+@media (max-width: 360px) {
+  .launchLanding {
+    --launch-timer-size-factor: 0.68;
+  }
+
+  .launchLanding__logoBar,
+  .launchLanding__footerBar {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
 @media (min-width: 768px) {
   .launchLanding__cards {
     display: grid;
@@ -594,13 +659,35 @@
 }
 
 @media (min-width: 1024px) {
+  .launchLanding__hero {
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+
   .launchLanding__cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .launchLanding__card:nth-child(3) {
     grid-column: auto;
     width: auto;
     justify-self: stretch;
+  }
+
+  .launchLanding__caption,
+  .launchLanding__heroLead {
+    max-width: 34rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .launchLanding__hero,
+  .launchLanding__cards {
+    max-width: 1200px;
   }
 }

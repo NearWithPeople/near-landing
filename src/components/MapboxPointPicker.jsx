@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
-export function MapboxPointPicker({ value, onChange, centerPoint, className = '' }) {
+export function MapboxPointPicker({ value, onChange, centerPoint, className = '', hint = '' }) {
   const mapNodeRef = useRef(null)
   const mapRef = useRef(null)
   const markerRef = useRef(null)
@@ -39,16 +39,29 @@ export function MapboxPointPicker({ value, onChange, centerPoint, className = ''
       marker.setLngLat([value.lng, value.lat]).addTo(map)
     }
 
-    map.on('click', (event) => {
+    function handleMapPick(event) {
       const nextPoint = {
         lat: Number(event.lngLat.lat.toFixed(6)),
         lng: Number(event.lngLat.lng.toFixed(6)),
       }
       marker.setLngLat([nextPoint.lng, nextPoint.lat]).addTo(map)
       onChangeRef.current?.(nextPoint)
+    }
+
+    map.on('click', handleMapPick)
+
+    map.once('load', () => {
+      map.resize()
+      window.requestAnimationFrame(() => map.resize())
     })
 
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize()
+    })
+    resizeObserver.observe(mapNodeRef.current)
+
     return () => {
+      resizeObserver.disconnect()
       marker.remove()
       map.remove()
       markerRef.current = null
@@ -97,5 +110,10 @@ export function MapboxPointPicker({ value, onChange, centerPoint, className = ''
     )
   }
 
-  return <div ref={mapNodeRef} className={`mapboxCanvas ${className}`.trim()} />
+  return (
+    <div className={`mapboxPointPicker ${className}`.trim()}>
+      <div ref={mapNodeRef} className="mapboxCanvas mapboxPointPicker__canvas" />
+      {hint ? <div className="mapboxPointPicker__hint">{hint}</div> : null}
+    </div>
+  )
 }

@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../../constants/legalPages'
@@ -9,144 +8,164 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
   const isLogin = registrationDisabled || form.mode === 'login'
   const isEmployer = form.role === 'employer'
 
-  useEffect(() => {
-    const prevHtml = document.documentElement.style.overflow
-    const prevBody = document.body.style.overflow
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.documentElement.style.overflow = prevHtml
-      document.body.style.overflow = prevBody
-    }
-  }, [])
-
   return (
-    <section className="authSplitPage">
-      <div className="authSplitPage__left">
-        <div className="authSplitPage__orb authSplitPage__orb--a" aria-hidden />
-        <div className="authSplitPage__orb authSplitPage__orb--b" aria-hidden />
-        <div className="authSplitPage__orb authSplitPage__orb--c" aria-hidden />
-
-        <div className="authSplitPage__heroWord" aria-hidden>
-        <Link to="/" aria-label="На главную NEAR.by">
-
-          <p className="authSplitPage__wordmark">
-            <span className="authSplitPage__wordmarkNear">NEAR</span>
-            <span className="authSplitPage__wordmarkBy">.by</span>
-          </p>
+    <section className="authPage">
+      <header className="authPage__topbar">
+        <Link to="/" className="authPage__back" aria-label="На главную">
+          ←
         </Link>
+        <div className="authPage__brand">
+          <span className="authPage__brandNear">NEAR</span>
+          <span className="authPage__brandBy">.by</span>
+        </div>
+        <div className="authPage__topbarSpacer" aria-hidden="true" />
+      </header>
 
+      <div className="authPage__scroll">
+        <div className="authPage__intro">
+          <span className="authPage__badge">{isLogin ? 'Вход' : 'Регистрация'}</span>
+          <h1 className="authPage__title">{isLogin ? 'Войти в приложение' : 'Создать аккаунт'}</h1>
+          <p className="authPage__lead">
+            {isLogin
+              ? 'Смены на карте, отклики и чат с работодателем — всё в одном месте.'
+              : 'Подберите роль и заполните данные — начните искать смены или публиковать вакансии.'}
+          </p>
         </div>
 
-      </div>
-
-      <div className="authSplitPage__right">
-        <div className="authSplitPage__card">
-          <div className="authCard__header">
-            <h1 className="authCard__title">{isLogin ? 'Войти в приложение' : 'Создать аккаунт'}</h1>
-          </div>
-
-          <div className="roleTabs" role="tablist" aria-label="Роль">
-            <button type="button" className={`roleTabs__item ${form.role === 'seeker' ? 'is-active' : ''}`} onClick={() => onChange('role', 'seeker')}>
-              Пользователь
+        <article className="authPage__card">
+          <div className="authPage__roleTabs" role="tablist" aria-label="Роль">
+            <button
+              type="button"
+              className={`authPage__roleTab${form.role === 'seeker' ? ' is-active' : ''}`}
+              onClick={() => onChange('role', 'seeker')}
+            >
+              Соискатель
             </button>
             <button
               type="button"
-              className={`roleTabs__item ${form.role === 'employer' ? 'is-active' : ''}`}
+              className={`authPage__roleTab${form.role === 'employer' ? ' is-active' : ''}`}
               onClick={() => onChange('role', 'employer')}
             >
               Работодатель
             </button>
           </div>
 
-          <form className="authForm" onSubmit={onSubmit} noValidate>
+          <form className="authPage__form" onSubmit={onSubmit} noValidate>
             {!isLogin ? (
               <>
-                <div className="authForm__grid">
-                  <label className="field">
-                    <span className="field__label">Фамилия</span>
-                    <input className="input input--dark" value={form.lastName} onChange={(e) => onChange('lastName', e.target.value)} />
+                <div className="authPage__grid">
+                  <label className="authPage__field">
+                    <span>Фамилия</span>
+                    <input className="authPage__input" value={form.lastName} onChange={(event) => onChange('lastName', event.target.value)} />
                   </label>
-                  <label className="field">
-                    <span className="field__label">{isEmployer ? 'Имя контактного лица' : 'Имя'}</span>
-                    <input className="input input--dark" value={form.firstName} onChange={(e) => onChange('firstName', e.target.value)} />
+                  <label className="authPage__field">
+                    <span>{isEmployer ? 'Имя контактного лица' : 'Имя'}</span>
+                    <input className="authPage__input" value={form.firstName} onChange={(event) => onChange('firstName', event.target.value)} />
                   </label>
                 </div>
 
-                <label className="field">
-                  <span className="field__label">Отчество</span>
-                  <input className="input input--dark" value={form.middleName} onChange={(e) => onChange('middleName', e.target.value)} />
+                <label className="authPage__field">
+                  <span>Отчество</span>
+                  <input className="authPage__input" value={form.middleName} onChange={(event) => onChange('middleName', event.target.value)} />
                 </label>
 
                 {!isEmployer ? (
-                  <label className="field">
-                    <span className="field__label">Возраст</span>
-                    <input className="input input--dark" type="number" min="16" max="99" inputMode="numeric" value={form.age} onChange={(e) => onChange('age', e.target.value)} />
+                  <label className="authPage__field">
+                    <span>Возраст</span>
+                    <input
+                      className="authPage__input"
+                      type="number"
+                      min="16"
+                      max="99"
+                      inputMode="numeric"
+                      value={form.age}
+                      onChange={(event) => onChange('age', event.target.value)}
+                    />
                   </label>
                 ) : null}
               </>
             ) : null}
 
-            <div className="authForm__grid">
-              <label className="field">
-                <span className="field__label">Телефон</span>
-                <input className="input input--dark" type="tel" inputMode="tel" value={form.phone} onChange={(e) => onChange('phone', e.target.value)} placeholder="+375 29 123 45 67" />
+            <div className="authPage__grid">
+              <label className="authPage__field">
+                <span>Телефон</span>
+                <input
+                  className="authPage__input"
+                  type="tel"
+                  inputMode="tel"
+                  value={form.phone}
+                  onChange={(event) => onChange('phone', event.target.value)}
+                  placeholder="+375 29 123 45 67"
+                />
               </label>
-              <label className="field">
-                <span className="field__label">Email</span>
-                <input className="input input--dark" inputMode="email" value={form.email} onChange={(e) => onChange('email', e.target.value)} />
+              <label className="authPage__field">
+                <span>Email</span>
+                <input
+                  className="authPage__input"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={form.email}
+                  onChange={(event) => onChange('email', event.target.value)}
+                />
               </label>
             </div>
 
-            <label className="field">
-              <span className="field__label">Пароль</span>
-              <input className="input input--dark" type="password" value={form.password} onChange={(e) => onChange('password', e.target.value)} placeholder="Минимум 6 символов" />
+            <label className="authPage__field">
+              <span>Пароль</span>
+              <input
+                className="authPage__input"
+                type="password"
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                value={form.password}
+                onChange={(event) => onChange('password', event.target.value)}
+                placeholder="Минимум 6 символов"
+              />
             </label>
 
             {!isLogin ? (
-              <label className="field">
-                <span className="field__label">Telegram username (необязательно)</span>
+              <label className="authPage__field">
+                <span>Telegram (необязательно)</span>
                 <input
-                  className="input input--dark"
+                  className="authPage__input"
                   inputMode="text"
                   value={form.telegramUsername}
-                  onChange={(e) => onChange('telegramUsername', e.target.value)}
+                  onChange={(event) => onChange('telegramUsername', event.target.value)}
                   placeholder="@username"
                 />
               </label>
             ) : null}
 
             {!isLogin ? (
-              <label className="authForm__legal">
+              <label className="authPage__legal">
                 <input
-                  className="authForm__legalCheckbox"
+                  className="authPage__legalCheckbox"
                   type="checkbox"
                   checked={Boolean(form.acceptedLegal)}
-                  onChange={(e) => onChange('acceptedLegal', e.target.checked)}
+                  onChange={(event) => onChange('acceptedLegal', event.target.checked)}
                 />
-                <span className="authForm__legalText">
-                  Подтверждаю ознакомление с{' '}
-                  <Link to={FAQ_PATH}>FAQ</Link>,{' '}
-                  <Link to={CONTACTS_PATH}>контактами</Link> и{' '}
-                  <Link to={PRIVACY_PATH}>политикой конфиденциальности</Link>. Без согласия регистрация недоступна.
+                <span className="authPage__legalText">
+                  Подтверждаю ознакомление с <Link to={FAQ_PATH}>FAQ</Link>, <Link to={CONTACTS_PATH}>контактами</Link> и{' '}
+                  <Link to={PRIVACY_PATH}>политикой конфиденциальности</Link>.
                 </span>
               </label>
             ) : null}
 
-            <button className="primaryButton primaryButton--wide" type="submit" disabled={isSubmitting || (!isLogin && !form.acceptedLegal)}>
-              {isSubmitting ? 'Подождите...' : isLogin ? 'Войти' : 'Зарегистрироваться'}
+            <button className="authPage__submit" type="submit" disabled={isSubmitting || (!isLogin && !form.acceptedLegal)}>
+              {isSubmitting ? 'Подождите…' : isLogin ? 'Войти' : 'Зарегистрироваться'}
             </button>
+
             {!registrationDisabled ? (
-              <div className="authCard__switch">
-                {isLogin ? 'Нет аккаунта?' : 'У вас уже есть аккаунт?'}{' '}
-                <button type="button" className="authCard__switchButton" onClick={() => onChange('mode', isLogin ? 'register' : 'login')}>
+              <div className="authPage__switch">
+                {isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}{' '}
+                <button type="button" className="authPage__switchButton" onClick={() => onChange('mode', isLogin ? 'register' : 'login')}>
                   {isLogin ? 'Зарегистрироваться' : 'Войти'}
                 </button>
               </div>
             ) : null}
-            {error ? <div className="formError">{error}</div> : null}
+
+            {error ? <div className="authPage__error">{error}</div> : null}
           </form>
-        </div>
+        </article>
       </div>
     </section>
   )

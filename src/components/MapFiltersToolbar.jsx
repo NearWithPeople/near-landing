@@ -1,5 +1,7 @@
 import { CustomSelect } from './CustomSelect'
-import { ResponsiveFilters } from './ResponsiveFilters'
+import { MapFiltersSheet, MAP_FILTER_DEFAULTS } from './MapFiltersSheet'
+
+export { MAP_FILTER_DEFAULTS } from './MapFiltersSheet'
 
 const SHIFT_DATE_OPTIONS = [
   { value: 'all', label: 'Любой день' },
@@ -15,31 +17,9 @@ const SORT_OPTIONS = [
   { value: 'date', label: 'По дате' },
 ]
 
-export const MAP_FILTER_DEFAULTS = {
-  category: 'all',
-  shiftDate: 'all',
-  payMin: 0,
-  sortBy: 'relevant',
-  query: '',
-}
-
-export function MapFiltersToolbar({ filters, onFilterChange, categoryOptions, payOptions }) {
-  const activeFilterCount = [
-    filters.category !== MAP_FILTER_DEFAULTS.category,
-    filters.shiftDate !== MAP_FILTER_DEFAULTS.shiftDate,
-    filters.payMin !== MAP_FILTER_DEFAULTS.payMin,
-    filters.sortBy !== MAP_FILTER_DEFAULTS.sortBy,
-    filters.query.trim() !== MAP_FILTER_DEFAULTS.query,
-  ].filter(Boolean).length
-
+function MapFiltersDesktopBar({ filters, onFilterChange, categoryOptions, payOptions }) {
   return (
-    <ResponsiveFilters
-      buttonLabel="Фильтры"
-      buttonHint={activeFilterCount ? `Выбрано: ${activeFilterCount}` : 'Все вакансии'}
-      mobileSheetPosition="bottom"
-      desktopClassName="mapToolbar"
-      className="responsiveFilters--map"
-    >
+    <div className="mapToolbar mapFiltersDesktop">
       <CustomSelect
         value={filters.category}
         options={categoryOptions}
@@ -85,13 +65,49 @@ export function MapFiltersToolbar({ filters, onFilterChange, categoryOptions, pa
       />
 
       <div className={`mapToolbar__searchWrap ${filters.query ? 'is-active' : ''}`.trim()}>
-        <input className="mapToolbar__search" placeholder="Поиск по вакансиям" value={filters.query} onChange={(e) => onFilterChange('query', e.target.value)} />
+        <input
+          className="mapToolbar__search"
+          placeholder="Поиск по вакансиям"
+          value={filters.query}
+          onChange={(event) => onFilterChange('query', event.target.value)}
+        />
         {filters.query ? (
-          <button type="button" className="mapToolbar__clear" aria-label="Сбросить поиск" onClick={() => onFilterChange('query', MAP_FILTER_DEFAULTS.query)}>
+          <button
+            type="button"
+            className="mapToolbar__clear"
+            aria-label="Сбросить поиск"
+            onClick={() => onFilterChange('query', MAP_FILTER_DEFAULTS.query)}
+          >
             <span aria-hidden>&times;</span>
           </button>
         ) : null}
       </div>
-    </ResponsiveFilters>
+    </div>
+  )
+}
+
+export function MapFiltersToolbar({ filters, onFilterChange, categoryOptions, payOptions, isOpen, onOpenChange }) {
+  return (
+    <>
+      <div className="mapFiltersDock" aria-label="Фильтры карты">
+        <MapFiltersDesktopBar
+          filters={filters}
+          onFilterChange={onFilterChange}
+          categoryOptions={categoryOptions}
+          payOptions={payOptions}
+        />
+      </div>
+
+      <MapFiltersSheet
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        filters={filters}
+        onFilterChange={onFilterChange}
+        categoryOptions={categoryOptions}
+        payOptions={payOptions}
+        shiftDateOptions={SHIFT_DATE_OPTIONS}
+        sortOptions={SORT_OPTIONS}
+      />
+    </>
   )
 }

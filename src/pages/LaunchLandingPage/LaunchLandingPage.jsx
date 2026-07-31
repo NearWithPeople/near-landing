@@ -96,7 +96,10 @@ export function LaunchLandingPage() {
       <header className="launchLanding__hero launchLanding__zone launchLanding__zone--light">
         <div className="launchLanding__timer" aria-live="polite" aria-atomic="true">
           {isFinished ? (
-            <p className="launchLanding__timerLine launchLanding__timerLine--hours">Скоро запуск</p>
+            <p className="launchLanding__timerLine launchLanding__timerLine--hours launchLanding__timerLine--soon">
+              <span className="launchLanding__soonWord">Скоро</span>
+              <span className="launchLanding__soonWord">запуск</span>
+            </p>
           ) : (
             <>
               <p className="launchLanding__timerLine launchLanding__timerLine--hours">
@@ -117,8 +120,17 @@ export function LaunchLandingPage() {
 
         <div className="launchLanding__heroCopy">
           <p className="launchLanding__caption">
-            ...осталось до запуска первого{' '}
-            <span className="launchLanding__captionHighlight">радара подработок</span>
+            {isFinished ? (
+              <>
+                Запускаем первый{' '}
+                <span className="launchLanding__captionHighlight">радар подработок</span>
+              </>
+            ) : (
+              <>
+                ...осталось до запуска первого{' '}
+                <span className="launchLanding__captionHighlight">радара подработок</span>
+              </>
+            )}
           </p>
           <p className="launchLanding__heroLead">
             и вот почему
@@ -139,14 +151,14 @@ export function LaunchLandingPage() {
 
       <div className="launchLanding__footerBar">
         <div className="launchLanding__bottomBlur" aria-hidden="true" />
-        <a
-          className="launchLanding__cta"
-          href={LAUNCH_TELEGRAM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Хочу попробовать!
-        </a>
+          <a
+            className="launchLanding__cta"
+            href={LAUNCH_TELEGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Хочу попробовать!
+          </a>
         <p className="launchLanding__copyright">© Copyright NEAR.BY 2026. All rights reserved.</p>
       </div>
     </section>

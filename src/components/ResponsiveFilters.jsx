@@ -1,15 +1,34 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', buttonHint = '', mobileSheetPosition = 'bottom', desktopClassName = '', className = '' }) {
-  const [isOpen, setIsOpen] = useState(false)
+export function ResponsiveFilters({
+  children,
+  buttonLabel = 'Фильтры',
+  buttonHint = '',
+  mobileSheetPosition = 'bottom',
+  desktopClassName = '',
+  className = '',
+  isOpen,
+  onOpenChange,
+  hideMobileToggle = false,
+}) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = isOpen ?? internalOpen
+
+  function setOpen(nextValue) {
+    if (onOpenChange) {
+      onOpenChange(nextValue)
+      return
+    }
+    setInternalOpen(nextValue)
+  }
 
   useEffect(() => {
-    if (!isOpen) return undefined
+    if (!open) return undefined
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
-        setIsOpen(false)
+        setOpen(false)
       }
     }
 
@@ -18,26 +37,28 @@ export function ResponsiveFilters({ children, buttonLabel = 'Фильтры', bu
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen])
+  }, [open])
 
   return (
-    <div className={`responsiveFilters ${className} ${isOpen ? 'is-open' : ''}`.trim()}>
+    <div className={`responsiveFilters ${className} ${open ? 'is-open' : ''}${hideMobileToggle ? ' responsiveFilters--externalToggle' : ''}`.trim()}>
       <div className={`filtersDesktop ${desktopClassName}`.trim()}>{children}</div>
 
       <div className="filtersMobile">
-        <button type="button" className="filtersMobile__toggle" onClick={() => setIsOpen(true)}>
-          <span className="filtersMobile__toggleLabel">{buttonLabel}</span>
-          {buttonHint ? <span className="filtersMobile__toggleHint">{buttonHint}</span> : null}
-        </button>
+        {!hideMobileToggle ? (
+          <button type="button" className="filtersMobile__toggle" onClick={() => setOpen(true)}>
+            <span className="filtersMobile__toggleLabel">{buttonLabel}</span>
+            {buttonHint ? <span className="filtersMobile__toggleHint">{buttonHint}</span> : null}
+          </button>
+        ) : null}
 
-        {isOpen && typeof document !== 'undefined'
+        {open && typeof document !== 'undefined'
           ? createPortal(
               <div className={`filtersMobile__sheet filtersMobile__sheet--${mobileSheetPosition}`.trim()} role="dialog" aria-modal="true" aria-label={buttonLabel}>
-                <button type="button" className="filtersMobile__backdrop" aria-label="Закрыть фильтры" onClick={() => setIsOpen(false)} />
+                <button type="button" className="filtersMobile__backdrop" aria-label="Закрыть фильтры" onClick={() => setOpen(false)} />
                 <div className={`filtersMobile__panel filtersMobile__panel--${mobileSheetPosition}`.trim()}>
                   <div className="filtersMobile__head">
                     <div className="filtersMobile__title">{buttonLabel}</div>
-                    <button type="button" className="filtersMobile__close" onClick={() => setIsOpen(false)}>
+                    <button type="button" className="filtersMobile__close" onClick={() => setOpen(false)}>
                       Готово
                     </button>
                   </div>
