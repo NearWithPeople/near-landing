@@ -27,7 +27,7 @@ export function MapboxPointPicker({ value, onChange, centerPoint, className = ''
     })
 
     const marker = new mapboxgl.Marker({
-      color: '#5b7065',
+      color: '#5f58d4',
       scale: 1.08,
     })
 

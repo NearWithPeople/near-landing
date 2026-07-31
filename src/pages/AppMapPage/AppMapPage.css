@@ -123,7 +123,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.marker-cluster--small { background: #22c55e; } /* Green < 5 */
+.marker-cluster--small { background: #5f58d4; } /* Purple < 5 */
 .marker-cluster--medium { background: #f97316; } /* Orange 5-10 */
 .marker-cluster--large { background: #ef4444; } /* Red > 10 */
 
@@ -351,7 +351,7 @@
   position: absolute;
   top: 10px;
   left: -90px;
-  background: #2DD3A7;
+  background: #5f58d4;
   color: #121620;
   padding: 12px 40px;
   border-radius: 220px;
@@ -508,7 +508,7 @@
 
 .vacancySheet__readMore {
   margin-bottom: 16px;
-  color: #2dd3a7;
+  color: #a29bf0;
   font-size: 14px;
   font-weight: 800;
 }
@@ -953,7 +953,7 @@
 .mapFiltersList__check {
   font-size: 18px;
   line-height: 1;
-  color: #2dd3a7;
+  color: #a29bf0;
   font-weight: 900;
 }
 

@@ -190,7 +190,7 @@ function ensureLassoLayers(map) {
       type: 'fill',
       source: LASSO_SOURCE_ID,
       paint: {
-        'fill-color': '#2dd3a7',
+        'fill-color': '#5f58d4',
         'fill-opacity': 0.18,
       },
     })
@@ -202,7 +202,7 @@ function ensureLassoLayers(map) {
       type: 'line',
       source: LASSO_SOURCE_ID,
       paint: {
-        'line-color': '#2dd3a7',
+        'line-color': '#5f58d4',
         'line-width': 2.5,
         'line-opacity': 0.9,
       },

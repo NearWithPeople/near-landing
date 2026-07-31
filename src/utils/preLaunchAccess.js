@@ -50,11 +50,11 @@ export function stripPreLaunchAccessFromSearch(search) {
 
 export function getDefaultAppPath({ user, accessRole = 'seeker' }) {
   if (!user) {
-    return accessRole === 'employer' ? '/auth' : '/'
+    return accessRole === 'employer' ? '/login' : '/'
   }
 
   if (accessRole === 'employer') {
-    return user.role === 'employer' ? '/map' : '/auth'
+    return user.role === 'employer' ? '/map' : '/login'
   }
 
   if (user.role === 'employer') {

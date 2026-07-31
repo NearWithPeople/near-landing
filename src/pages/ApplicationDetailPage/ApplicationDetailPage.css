@@ -60,7 +60,7 @@
 }
 
 .applicationDetailPage__statusBadge--active {
-  background: #2DD3A7;
+  background: #5f58d4;
   color: #121620;
   box-shadow: 0 4px 12px rgba(45, 211, 167, 0.3);
 }
@@ -91,7 +91,7 @@
 }
 
 .applicationDetailPage__statusBadge--completed {
-  background: #22c55e;
+  background: #8b85e8;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }

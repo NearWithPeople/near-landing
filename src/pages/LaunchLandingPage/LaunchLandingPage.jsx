@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { Link } from 'react-router-dom'
+
 import './LaunchLandingPage.css'
 
 const LAUNCH_TARGET = new Date('2026-06-20T00:00:00')
@@ -88,8 +90,19 @@ export function LaunchLandingPage() {
     <section className="launchLanding" aria-labelledby="launch-landing-title">
       <div className="launchLanding__logoBar">
         <div className="launchLanding__topBlur" aria-hidden="true" />
-        <div className="launchLanding__logoWrap">
-          <span className="launchLanding__logo" role="img" aria-label="nearby" />
+        <div className="launchLanding__logoBarInner">
+          <div className="launchLanding__logoBarSpacer" aria-hidden="true" />
+          <div className="launchLanding__logoWrap">
+            <span className="launchLanding__logo" role="img" aria-label="nearby" />
+          </div>
+          <nav className="launchLanding__authNav" aria-label="Аккаунт">
+            <Link to="/login" className="launchLanding__authLink">
+              Войти
+            </Link>
+            <Link to="/register" className="launchLanding__authLink launchLanding__authLink--primary">
+              Регистрация
+            </Link>
+          </nav>
         </div>
       </div>
 

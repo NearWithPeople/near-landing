@@ -7,30 +7,33 @@
   box-sizing: border-box;
 }
 
-/* Лесовая палитра: Лес / Вечно-зелёный / Сосна / Туман */
 :root {
   --palette-forest: #1B283B;
-  --palette-evergreen: #304040;
-  --palette-pine: #5b7065;
-  --palette-mist: #c9d1c8;
-
   --palette-forest-rgb: 27, 40, 59;
-  --palette-evergreen-rgb: 48, 64, 64;
-  --palette-pine-rgb: 91, 112, 101;
-  --palette-mist-rgb: 201, 209, 200;
+  --palette-accent: #5F58D4;
+  --palette-accent-rgb: 95, 88, 212;
+  --palette-accent-hover: #7A73E8;
+  --palette-accent-pressed: #4A44B8;
+  --palette-accent-soft: rgba(95, 88, 212, 0.18);
+  --palette-mist: #E8EAF0;
+  --palette-mist-rgb: 232, 234, 240;
 
-  --palette-pine-hover: #6d8278;
-  --palette-pine-pressed: #4a5d54;
+  /* Legacy aliases used across stylesheets */
+  --palette-pine: var(--palette-accent);
+  --palette-pine-rgb: 95, 88, 212;
+  --palette-pine-hover: var(--palette-accent-hover);
+  --palette-pine-pressed: var(--palette-accent-pressed);
+  --palette-evergreen: var(--palette-accent-pressed);
+  --palette-evergreen-rgb: 74, 68, 184;
 
   --near-bg: var(--palette-forest);
   --near-ink: var(--palette-mist);
   --near-muted: rgba(var(--palette-mist-rgb), 0.72);
-  --near-gold: var(--palette-pine);
-  --near-gold-soft: rgba(var(--palette-pine-rgb), 0.18);
-  --near-gold-dark: #44554d;
-  --near-white: #f5faf8;
-  --near-green: #7a9488;
-  --near-blue: var(--palette-pine);
+  --near-gold: var(--palette-accent);
+  --near-gold-soft: var(--palette-accent-soft);
+  --near-gold-dark: var(--palette-accent-pressed);
+  --near-white: #ffffff;
+  --near-blue: var(--palette-accent);
 
   --radius: 16px;
   --radius-lg: 24px;

@@ -22,7 +22,7 @@ import { CompanyProfilePage } from './pages/CompanyProfilePage/CompanyProfilePag
 import { UserProfilePage } from './pages/UserProfilePage/UserProfilePage'
 import { getCategoryOptions } from './constants/vacancyCategories'
 import { createApplication, hasUserAppliedToVacancy, listApplicationsForEmployer, listApplicationsForUser, listApplicationsForVacancy, updateApplicationStatus } from './services/applicationService'
-import { getCurrentUser, loginAccount, logoutUser, updateUserProfile } from './services/authService'
+import { getCurrentUser, loginAccount, logoutUser, registerAccount, updateUserProfile } from './services/authService'
 import { loadAppBootstrap, normalizeVacancyFromApi } from './services/appService'
 import { loadSiteContent } from './services/siteService'
 import { listCompletedTasksForUser, listEmployerVacancies, rateCompletedTask } from './services/taskService'
@@ -35,6 +35,11 @@ import {
   stripPreLaunchAccessFromSearch,
 } from './utils/preLaunchAccess'
 import { getDisplayApplications, summarizeApplications } from './utils/applicationPresentation'
+
+const AUTH_MODE_BY_PATH = {
+  '/login': 'login',
+  '/register': 'register',
+}
 
 const LEGACY_APP_ROUTES = {
   '/app': '/',
@@ -416,18 +421,13 @@ export default function App() {
   }, [location.pathname, location.search])
 
   useEffect(() => {
-    if (location.pathname !== '/auth') return
-    const nextMode = new URLSearchParams(location.search).get('mode')
-    if (nextMode === 'register') {
-      navigate('/auth?mode=login', { replace: true })
-      return
-    }
-    if (nextMode !== 'login') return
+    const nextMode = AUTH_MODE_BY_PATH[location.pathname]
+    if (!nextMode) return
     setAuthForm((prev) => {
       if (prev.mode === nextMode) return prev
       return { ...prev, mode: nextMode }
     })
-  }, [location.pathname, location.search, navigate])
+  }, [location.pathname])
 
   async function handleAuthSubmit(e) {
     e.preventDefault()
@@ -477,7 +477,61 @@ export default function App() {
         return
       }
 
-      setAuthError('Регистрация временно недоступна.')
+      if (authForm.mode === 'register') {
+        const phone = normalizePhone(authForm.phone)
+        const email = authForm.email.trim()
+
+        if (!phone && !email) {
+          setAuthError('Укажи телефон или email для регистрации.')
+          return
+        }
+
+        if (phone && !isBelarusPhone(phone)) {
+          setAuthError('Укажи телефон в белорусском формате: +375 XX XXX XX XX или 80XX XXX XX XX.')
+          return
+        }
+
+        if (!authForm.firstName.trim() || !authForm.lastName.trim()) {
+          setAuthError('Укажи имя и фамилию.')
+          return
+        }
+
+        if (authForm.role === 'seeker') {
+          const age = Number(authForm.age)
+          if (!age || age < 16 || age > 99) {
+            setAuthError('Укажи возраст от 16 до 99 лет.')
+            return
+          }
+        }
+
+        if (!authForm.acceptedLegal) {
+          setAuthError('Подтверди ознакомление с документами.')
+          return
+        }
+
+        const user = await registerAccount({
+          role: authForm.role,
+          fullName: buildFullName({
+            lastName: authForm.lastName,
+            firstName: authForm.firstName,
+            middleName: authForm.middleName,
+          }),
+          phone,
+          email,
+          password: authForm.password.trim(),
+          age: authForm.role === 'seeker' ? Number(authForm.age) : null,
+          telegramUsername: authForm.telegramUsername.trim(),
+          companyName: authForm.companyName.trim(),
+        })
+
+        setCurrentUser(user)
+        setAuthError('')
+        setDataVersion((prev) => prev + 1)
+        navigate(getDefaultAppPath({ user, accessRole: preLaunchAccessRole }))
+        return
+      }
+
+      setAuthError('Неизвестный режим авторизации.')
     } catch (error) {
       setAuthError(error.message || 'Не удалось выполнить авторизацию.')
     } finally {
@@ -487,11 +541,7 @@ export default function App() {
 
   function handleAuthFieldChange(field, value) {
     if (field === 'mode') {
-      if (value === 'register') {
-        setAuthError('Регистрация временно недоступна.')
-        return
-      }
-      navigate(`/auth?mode=${value}`, { replace: true })
+      navigate(value === 'register' ? '/register' : '/login', { replace: true })
     }
     setAuthForm((prev) => ({ ...prev, [field]: value }))
     if (authError) setAuthError('')
@@ -593,7 +643,7 @@ export default function App() {
       return
     }
 
-    if (location.pathname === '/auth' || location.pathname === '/onboarding') {
+    if (['/login', '/register', '/onboarding'].includes(location.pathname)) {
       navigate('/', { replace: true })
     }
   }, [currentUser, location.pathname, navigate])
@@ -608,7 +658,7 @@ export default function App() {
   }, [location.pathname, location.search, vacancies])
 
   function renderAppPage(section) {
-    if (!currentUser) return <Navigate to="/auth" replace />
+    if (!currentUser) return <Navigate to="/login" replace />
 
     return (
       <AppShell
@@ -814,7 +864,7 @@ export default function App() {
 
   function EmployerVacancyFormRoute() {
     if (!currentUser || currentUser.role !== 'employer') {
-      return <Navigate to="/auth" replace />
+      return <Navigate to="/login" replace />
     }
 
     return (
@@ -842,7 +892,7 @@ export default function App() {
     const { vacancyId } = useParams()
 
     if (!currentUser || currentUser.role !== 'employer') {
-      return <Navigate to="/auth" replace />
+      return <Navigate to="/login" replace />
     }
 
     const vacancy = getVacancyById(remoteData.employerVacancies, vacancyId, searchPoint, { includeExpired: true })
@@ -884,7 +934,7 @@ export default function App() {
   }
 
   function ApplicationDetailRoute() {
-    if (!currentUser) return <Navigate to="/auth" replace />
+    if (!currentUser) return <Navigate to="/login" replace />
 
     const { applicationId } = useParams()
     const application = displayApplications.find((item) => item.id === applicationId) || null
@@ -925,7 +975,7 @@ export default function App() {
   }
 
   function CompanyProfileRoute() {
-    if (!currentUser) return <Navigate to="/auth" replace />
+    if (!currentUser) return <Navigate to="/login" replace />
 
     const { ownerId } = useParams()
 
@@ -954,7 +1004,7 @@ export default function App() {
   }
 
   function UserProfileRoute() {
-    if (!currentUser) return <Navigate to="/auth" replace />
+    if (!currentUser) return <Navigate to="/login" replace />
 
     const { userId } = useParams()
     const isOwnProfile = String(currentUser.id) === String(userId)
@@ -985,6 +1035,22 @@ export default function App() {
     )
   }
 
+  function renderAuthPage() {
+    if (currentUser) {
+      return <Navigate to={getDefaultAppPath({ user: currentUser, accessRole: preLaunchAccessRole })} replace />
+    }
+
+    return (
+      <AuthPage
+        form={authForm}
+        error={authError}
+        isSubmitting={isAuthSubmitting}
+        onChange={handleAuthFieldChange}
+        onSubmit={handleAuthSubmit}
+      />
+    )
+  }
+
   return (
     <div className="site">
       <main className="site__main" id="start">
@@ -999,21 +1065,15 @@ export default function App() {
               )
             }
           />
+          <Route path="/login" element={renderAuthPage()} />
+          <Route path="/register" element={renderAuthPage()} />
           <Route
             path="/auth"
             element={
-              currentUser ? (
-                <Navigate to={getDefaultAppPath({ user: currentUser, accessRole: preLaunchAccessRole })} replace />
-              ) : (
-                <AuthPage
-                  form={authForm}
-                  error={authError}
-                  isSubmitting={isAuthSubmitting}
-                  registrationDisabled
-                  onChange={handleAuthFieldChange}
-                  onSubmit={handleAuthSubmit}
-                />
-              )
+              <Navigate
+                to={new URLSearchParams(location.search).get('mode') === 'register' ? '/register' : '/login'}
+                replace
+              />
             }
           />
           <Route path="/map" element={renderAppPage('map')} />

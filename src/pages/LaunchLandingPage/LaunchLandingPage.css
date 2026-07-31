@@ -107,17 +107,75 @@
   left: 0;
   right: 0;
   z-index: 20;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: var(--launch-logo-bar-padding-y) clamp(20px, 5vw, 48px);
   background: transparent;
   isolation: isolate;
 }
 
+.launchLanding__logoBarInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(12px, 3vw, 20px);
+}
+
+.launchLanding__logoBarSpacer {
+  min-width: 0;
+}
+
+.launchLanding__authNav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: clamp(8px, 2vw, 12px);
+  min-width: 0;
+}
+
+.launchLanding__authLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: 1px solid rgba(60, 52, 192, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--launch-text-on-light);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: clamp(0.8125rem, 2.4vw, 0.9375rem);
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.launchLanding__authLink:hover {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(60, 52, 192, 0.34);
+}
+
+.launchLanding__authLink:focus-visible {
+  outline: 2px solid rgba(60, 52, 192, 0.55);
+  outline-offset: 2px;
+}
+
+.launchLanding__authLink--primary {
+  border-color: rgba(95, 88, 212, 0.45);
+  background: rgba(95, 88, 212, 0.18);
+  color: var(--launch-accent-deep);
+}
+
+.launchLanding__authLink--primary:hover {
+  background: rgba(95, 88, 212, 0.28);
+  border-color: rgba(95, 88, 212, 0.62);
+}
+
 .launchLanding__logoBar .launchLanding__logoWrap {
   position: relative;
   z-index: 1;
+  justify-self: center;
 }
 
 .launchLanding__footerBar {
