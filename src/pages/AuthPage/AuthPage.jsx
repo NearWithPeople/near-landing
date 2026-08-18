@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+import buselMobSing from '../../assets/icons/busel-mob-sing.png'
+import buselSing from '../../assets/icons/busel-sing.png'
 import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../../constants/legalPages'
 
 import './AuthPage.css'
@@ -21,34 +23,43 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
       </header>
 
       <div className="authPage__scroll">
-        <div className="authPage__intro">
-          <h1 className="authPage__title">{isLogin ? 'Войти в приложение' : 'Создать аккаунт'}</h1>
-          <p className="authPage__lead">
-            {isLogin
-              ? 'Смены на карте, отклики и чат с работодателем — всё в одном месте.'
-              : 'Подберите роль и заполните данные — начните искать смены или публиковать вакансии.'}
-          </p>
-        </div>
+        <div className="authPage__layout">
+          <aside className="authPage__aside" aria-hidden="true">
+            <img src={buselSing} alt="" className="authPage__mascot" decoding="async" />
+          </aside>
 
-        <article className="authPage__card">
-          <div className="authPage__roleTabs" role="tablist" aria-label="Роль">
-            <button
-              type="button"
-              className={`authPage__roleTab${form.role === 'seeker' ? ' is-active' : ''}`}
-              onClick={() => onChange('role', 'seeker')}
-            >
-              Соискатель
-            </button>
-            <button
-              type="button"
-              className={`authPage__roleTab${form.role === 'employer' ? ' is-active' : ''}`}
-              onClick={() => onChange('role', 'employer')}
-            >
-              Работодатель
-            </button>
-          </div>
+          <div className="authPage__panel">
+            <div className="authPage__intro">
+              <h1 className="authPage__title">{isLogin ? 'Войти в приложение' : 'Создать аккаунт'}</h1>
+              <p className="authPage__lead">
+                {isLogin
+                  ? 'Смены на карте, отклики и чат с работодателем — всё в одном месте.'
+                  : 'Подберите роль и заполните данные — начните искать смены или публиковать вакансии.'}
+              </p>
+            </div>
 
-          <form className="authPage__form" onSubmit={onSubmit} noValidate>
+            <div className="authPage__cardStack">
+              <img src={buselMobSing} alt="" className="authPage__mascotMobile" decoding="async" />
+
+              <article className="authPage__card">
+              <div className="authPage__roleTabs" role="tablist" aria-label="Роль">
+                <button
+                  type="button"
+                  className={`authPage__roleTab${form.role === 'seeker' ? ' is-active' : ''}`}
+                  onClick={() => onChange('role', 'seeker')}
+                >
+                  Соискатель
+                </button>
+                <button
+                  type="button"
+                  className={`authPage__roleTab${form.role === 'employer' ? ' is-active' : ''}`}
+                  onClick={() => onChange('role', 'employer')}
+                >
+                  Работодатель
+                </button>
+              </div>
+
+              <form className="authPage__form" onSubmit={onSubmit} noValidate>
             {!isLogin ? (
               <>
                 <div className="authPage__grid">
@@ -161,9 +172,12 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
               </div>
             ) : null}
 
-            {error ? <div className="authPage__error">{error}</div> : null}
-          </form>
-        </article>
+                {error ? <div className="authPage__error">{error}</div> : null}
+              </form>
+              </article>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
