@@ -91,7 +91,6 @@ export function LaunchLandingPage() {
       <div className="launchLanding__logoBar">
         <div className="launchLanding__topBlur" aria-hidden="true" />
         <div className="launchLanding__logoBarInner">
-          <div className="launchLanding__logoBarSpacer" aria-hidden="true" />
           <div className="launchLanding__logoWrap">
             <span className="launchLanding__logo" role="img" aria-label="nearby" />
           </div>

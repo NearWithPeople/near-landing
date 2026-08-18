@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 
 import buselMobSing from '../../assets/icons/busel-mob-sing.png'
-import buselSing from '../../assets/icons/busel-sing.png'
 import { CONTACTS_PATH, FAQ_PATH, PRIVACY_PATH } from '../../constants/legalPages'
 
 import './AuthPage.css'
@@ -16,19 +15,24 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
         <Link to="/" className="authPage__back" aria-label="На главную">
           ←
         </Link>
-        <div className="authPage__logoWrap">
+        <Link to="/" className="authPage__logoWrap" aria-label="На главную">
           <span className="authPage__logo" role="img" aria-label="nearby" />
-        </div>
+        </Link>
         <div className="authPage__topbarSpacer" aria-hidden="true" />
       </header>
 
       <div className="authPage__scroll">
         <div className="authPage__layout">
-          <aside className="authPage__aside" aria-hidden="true">
-            <img src={buselSing} alt="" className="authPage__mascot" decoding="async" />
-          </aside>
-
           <div className="authPage__panel">
+            <div className="authPage__panelHeader">
+              <Link to="/" className="authPage__back authPage__back--panel" aria-label="На главную">
+                ←
+              </Link>
+              <Link to="/" className="authPage__panelBrand" aria-label="На главную">
+                <span className="authPage__logo" role="img" aria-label="nearby" />
+              </Link>
+            </div>
+
             <div className="authPage__intro">
               <h1 className="authPage__title">{isLogin ? 'Войти в приложение' : 'Создать аккаунт'}</h1>
               <p className="authPage__lead">
@@ -42,24 +46,30 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
               <img src={buselMobSing} alt="" className="authPage__mascotMobile" decoding="async" />
 
               <article className="authPage__card">
-              <div className="authPage__roleTabs" role="tablist" aria-label="Роль">
-                <button
-                  type="button"
-                  className={`authPage__roleTab${form.role === 'seeker' ? ' is-active' : ''}`}
-                  onClick={() => onChange('role', 'seeker')}
-                >
-                  Соискатель
-                </button>
-                <button
-                  type="button"
-                  className={`authPage__roleTab${form.role === 'employer' ? ' is-active' : ''}`}
-                  onClick={() => onChange('role', 'employer')}
-                >
-                  Работодатель
-                </button>
-              </div>
+                <div className="authPage__roleTabs" role="tablist" aria-label="Роль">
+                  <button
+                    type="button"
+                    className={`authPage__roleTab${form.role === 'seeker' ? ' is-active' : ''}`}
+                    onClick={() => onChange('role', 'seeker')}
+                  >
+                    Соискатель
+                  </button>
+                  <button
+                    type="button"
+                    className={`authPage__roleTab${form.role === 'employer' ? ' is-active' : ''}`}
+                    onClick={() => onChange('role', 'employer')}
+                  >
+                    Работодатель
+                  </button>
+                </div>
 
-              <form className="authPage__form" onSubmit={onSubmit} noValidate>
+                {error ? (
+                  <div className="authPage__error" role="alert">
+                    {error}
+                  </div>
+                ) : null}
+
+                <form className="authPage__form" onSubmit={onSubmit} noValidate>
             {!isLogin ? (
               <>
                 <div className="authPage__grid">
@@ -172,8 +182,7 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
               </div>
             ) : null}
 
-                {error ? <div className="authPage__error">{error}</div> : null}
-              </form>
+                </form>
               </article>
             </div>
           </div>
