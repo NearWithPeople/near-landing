@@ -14,16 +14,14 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
         <Link to="/" className="authPage__back" aria-label="На главную">
           ←
         </Link>
-        <div className="authPage__brand">
-          <span className="authPage__brandNear">NEAR</span>
-          <span className="authPage__brandBy">.by</span>
+        <div className="authPage__logoWrap">
+          <span className="authPage__logo" role="img" aria-label="nearby" />
         </div>
         <div className="authPage__topbarSpacer" aria-hidden="true" />
       </header>
 
       <div className="authPage__scroll">
         <div className="authPage__intro">
-          <span className="authPage__badge">{isLogin ? 'Вход' : 'Регистрация'}</span>
           <h1 className="authPage__title">{isLogin ? 'Войти в приложение' : 'Создать аккаунт'}</h1>
           <p className="authPage__lead">
             {isLogin

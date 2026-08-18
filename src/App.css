@@ -37,8 +37,9 @@
   overflow: hidden;
 }
 
-.site:has(.launchLanding) {
-  background: #05030f;
+.site:has(.launchLanding),
+.site:has(.authPage) {
+  background: #e9e7ff;
 }
 
 .appTopbar--custom {
