@@ -264,6 +264,43 @@
   box-shadow: 0 0 0 3px rgba(95, 88, 212, 0.16);
 }
 
+.authPage__passwordWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.authPage__input--password {
+  padding-right: 96px;
+}
+
+.authPage__passwordToggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: rgba(233, 231, 255, 0.92);
+  color: var(--auth-accent-deep);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.authPage__passwordToggle:hover {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.authPage__passwordToggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(95, 88, 212, 0.16);
+}
+
 .authPage__legal {
   display: flex;
   gap: 12px;

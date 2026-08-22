@@ -28,14 +28,19 @@ export async function apiRequest(path, options = {}) {
     headers.set('Authorization', `Bearer ${session.jwt}`)
   }
 
-  const response = await fetch(buildUrl(path), {
-    ...options,
-    headers,
-    body:
-      options.body && !(options.body instanceof FormData) && typeof options.body !== 'string'
-        ? JSON.stringify(options.body)
-        : options.body,
-  })
+  let response
+  try {
+    response = await fetch(buildUrl(path), {
+      ...options,
+      headers,
+      body:
+        options.body && !(options.body instanceof FormData) && typeof options.body !== 'string'
+          ? JSON.stringify(options.body)
+          : options.body,
+    })
+  } catch {
+    throw new Error('Не удалось связаться с сервером. Проверьте, что near-strapi запущен и VITE_API_URL указывает на http://localhost:1337/api.')
+  }
 
   if (response.status === 401) {
     clearAuthSession()

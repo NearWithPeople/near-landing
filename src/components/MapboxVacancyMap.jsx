@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { getCategoryEmoji } from '../constants/vacancyCategories'
+import { applyCategoryMarkerStyle, getCategoryEmoji } from '../constants/vacancyCategories'
 import { reverseGeocodeBelarusPoint } from '../services/mapboxGeocoding'
 import { isPointInPolygon, simplifyPolygonPoints } from '../utils/pointInPolygon'
 
@@ -27,10 +27,10 @@ function getViewportPadding(hasSelection = false) {
 
   if (window.innerWidth >= 1024) {
     return {
-      top: 120,
-      right: hasSelection ? 500 : 40,
-      bottom: hasSelection ? 120 : 80,
-      left: desktopRailWidth + (hasSelection ? 220 : 40),
+      top: hasSelection ? 120 : 120,
+      right: hasSelection ? 460 : 40,
+      bottom: hasSelection ? 140 : 80,
+      left: desktopRailWidth + (hasSelection ? 48 : 40),
     }
   }
 
@@ -256,7 +256,7 @@ function updateBubblePositions(map, markersRef) {
     const isPointOffscreen = pos.x < 0 || pos.x > width || pos.y < 0 || pos.y > height
     
     // Check if bubble (96px) would be partially off-screen
-    const bubbleSize = 96
+    const bubbleSize = 144
     const isBubbleOffscreen = 
       pos.x - bubbleSize / 2 < margin || 
       pos.x + bubbleSize / 2 > width - margin || 
@@ -307,6 +307,8 @@ export function MapboxVacancyMap({
   const vacanciesRef = useRef(vacancies)
   const lassoSourceVacanciesRef = useRef(lassoSourceVacancies)
   const selectedVacancyIdRef = useRef(selectedVacancyId)
+  const prevSelectedVacancyIdRef = useRef('')
+  const suppressAutoSelectUntilRef = useRef(0)
   const savedViewRef = useRef(null)
   const lassoPolygonRef = useRef([])
   const lassoActiveRef = useRef(lassoActive)
@@ -511,7 +513,12 @@ export function MapboxVacancyMap({
       const center = map.getCenter()
 
       // 1. Auto-select vacancy on high zoom if one is visible and none selected
-      if (currentZoom >= 16.5 && !selectedVacancyIdRef.current && !lassoActiveRef.current) {
+      if (
+        currentZoom >= 16.5 &&
+        !selectedVacancyIdRef.current &&
+        !lassoActiveRef.current &&
+        Date.now() >= suppressAutoSelectUntilRef.current
+      ) {
         const features = map.queryRenderedFeatures({ layers: [POINTS_LAYER_ID] })
         if (features.length > 0) {
           // Find the one closest to center
@@ -572,19 +579,7 @@ export function MapboxVacancyMap({
 
     const handleMapClick = (event) => {
       if (lassoActiveRef.current) return
-      const interactiveFeatures = map.queryRenderedFeatures(event.point, {
-        layers: [CLUSTERS_LAYER_ID],
-      })
-      if (interactiveFeatures.length > 0) return
       onSelectRef.current?.('')
-    }
-
-    const handleMouseEnter = () => {
-      map.getCanvas().style.cursor = 'pointer'
-    }
-
-    const handleMouseLeave = () => {
-      map.getCanvas().style.cursor = ''
     }
 
     map.once('load', () => {
@@ -593,6 +588,8 @@ export function MapboxVacancyMap({
       ensureLassoLayers(map)
       updateSourceData(map, vacanciesRef.current)
       notifyVisibleVacancies()
+      updateMarkers()
+      updateBubblePositions(map, markersRef)
 
       map.on('click', handleMapClick)
       
@@ -673,7 +670,9 @@ export function MapboxVacancyMap({
           if (!vacancy) return
 
           const bubble = document.createElement('div')
-          bubble.className = 'marker-bubble'
+          bubble.className = 'marker-bubble frosted-circle category-colored-bubble'
+
+          applyCategoryMarkerStyle(el, vacancy.type || vacancy.category)
           
           const stableEmoji = getCategoryEmoji(vacancy.type || vacancy.category)
 
@@ -687,12 +686,6 @@ export function MapboxVacancyMap({
           bubble.onclick = (e) => {
             e.stopPropagation()
             onSelectRef.current(vacancyId)
-            map.flyTo({
-              center: coords,
-              zoom: Math.max(map.getZoom(), 16),
-              padding: getViewportPadding(true),
-              duration: 800
-            })
           }
         }
 
@@ -702,8 +695,14 @@ export function MapboxVacancyMap({
         
         currentMarkers.set(id, marker)
       } else {
-        // Update existing marker position if needed
         marker.setLngLat(coords)
+
+        if (!isCluster) {
+          const vacancy = vacanciesRef.current.find((item) => item.id === feature.properties.id)
+          if (vacancy) {
+            applyCategoryMarkerStyle(marker.getElement(), vacancy.type || vacancy.category)
+          }
+        }
       }
 
       // Update active state for individual points
@@ -749,6 +748,8 @@ export function MapboxVacancyMap({
     if (!map || !map.isStyleLoaded()) return
 
     updateSourceData(map, vacancies)
+    updateMarkers()
+    updateBubblePositions(map, markersRef)
 
     if (lassoActive) {
       if (map.getPitch() > 0.5) {
@@ -803,18 +804,35 @@ export function MapboxVacancyMap({
 
   useEffect(() => {
     const map = mapRef.current
-    const active = vacancies.find((vacancy) => vacancy.id === selectedVacancyId)
-    if (!map || !active || lassoActive) return
+    if (!map || lassoActive) return
 
-    map.flyTo({
-      center: [active.lng, active.lat],
-      zoom: Math.max(map.getZoom(), 16),
-      padding: getViewportPadding(true),
-      pitch: 60,
-      bearing: -20,
-      essential: true,
-      duration: 800,
-    })
+    const previousVacancyId = prevSelectedVacancyIdRef.current
+    const active = vacancies.find((vacancy) => vacancy.id === selectedVacancyId)
+
+    if (active) {
+      map.flyTo({
+        center: [active.lng, active.lat],
+        zoom: Math.max(map.getZoom(), 16),
+        padding: getViewportPadding(true),
+        pitch: 60,
+        bearing: -20,
+        essential: true,
+        duration: 800,
+      })
+    } else if (previousVacancyId) {
+      map.easeTo({
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+        bearing: map.getBearing(),
+        pitch: map.getPitch(),
+        padding: getViewportPadding(false),
+        duration: 0,
+        essential: true,
+      })
+      suppressAutoSelectUntilRef.current = Date.now() + 1000
+    }
+
+    prevSelectedVacancyIdRef.current = selectedVacancyId
   }, [selectedVacancyId, vacancies, lassoActive])
 
   if (!MAPBOX_TOKEN) {

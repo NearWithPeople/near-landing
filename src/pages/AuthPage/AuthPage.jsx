@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import buselMobSing from '../../assets/icons/busel-mob-sing.png'
@@ -8,6 +9,7 @@ import './AuthPage.css'
 export function AuthPage({ form, error, isSubmitting, registrationDisabled = false, onChange, onSubmit }) {
   const isLogin = registrationDisabled || form.mode === 'login'
   const isEmployer = form.role === 'employer'
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   return (
     <section className="authPage">
@@ -131,14 +133,25 @@ export function AuthPage({ form, error, isSubmitting, registrationDisabled = fal
 
             <label className="authPage__field">
               <span>Пароль</span>
-              <input
-                className="authPage__input"
-                type="password"
-                autoComplete={isLogin ? 'current-password' : 'new-password'}
-                value={form.password}
-                onChange={(event) => onChange('password', event.target.value)}
-                placeholder="Минимум 6 символов"
-              />
+              <div className="authPage__passwordWrap">
+                <input
+                  className="authPage__input authPage__input--password"
+                  type={isPasswordVisible ? 'text' : 'password'}
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                  value={form.password}
+                  onChange={(event) => onChange('password', event.target.value)}
+                  placeholder="Минимум 6 символов"
+                />
+                <button
+                  type="button"
+                  className="authPage__passwordToggle"
+                  aria-label={isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'}
+                  aria-pressed={isPasswordVisible}
+                  onClick={() => setIsPasswordVisible((prev) => !prev)}
+                >
+                  {isPasswordVisible ? 'Скрыть' : 'Показать'}
+                </button>
+              </div>
             </label>
 
             {!isLogin ? (
