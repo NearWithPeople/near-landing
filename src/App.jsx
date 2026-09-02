@@ -28,12 +28,6 @@ import { loadSiteContent } from './services/siteService'
 import { listCompletedTasksForUser, listEmployerVacancies, rateCompletedTask } from './services/taskService'
 import { archiveVacancy, createVacancy, getVacancyById, listVacancies } from './services/vacancyService'
 import { buildFullName, formatNearbyVacanciesLabel, isBelarusPhone, normalizePhone } from './utils/common'
-import {
-  consumePreLaunchAccessFromSearch,
-  getDefaultAppPath,
-  readPreLaunchAccessRole,
-  stripPreLaunchAccessFromSearch,
-} from './utils/preLaunchAccess'
 import { getDisplayApplications, summarizeApplications } from './utils/applicationPresentation'
 
 const AUTH_MODE_BY_PATH = {
@@ -53,6 +47,10 @@ const LEGACY_APP_ROUTES = {
 }
 
 const CITY_STORAGE_KEY = 'near_selected_city_v1'
+
+function getDefaultAuthenticatedPath() {
+  return '/map'
+}
 
 function getVacancyStatusLabel(status) {
   if (status === 'pending_review') return 'На модерации'
@@ -174,7 +172,7 @@ export default function App() {
   const [appFilters, setAppFilters] = useState(() => normalizeAppFilters())
   const [authForm, setAuthForm] = useState(() => ({
     mode: 'login',
-    role: readPreLaunchAccessRole() === 'employer' ? 'employer' : 'seeker',
+    role: 'seeker',
     lastName: '',
     firstName: '',
     middleName: '',
@@ -207,7 +205,7 @@ export default function App() {
     sortBy: 'relevant',
   })
   const [userPoint, setUserPoint] = useState({ lat: 53.9023, lng: 27.5619 }) // Minsk center fallback
-  const [preLaunchAccessRole, setPreLaunchAccessRole] = useState(() => readPreLaunchAccessRole())
+  const [userLocateToken, setUserLocateToken] = useState(0)
   const currentUserId = currentUser?.id || ''
 
   const selectedCityOption = useMemo(() => getCityOption(selectedCity, appFilters.cityOptions), [appFilters.cityOptions, selectedCity])
@@ -313,35 +311,6 @@ export default function App() {
       cancelled = true
     }
   }, [])
-
-  useEffect(() => {
-    const grantedRole = consumePreLaunchAccessFromSearch(location.search)
-    if (!grantedRole) return
-
-    setPreLaunchAccessRole(grantedRole)
-
-    if (grantedRole === 'employer') {
-      setAuthForm((prev) => ({ ...prev, role: 'employer' }))
-    }
-
-    const cleanedSearch = stripPreLaunchAccessFromSearch(location.search)
-    const nextPath = getDefaultAppPath({
-      user: currentUser,
-      accessRole: grantedRole,
-    })
-
-    navigate({ pathname: nextPath, search: cleanedSearch }, { replace: true })
-  }, [currentUser, location.pathname, location.search, navigate])
-
-// сдеоай так чтобы он щапрагивал первый ращ когда нажимаешь чтобы  на карте найти себя а не при взоде на сайт
-  // useEffect(() => {
-  //   if (!('geolocation' in navigator)) return
-  //   navigator.geolocation.getCurrentPosition(
-  //     (pos) => setUserPoint({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-  //     () => {},
-  //     { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-  //   )
-  // }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -473,7 +442,7 @@ export default function App() {
         setCurrentUser(user)
         setAuthError('')
         setDataVersion((prev) => prev + 1)
-        navigate(getDefaultAppPath({ user, accessRole: preLaunchAccessRole }))
+        navigate(getDefaultAuthenticatedPath())
         return
       }
 
@@ -527,7 +496,7 @@ export default function App() {
         setCurrentUser(user)
         setAuthError('')
         setDataVersion((prev) => prev + 1)
-        navigate(getDefaultAppPath({ user, accessRole: preLaunchAccessRole }))
+        navigate(getDefaultAuthenticatedPath())
         return
       }
 
@@ -596,6 +565,23 @@ export default function App() {
     } catch (error) {
       console.error('Failed to automatically apply to vacancy:', error)
     }
+  }
+
+  function handleLocateUser() {
+    if (!('geolocation' in navigator)) return
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setSelectedCity('all')
+        setUserPoint({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        })
+        setUserLocateToken((value) => value + 1)
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    )
   }
 
   async function handleProfileSave(profileForm) {
@@ -684,6 +670,7 @@ export default function App() {
         }
         onMapNearbyClick={section === 'map' ? () => setIsNearbyListOpen(true) : undefined}
         onMapListClick={section === 'map' ? () => setIsNearbyListOpen(true) : undefined}
+        onLocateUser={section === 'map' ? handleLocateUser : undefined}
         isMapFiltersOpen={isMapFiltersOpen}
         onMapFiltersOpenChange={section === 'map' ? setIsMapFiltersOpen : undefined}
         lassoActive={section === 'map' ? lassoActive : false}
@@ -745,6 +732,8 @@ export default function App() {
               setLassoVacancyIds(Array.isArray(ids) ? ids : [])
               setLassoActive(false)
             }}
+            userLocatePoint={userPoint}
+            userLocateToken={userLocateToken}
           />
         ) : null}
         {section === 'applications' ? (
@@ -1037,7 +1026,7 @@ export default function App() {
 
   function renderAuthPage() {
     if (currentUser) {
-      return <Navigate to={getDefaultAppPath({ user: currentUser, accessRole: preLaunchAccessRole })} replace />
+      return <Navigate to={getDefaultAuthenticatedPath()} replace />
     }
 
     return (
@@ -1059,7 +1048,7 @@ export default function App() {
             path="/"
             element={
               currentUser ? (
-                <Navigate to={getDefaultAppPath({ user: currentUser, accessRole: preLaunchAccessRole })} replace />
+                <Navigate to={getDefaultAuthenticatedPath()} replace />
               ) : (
                 <LaunchLandingPage />
               )

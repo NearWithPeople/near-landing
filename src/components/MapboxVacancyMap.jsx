@@ -295,6 +295,8 @@ export function MapboxVacancyMap({
   hasLassoSelection = false,
   onLassoSelectionChange,
   lassoSourceVacancies = vacancies,
+  userLocatePoint,
+  userLocateToken = 0,
 }) {
   const mapNodeRef = useRef(null)
   const mapWrapperRef = useRef(null)
@@ -834,6 +836,21 @@ export function MapboxVacancyMap({
 
     prevSelectedVacancyIdRef.current = selectedVacancyId
   }, [selectedVacancyId, vacancies, lassoActive])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !userLocateToken || !userLocatePoint || lassoActive) return
+
+    map.flyTo({
+      center: [userLocatePoint.lng, userLocatePoint.lat],
+      zoom: Math.max(map.getZoom(), 15.5),
+      padding: getViewportPadding(Boolean(selectedVacancyIdRef.current)),
+      pitch: 60,
+      bearing: -20,
+      essential: true,
+      duration: 800,
+    })
+  }, [userLocateToken, userLocatePoint, lassoActive])
 
   if (!MAPBOX_TOKEN) {
     return (

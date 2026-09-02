@@ -25,6 +25,8 @@ export function AppMapPage({
   lassoActive = false,
   hasLassoSelection = false,
   onLassoSelectionChange,
+  userLocatePoint,
+  userLocateToken = 0,
 }) {
   const [previewVacancyId, setPreviewVacancyId] = useState(autoOpenVacancyId)
   const previewVacancy = useMemo(() => vacancies.find((vacancy) => vacancy.id === previewVacancyId) || null, [previewVacancyId, vacancies])
@@ -75,6 +77,8 @@ export function AppMapPage({
           lassoActive={lassoActive}
           hasLassoSelection={hasLassoSelection}
           onLassoSelectionChange={onLassoSelectionChange}
+          userLocatePoint={userLocatePoint}
+          userLocateToken={userLocateToken}
         />
 
         {isNearbyListOpen ? (

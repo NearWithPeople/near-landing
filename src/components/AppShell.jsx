@@ -100,6 +100,7 @@ export function AppShell({
   onLassoToggle,
   onMapNearbyClick,
   onMapListClick,
+  onLocateUser,
 }) {
   const resolvedChatsCount = Number(chatsCount) || 0
   const isEmployer = currentUser?.role === 'employer'
@@ -247,7 +248,7 @@ export function AppShell({
                   </button>
                 </div>
                 <div className="bottomNav__controls bottomNav__controls--right">
-                  <button type="button" className="bottomNav__controlButton" aria-label="Моё местоположение">
+                  <button type="button" className="bottomNav__controlButton" aria-label="Моё местоположение" onClick={onLocateUser}>
                     <img src="/map-icons/locate-fixed.png" alt="" />
                   </button>
                 </div>

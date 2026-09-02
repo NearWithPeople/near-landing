@@ -1,12 +1,14 @@
 import { clearAuthSession, getAuthSession } from './storageService'
 
-const PROD_STRAPI_ORIGIN = 'https://romantic-apparel-51b7e4a8ea.strapiapp.com'
-
 function getDefaultApiBaseUrl() {
   const configured = String(import.meta.env.VITE_API_URL || '').trim()
   if (configured) return configured.replace(/\/+$/, '')
 
-  return `${PROD_STRAPI_ORIGIN}/api`
+  if (import.meta.env.PROD) {
+    return '/api'
+  }
+
+  return 'http://localhost:1337/api'
 }
 
 const API_BASE_URL = getDefaultApiBaseUrl()
